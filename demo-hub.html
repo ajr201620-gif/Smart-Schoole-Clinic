@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Clinic OS — Demo Hub (تحكيم)</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">SC</div>
+      <div>
+        <div class="brand-title">Smart Clinic OS</div>
+        <div class="brand-sub">Demo Hub — لوحة العرض للحكّام</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button class="btn ghost" id="btnTheme" title="تبديل الوضع">🌓</button>
+      <a class="btn ghost" href="index.html">العودة للبوابة</a>
+      <button class="btn" id="btnResetAll">Reset Demo</button>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="nav-title">العرض</div>
+      <nav class="nav" id="hubNav">
+        <button class="nav-item active" data-view="scenario"><span class="ico">🎬</span><span>Scenario</span></button>
+        <button class="nav-item" data-view="storage"><span class="ico">🧠</span><span>Data Store</span></button>
+        <button class="nav-item" data-view="links"><span class="ico">🔗</span><span>Links</span></button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="pill">
+          <span class="dot" id="dotLive"></span>
+          <div>
+            <div style="font-weight:1000;">Demo</div>
+            <div class="muted small" id="sysStatus">System: Ready</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="muted small">
+          * هذه اللوحة تولد بيانات “سيناريو” للعرض فقط.
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+
+      <!-- Hero -->
+      <section class="hero">
+        <div class="hero-left">
+          <div class="kicker">🎯 Judging Mode</div>
+          <h1>سيناريو كامل بضغطة زر</h1>
+          <p class="hero-desc">
+            “طالب → عيادة → ولي أمر → إدارة” مع سجل أحداث واضح وسهل للشرح.
+          </p>
+
+          <div class="hero-cta">
+            <button class="btn" id="btnRunFull">تشغيل السيناريو كامل</button>
+            <button class="btn ghost" id="btnStep">تنفيذ خطوة واحدة</button>
+          </div>
+
+          <div class="hero-badges">
+            <span class="badge">Static</span>
+            <span class="badge ghost">LocalStorage</span>
+            <span class="badge">Judge-Friendly</span>
+          </div>
+        </div>
+
+        <div class="hero-right">
+          <div class="scorecard">
+            <div class="scorecard-head">
+              <div>
+                <div class="score-title">Demo Progress</div>
+                <div class="score-sub">مرحلة السيناريو</div>
+              </div>
+              <div class="ring">
+                <div class="ring-inner">
+                  <div class="ring-num" id="prog">0</div>
+                  <div class="ring-lbl">/4</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="scorecard-grid">
+              <div class="mini">
+                <div class="mini-k">Student</div>
+                <div class="mini-v" id="st1">—</div>
+              </div>
+              <div class="mini">
+                <div class="mini-k">Doctor</div>
+                <div class="mini-v" id="st2">—</div>
+              </div>
+              <div class="mini">
+                <div class="mini-k">Parent</div>
+                <div class="mini-v" id="st3">—</div>
+              </div>
+              <div class="mini">
+                <div class="mini-k">Admin</div>
+                <div class="mini-v" id="st4">—</div>
+              </div>
+            </div>
+
+            <div class="scorecard-foot muted small">* بيانات تجريبية.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="views">
+
+        <!-- Scenario -->
+        <section class="view show" id="view-scenario">
+          <div class="section-head">
+            <div>
+              <h2>Scenario Runner</h2>
+              <div class="muted">تحكم كامل بالسير</div>
+            </div>
+            <div class="section-actions">
+              <button class="btn ghost" id="btnStudent">1) إنشاء طلب طالب</button>
+              <button class="btn ghost" id="btnDoctor">2) استلام العيادة</button>
+              <button class="btn ghost" id="btnParent">3) إشعار ولي الأمر</button>
+              <button class="btn ghost" id="btnAdmin">4) إشعار الإدارة</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <h3>سجل الأحداث (Live)</h3>
+                <div class="muted small">Demo log</div>
+              </div>
+
+              <div class="log" id="logBox">
+                <div class="logline"><span class="muted">--:--:--</span><span>بانتظار التشغيل…</span></div>
+              </div>
+
+              <div class="card-actions">
+                <button class="btn ghost" id="btnExportLog">تصدير log</button>
+                <button class="btn" id="btnOpenData">عرض البيانات</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <h3>ملخص السيناريو</h3>
+                <div class="muted small">What judge will see</div>
+              </div>
+
+              <div class="tip" style="line-height:1.95;">
+                ✅ بعد تشغيل السيناريو، افتح الصفحات:
+                <br>• Student: <b>student.html</b>
+                <br>• Doctor: <b>doctor.html</b>
+                <br>• Parent: <b>parent.html</b>
+                <br>• Admin: <b>admin.html</b>
+                <br><br>
+                💡 حتى لو كل صفحة عندها بياناتها المحلية، “Demo Hub” يعطي قصة عرض واضحة للحكّام.
+              </div>
+
+              <div class="divider"></div>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <a class="btn ghost" href="student.html">فتح الطالب</a>
+                <a class="btn ghost" href="doctor.html">فتح الطبيب</a>
+                <a class="btn ghost" href="parent.html">فتح ولي الأمر</a>
+                <a class="btn ghost" href="admin.html">فتح الإدارة</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Storage -->
+        <section class="view" id="view-storage">
+          <div class="section-head">
+            <div>
+              <h2>Data Store</h2>
+              <div class="muted">ما تم توليده (LocalStorage)</div>
+            </div>
+            <div class="section-actions">
+              <button class="btn ghost" id="btnRefreshData">تحديث</button>
+              <button class="btn" id="btnExportData">تصدير JSON</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>demo_bus.json</h3>
+              <div class="muted small">عرض مباشر</div>
+            </div>
+            <pre id="dataBox" style="white-space:pre-wrap; word-break:break-word; margin:0; background:var(--panel); border:1px solid var(--stroke); padding:14px; border-radius:18px; min-height:220px;"></pre>
+          </div>
+        </section>
+
+        <!-- Links -->
+        <section class="view" id="view-links">
+          <div class="section-head">
+            <div>
+              <h2>Quick Links</h2>
+              <div class="muted">روابط العرض</div>
+            </div>
+            <div class="section-actions">
+              <a class="btn ghost" href="index.html">index</a>
+              <a class="btn ghost" href="demo-hub.html">demo-hub</a>
+              <a class="btn ghost" href="admin.html">admin</a>
+              <a class="btn ghost" href="doctor.html">doctor</a>
+              <a class="btn ghost" href="student.html">student</a>
+              <a class="btn ghost" href="parent.html">parent</a>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <h3>نصيحة عرض</h3>
+                <div class="muted small">Pitch tip</div>
+              </div>
+              <ul class="bullets">
+                <li>ابدأ بـ Demo Hub: اضغط “تشغيل السيناريو”.</li>
+                <li>افتح Doctor ثم Parent ثم Admin.</li>
+                <li>ختم العرض بتصدير البيانات من هنا.</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <h3>ضحكة خفيفة قبل التحكيم</h3>
+                <div class="muted small">😄</div>
+              </div>
+              <div class="tip" style="line-height:1.95;">
+                إذا سألك الحكم: “هل النظام ذكي؟”
+                <br>قل له: “ذكي لدرجة يعرف إن التحكيم قاسي… فجهزنا له زر واحد!” 😄
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (function(){
+      const BUS_KEY = "sc_demo_bus";
+      const $ = (s,r=document)=>r.querySelector(s);
+      const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
+      const pad2 = (n)=>String(n).padStart(2,"0");
+      const time = ()=>{
+        const d=new Date();
+        return pad2(d.getHours())+":"+pad2(d.getMinutes())+":"+pad2(d.getSeconds());
+      };
+      const rand = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+
+      // Theme
+      $("#btnTheme")?.addEventListener("click", ()=>{
+        const html = document.documentElement;
+        html.dataset.theme = html.dataset.theme === "light" ? "dark" : "light";
+      });
+
+      // Nav
+      function openView(view){
+        $$("#hubNav .nav-item").forEach(b=>b.classList.remove("active"));
+        $(`#hubNav .nav-item[data-view="${view}"]`)?.classList.add("active");
+        $$(".view").forEach(v=>v.classList.remove("show"));
+        $(`#view-${view}`)?.classList.add("show");
+      }
+      $$("#hubNav .nav-item").forEach(btn=>{
+        btn.addEventListener("click", ()=> openView(btn.dataset.view));
+      });
+
+      function loadBus(){
+        try{ return JSON.parse(localStorage.getItem(BUS_KEY) || "null"); }catch(_){ return null; }
+      }
+      function saveBus(bus){
+        localStorage.setItem(BUS_KEY, JSON.stringify(bus));
+      }
+
+      function ensureBus(){
+        let bus = loadBus();
+        if(!bus){
+          bus = {
+            meta: { createdAt: new Date().toISOString(), version:"demo-1" },
+            progress: 0,
+            studentRequest: null,
+            clinicCase: null,
+            parentNotice: null,
+            adminNotice: null,
+            log: []
+          };
+          saveBus(bus);
+        }
+        return bus;
+      }
+
+      function log(msg, data){
+        const bus = ensureBus();
+        const line = { t: time(), msg, data: data || null };
+        bus.log.unshift(line);
+        bus.log = bus.log.slice(0, 80);
+        saveBus(bus);
+        render();
+        pulse();
+      }
+
+      function pulse(){
+        $("#dotLive")?.classList.add("pulse");
+        setTimeout(()=>$("#dotLive")?.classList.remove("pulse"), 900);
+      }
+
+      function setProg(bus){
+        $("#prog").textContent = String(bus.progress || 0);
+        $("#st1").textContent = bus.progress >= 1 ? "✔" : "—";
+        $("#st2").textContent = bus.progress >= 2 ? "✔" : "—";
+        $("#st3").textContent = bus.progress >= 3 ? "✔" : "—";
+        $("#st4").textContent = bus.progress >= 4 ? "✔" : "—";
+      }
+
+      function renderLog(bus){
+        const box = $("#logBox");
+        if(!box) return;
+        const rows = bus.log || [];
+        if(!rows.length){
+          box.innerHTML = `<div class="logline"><span class="muted">--:--:--</span><span>لا يوجد log</span></div>`;
+          return;
+        }
+        box.innerHTML = rows.map(r=>`
+          <div class="logline">
+            <span class="muted">${r.t}</span>
+            <span>${escapeHtml(r.msg)}</span>
+          </div>
+        `).join("");
+      }
+
+      function renderData(bus){
+        const pre = $("#dataBox");
+        if(!pre) return;
+        pre.textContent = JSON.stringify(bus, null, 2);
+      }
+
+      function render(){
+        const bus = ensureBus();
+        setProg(bus);
+        renderLog(bus);
+        renderData(bus);
+        // update status text
+        $("#sysStatus").textContent = "System: Ready • " + (bus.progress||0) + "/4";
+      }
+
+      function escapeHtml(s){
+        return String(s).replace(/[&<>"']/g, m => ({
+          "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+        }[m]));
+      }
+
+      // Steps
+      function stepStudent(){
+        const bus = ensureBus();
+        const req = {
+          id: "REQ-" + Math.random().toString(36).slice(2,8).toUpperCase(),
+          t: time(),
+          studentId: "STD-" + rand(10,99),
+          studentName: "طالب #" + rand(10,99),
+          age: rand(9,16),
+          classRoom: rand(1,6) + "/" + ["أ","ب","ج"][rand(0,2)],
+          symptom: ["headache","fever","stomach","cough"][rand(0,3)],
+          urgency: ["low","med","high"][rand(0,2)],
+          desc: "بدأت الأعراض قبل " + rand(1,6) + " ساعة. (Demo)"
+        };
+        bus.studentRequest = req;
+        bus.progress = Math.max(bus.progress, 1);
+        saveBus(bus);
+        log("✅ الطالب أرسل طلب زيارة: " + req.id, req);
+      }
+
+      function stepDoctor(){
+        const bus = ensureBus();
+        if(!bus.studentRequest){ stepStudent(); }
+        const req = bus.studentRequest;
+
+        const vit = {
+          temp: +(36.6 + Math.random()*1.6).toFixed(1),
+          hr: rand(75,120),
+          spo2: rand(94,99),
+          bp: rand(105,130) + "/" + rand(65,85)
+        };
+        let risk = 10;
+        if(vit.temp >= 38) risk += 20;
+        if(vit.hr >= 110) risk += 20;
+        if(vit.spo2 <= 94) risk += 35;
+        risk = Math.min(100, risk + rand(0,15));
+
+        const priority = risk>=65?"CRIT":risk>=45?"HIGH":risk>=28?"MED":"LOW";
+        const decision = priority==="CRIT"?"emergency":priority==="HIGH"?"call_guardian":priority==="MED"?"observe_followup":"return_class";
+
+        const c = {
+          id: "CASE-" + Math.random().toString(36).slice(2,8).toUpperCase(),
+          t: time(),
+          fromRequest: req.id,
+          studentId: req.studentId,
+          studentName: req.studentName,
+          vitals: vit,
+          riskScore: risk,
+          priority,
+          dx: "اشتباه " + (req.symptom==="fever"?"حمّى":req.symptom==="cough"?"عدوى تنفسية":req.symptom==="stomach"?"اضطراب هضمي":"إجهاد/صداع") + " (Demo)",
+          decision,
+          plan: "سوائل + راحة + متابعة حسب الحاجة. (Demo)"
+        };
+
+        bus.clinicCase = c;
+        bus.progress = Math.max(bus.progress, 2);
+        saveBus(bus);
+        log("🩺 العيادة استلمت الطلب وأنشأت حالة: " + c.id, c);
+      }
+
+      function stepParent(){
+        const bus = ensureBus();
+        if(!bus.clinicCase){ stepDoctor(); }
+        const c = bus.clinicCase;
+
+        const n = {
+          id: "PN-" + Math.random().toString(36).slice(2,7).toUpperCase(),
+          t: time(),
+          to: "parent",
+          level: c.priority,
+          title: "إشعار ولي الأمر",
+          body: `تم تسجيل حالة للطالب ${c.studentName}. Priority=${c.priority}. Decision=${c.decision}. (Demo)`
+        };
+        bus.parentNotice = n;
+        bus.progress = Math.max(bus.progress, 3);
+        saveBus(bus);
+        log("👨‍👩‍👧 تم إنشاء إشعار لولي الأمر: " + n.id, n);
+      }
+
+      function stepAdmin(){
+        const bus = ensureBus();
+        if(!bus.parentNotice){ stepParent(); }
+        const c = bus.clinicCase;
+
+        const n = {
+          id: "AN-" + Math.random().toString(36).slice(2,7).toUpperCase(),
+          t: time(),
+          to: "admin",
+          level: c.priority,
+          title: "إشعار إدارة المدرسة",
+          body: `ملخص مجمّع: حالة Priority=${c.priority} + إجراء ${c.decision}. (No sensitive details) (Demo)`
+        };
+        bus.adminNotice = n;
+        bus.progress = Math.max(bus.progress, 4);
+        saveBus(bus);
+        log("🏫 تم إنشاء إشعار للإدارة: " + n.id, n);
+      }
+
+      const steps = [stepStudent, stepDoctor, stepParent, stepAdmin];
+
+      function doStep(){
+        const bus = ensureBus();
+        const p = bus.progress || 0;
+        const fn = steps[Math.min(3, p)];
+        fn();
+        render();
+      }
+
+      function runFull(){
+        stepStudent();
+        stepDoctor();
+        stepParent();
+        stepAdmin();
+        render();
+        alert("تم تشغيل السيناريو كامل ✅");
+      }
+
+      // Buttons
+      $("#btnStudent")?.addEventListener("click", stepStudent);
+      $("#btnDoctor")?.addEventListener("click", stepDoctor);
+      $("#btnParent")?.addEventListener("click", stepParent);
+      $("#btnAdmin")?.addEventListener("click", stepAdmin);
+
+      $("#btnStep")?.addEventListener("click", doStep);
+      $("#btnRunFull")?.addEventListener("click", runFull);
+
+      $("#btnOpenData")?.addEventListener("click", ()=> openView("storage"));
+      $("#btnRefreshData")?.addEventListener("click", render);
+
+      $("#btnExportLog")?.addEventListener("click", ()=>{
+        const bus = ensureBus();
+        const txt = (bus.log||[]).map(x=>`${x.t} - ${x.msg}`).join("\n");
+        download("demo-log.txt", txt);
+      });
+
+      $("#btnExportData")?.addEventListener("click", ()=>{
+        const bus = ensureBus();
+        download("demo-bus.json", JSON.stringify(bus, null, 2), "application/json");
+      });
+
+      function download(name, text, type="text/plain"){
+        const blob = new Blob([text], {type:type+";charset=utf-8"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = name;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url), 800);
+      }
+
+      $("#btnResetAll")?.addEventListener("click", ()=>{
+        if(!confirm("Reset Demo (LocalStorage)؟")) return;
+        localStorage.clear();
+        render();
+        log("🔄 تم عمل Reset للديمو", {});
+        alert("تم ✅");
+      });
+
+      // Init
+      render();
+      log("جاهز للتشغيل 🎬", {});
+    })();
+  </script>
+
+</body>
+</html>
