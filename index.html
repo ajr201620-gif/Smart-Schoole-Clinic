@@ -2,67 +2,141 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>منظومة العيادة الذكية | Smart Health Hub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المنظومة الرقمية المتكاملة للعيادة الذكية | Smart Clinic Pro 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body { background: #010409; color: #c9d1d9; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        .glass-panel { background: rgba(22, 27, 34, 0.8); backdrop-filter: blur(20px); border: 1px border-[#30363d]; border-radius: 24px; }
-        .step-active { border-right: 4px solid #238636; background: rgba(35, 134, 54, 0.1); }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="p-4 md:p-10">
+<body class="bg-[#010409] text-slate-300 antialiased selection:bg-blue-500/30">
 
-    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <nav class="sticky top-0 z-50 glass border-b border-white/5 px-6 py-4 flex justify-between items-center backdrop-blur-3xl">
+        <div class="flex items-center gap-4">
+            <div class="relative">
+                <div class="absolute -inset-1 bg-blue-600 rounded-lg blur opacity-25 animate-pulse"></div>
+                <div class="relative bg-slate-900 p-2 rounded-lg border border-blue-500/50">
+                    <i class="fas fa-microchip text-blue-500 text-xl"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="text-xl font-black text-white tracking-tighter italic uppercase">Smart Clinic <span class="text-blue-500">AI</span></h1>
+                <p class="text-[9px] text-slate-500 font-mono">INTEGRATED DIGITAL ECOSYSTEM v4.0</p>
+            </div>
+        </div>
         
-        <aside class="lg:col-span-1 space-y-4">
-            <div class="glass-panel p-6">
-                <h3 class="text-blue-500 font-bold mb-6 italic text-center">خطوات التشغيل الذكية</h3>
-                <div class="space-y-4 text-sm">
-                    <div id="step1" class="p-3 rounded-xl step-active flex items-center gap-3"><i class="fas fa-id-card"></i> 1. تسجيل دخول الطالب</div>
-                    <div id="step2" class="p-3 rounded-xl flex items-center gap-3 opacity-50"><i class="fas fa-sensor"></i> 2. قياس المؤشرات (IoT)</div>
-                    <div id="step3" class="p-3 rounded-xl flex items-center gap-3 opacity-50"><i class="fas fa-comment-medical"></i> 3. إدخال الشكوى</div>
-                    <div id="step4" class="p-3 rounded-xl flex items-center gap-3 opacity-50"><i class="fas fa-brain"></i> 4. الفرز الذكي (AI)</div>
-                    <div id="step5" class="p-3 rounded-xl flex items-center gap-3 opacity-50"><i class="fas fa-user-md"></i> 5. تدخل طبي/عن بُعد</div>
-                </div>
-            </div>
-            
-            <div class="glass-panel p-4 border-t-2 border-emerald-500/50">
-                <p class="text-[10px] text-emerald-500 font-mono text-center">
-                    <i class="fas fa-link"></i> بيانات محمية بتقنية Blockchain
-                </p>
-            </div>
-        </aside>
+        <div class="hidden lg:flex items-center gap-8 text-[11px] font-bold uppercase tracking-widest">
+            <a href="#" onclick="showSection('hub')" class="nav-link active">مركز الرصد</a>
+            <a href="#" onclick="showSection('analytics')" class="nav-link">تحليل البيانات</a>
+            <a href="#" onclick="showSection('blockchain')" class="nav-link">السجل الآمن</a>
+            <a href="#" onclick="showSection('ar-edu')" class="nav-link">الواقع المعزز</a>
+        </div>
 
-        <main class="lg:col-span-3 space-y-6">
-            
-            <div class="glass-panel p-8 relative overflow-hidden">
-                <div class="flex justify-between items-center mb-8">
-                    <div>
-                        <h2 class="text-3xl font-black text-white">رصد المؤشرات الصحية</h2>
-                        <p class="text-slate-400 text-sm italic">تحليل لحظي لاتخاذ قرار وقائي سريع</p>
+        <div class="flex items-center gap-4">
+            <div class="iot-status-glow"></div>
+            <span class="text-[10px] font-mono text-emerald-500">IoT CONNECTED</span>
+        </div>
+    </nav>
+
+    <div class="max-w-[1600px] mx-auto p-4 lg:p-10">
+        
+        <section id="hub" class="content-section active space-y-8 animate-fade-in">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <div class="lg:col-span-3 space-y-4">
+                    <div class="glass p-6 rounded-[2rem] border border-white/5 relative overflow-hidden">
+                        <h3 class="text-xs font-black text-blue-400 mb-6 uppercase tracking-widest border-b border-white/5 pb-2">خطوات التشغيل الفعالة</h3>
+                        <div class="space-y-3" id="workflow-list">
+                            <div class="step-item active" id="s1"><span class="step-badge">01</span> تسجيل الدخول</div>
+                            <div class="step-item" id="s2"><span class="step-badge">02</span> قياس العلامات</div>
+                            <div class="step-item" id="s3"><span class="step-badge">03</span> إدخال الشكوى</div>
+                            <div class="step-item" id="s4"><span class="step-badge">04</span> الفرز الذكي (AI)</div>
+                            <div class="step-item" id="s5"><span class="step-badge">05</span> التدخل الطبي</div>
+                            <div class="step-item" id="s6"><span class="step-badge">06</span> التوثيق النهائي</div>
+                        </div>
                     </div>
-                    <div class="bg-blue-600/20 p-4 rounded-2xl border border-blue-500/50">
-                        <i class="fas fa-satellite-dish animate-pulse text-blue-500"></i>
-                        <span class="text-xs font-bold mr-2">IoT ACTIVE</span>
+
+                    <div class="glass p-6 rounded-[2rem] bg-gradient-to-br from-blue-600/10 to-transparent">
+                        <h4 class="text-[10px] font-bold text-slate-400 mb-3 uppercase italic">حالة البلوك تشين</h4>
+                        <div class="flex items-center gap-3">
+                            <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                            <span class="text-xs font-mono">Blocks Synced: #842,109</span>
+                        </div>
                     </div>
                 </div>
 
-                <div id="work-area" class="min-h-[400px] flex flex-col justify-center items-center border-2 border-dashed border-slate-700 rounded-[2.5rem]">
-                    <i class="fas fa-fingerprint text-6xl text-blue-600 mb-6 cursor-pointer hover:scale-110 transition-transform" onclick="nextStep(2)"></i>
-                    <p class="text-xl font-bold">ضع بصمتك أو امسح البطاقة الذكية</p>
-                    <span class="text-slate-500 mt-2">لاستدعاء ملفك الصحي الرقمي</span>
-                </div>
-            </div>
+                <div class="lg:col-span-9 space-y-6">
+                    <div class="glass-panel p-10 rounded-[3rem] border border-white/10 min-h-[550px] flex flex-col items-center justify-center relative overflow-hidden" id="main-monitor">
+                        <div class="absolute inset-0 -z-10 grid-bg opacity-10"></div>
+                        
+                        <div id="ui-interactive-area" class="text-center w-full max-w-2xl">
+                            <div class="scan-animation mb-8 mx-auto" onclick="proceedToStep(2)">
+                                <div class="ring"></div>
+                                <div class="ring"></div>
+                                <i class="fas fa-fingerprint text-5xl text-blue-500"></i>
+                            </div>
+                            <h2 class="text-3xl font-black text-white mb-4 italic">استدعاء الملف الصحي الرقمي</h2>
+                            <p class="text-slate-400 text-sm leading-relaxed max-w-md mx-auto">قم بوضع البصمة أو استخدام البطاقة الذكية للتعرف على الطالب وربط البيانات بالجهات الصحية فوراً.</p>
+                        </div>
+                    </div>
 
-            <div class="glass-panel p-6 bg-gradient-to-r from-purple-900/20 to-transparent">
-                <h4 class="text-sm font-bold mb-3"><i class="fas fa-vr-cardboard text-purple-500"></i> تجربة التوعية بالواقع المعزز (AR)</h4>
-                <div class="flex gap-4">
-                    <button class="bg-purple-600/30 border border-purple-500/50 px-6 py-2 rounded-full text-xs hover:bg-purple-500 transition-colors">عرض تجسيمي لأعضاء الجسم</button>
-                    <button class="bg-purple-600/30 border border-purple-500/50 px-6 py-2 rounded-full text-xs hover:bg-purple-500 transition-colors">إرشادات وقائية تفاعلية</button>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="vital-card border-l-4 border-orange-500">
+                            <i class="fas fa-thermometer-half text-orange-500 mb-2"></i>
+                            <span class="label">درجة الحرارة</span>
+                            <div class="value" id="v-temp">--.-°C</div>
+                        </div>
+                        <div class="vital-card border-l-4 border-red-500">
+                            <i class="fas fa-heartbeat text-red-500 mb-2"></i>
+                            <span class="label">نبض القلب</span>
+                            <div class="value" id="v-pulse">-- bpm</div>
+                        </div>
+                        <div class="vital-card border-l-4 border-blue-500">
+                            <i class="fas fa-wind text-blue-500 mb-2"></i>
+                            <span class="label">تشبع الأكسجين</span>
+                            <div class="value" id="v-ox">-- %</div>
+                        </div>
+                        <div class="vital-card border-l-4 border-emerald-500">
+                            <i class="fas fa-weight text-emerald-500 mb-2"></i>
+                            <span class="label">كتلة الجسم</span>
+                            <div class="value" id="v-weight">-- kg</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </main>
+        </section>
+
+        <section id="analytics" class="content-section hidden space-y-8 animate-fade-in">
+            <div class="glass p-8 rounded-[3rem]">
+                <h2 class="text-2xl font-black text-white mb-6 italic"><i class="fas fa-chart-pie text-blue-500 ml-3"></i> تحليل الأنماط الصحية والتنبؤ بالمخاطر</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 h-[400px]">
+                        <canvas id="healthChart"></canvas>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-white/5 rounded-2xl border border-white/10">
+                            <h4 class="text-xs font-bold text-blue-400 mb-2 italic underline">تنبؤ الـ AI للأسبوع القادم</h4>
+                            <p class="text-sm text-slate-300 italic font-bold">احتمالية انتشار عدوى موسمية (إنفلونزا) في الفصول الابتدائية بنسبة 15%. يوصى بتفعيل التدخل الوقائي السريع.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ar-edu" class="content-section hidden space-y-8 animate-fade-in">
+            <div class="glass p-10 rounded-[3rem] text-center border border-purple-500/20 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-[80px]"></div>
+                <h2 class="text-3xl font-black text-purple-400 mb-6 italic">تعزيز التوعية عبر الواقع المعزز (AR)</h2>
+                <div class="max-w-xl mx-auto space-y-6">
+                    <div class="p-8 border-2 border-dashed border-purple-500/30 rounded-[2rem] hover:bg-purple-500/5 transition-all">
+                        <i class="fas fa-vr-cardboard text-6xl text-purple-500 mb-4 animate-bounce"></i>
+                        <p class="text-slate-300 font-bold mb-6">قم بتوجيه كاميرا جهازك نحو الملصق الصحي التفاعلي لتجربة تعليمية ثلاثية الأبعاد.</p>
+                        <button class="bg-purple-600 px-10 py-4 rounded-2xl font-black shadow-lg shadow-purple-900/40">تفعيل وضع AR</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </div>
 
     <script src="script.js"></script>
