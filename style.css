@@ -1,160 +1,52 @@
-/* Smart Clinic OS - Visual Engine v5.0
-   Designed for: Smart School Clinic Project
-*/
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Tajawal:wght@400;700;900&display=swap');
 
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Tajawal:wght@200;400;700;900&display=swap');
+body { font-family: 'Tajawal', sans-serif; cursor: crosshair; }
 
-:root {
-    --primary-neon: #00f2ff;
-    --secondary-neon: #00ff88;
-    --danger-neon: #ff0055;
-    --warning-neon: #ffcc00;
-    --bg-deep: #020617;
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --sidebar-width: 300px;
+/* فيديو الخلفية */
+.video-background { position: fixed; inset: 0; z-index: -2; overflow: hidden; }
+#bg-video { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
+.overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(2,6,23,0.5) 0%, rgba(2,6,23,1) 100%); z-index: -1; }
+
+/* الزجاج والكرات */
+.glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.glass-main { background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.05); }
+
+.portal-card {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255,255,255,0.05);
+    padding: 2.5rem 1.5rem;
+    border-radius: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+.portal-card:hover { transform: translateY(-10px); border-color: #3b82f6; box-shadow: 0 0 30px rgba(59, 130, 246, 0.3); }
+.portal-card h3 { font-weight: 900; color: #fff; margin-top: 10px; }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    cursor: crosshair; /* لإعطاء شعور تقني */
+/* أزرار التنقل */
+.nav-btn {
+    width: 100%; padding: 1rem; border-radius: 1.2rem;
+    display: flex; align-items: center; gap: 15px;
+    color: #94a3b8; font-weight: 700; transition: 0.3s;
 }
+.nav-btn.active { background: rgba(59, 130, 246, 0.1); color: #fff; border-left: 4px solid #3b82f6; }
 
-body {
-    background-color: var(--bg-deep);
-    color: #cbd5e1;
-    font-family: 'Tajawal', sans-serif;
-    overflow-x: hidden;
-    line-height: 1.6;
+/* خريطة المدرسة */
+.school-map { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+.classroom {
+    padding: 20px; border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05);
+    text-align: center; transition: 0.3s; background: rgba(255,255,255,0.02);
 }
+.classroom.safe { border-color: #10b981; background: rgba(16, 185, 129, 0.05); }
+.classroom.warning { border-color: #f59e0b; animation: alert-pulse 2s infinite; }
 
-/* خلفية النسيج الشبكي المتحركة */
-body::before {
-    content: "";
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: 
-        linear-gradient(rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 0.95)),
-        url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
-    z-index: -1;
-}
+@keyframes alert-pulse { 0% { opacity: 1; } 50% { opacity: 0.6; box-shadow: 0 0 20px rgba(245, 158, 11, 0.2); } 100% { opacity: 1; } }
 
-/* حاويات الزجاج الذكي (Glassmorphism) */
-.glass-panel {
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(25px) saturate(150%);
-    -webkit-backdrop-filter: blur(25px);
-    border: 1px solid var(--glass-border);
-    border-radius: 30px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
+.blockchain-badge { background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 6px 15px; border-radius: 20px; font-size: 10px; font-weight: 900; }
 
-.glass-panel:hover {
-    border-color: var(--primary-neon);
-    box-shadow: 0 0 30px rgba(0, 242, 255, 0.15);
-}
+/* التنبيهات */
+.noti-item { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; border-right: 3px solid #3b82f6; margin-bottom: 8px; }
+.noti-item.warning { border-right-color: #ef4444; }
 
-/* تصميم لوحة المؤشرات الصحية اللحظية */
-.vital-card {
-    position: relative;
-    padding: 2rem;
-    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%);
-    border-radius: 24px;
-    border-right: 4px solid transparent;
-    overflow: hidden;
-}
-
-.vital-card.temp { border-right-color: var(--warning-neon); }
-.vital-card.pulse { border-right-color: var(--danger-neon); }
-.vital-card.ox { border-right-color: var(--primary-neon); }
-.vital-card.ai { border-right-color: var(--secondary-neon); }
-
-.vital-card h4 {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 2.2rem;
-    font-weight: 900;
-    color: #fff;
-    margin-top: 0.5rem;
-    text-shadow: 0 0 15px rgba(255,255,255,0.2);
-}
-
-/* تأثير البلوك تشين (Blockchain Nodes) */
-.blockchain-status {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.6rem;
-    letter-spacing: 2px;
-    color: var(--secondary-neon);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-transform: uppercase;
-}
-
-/* تأثير الرادار في الفحص الذكي */
-.radar-scan {
-    width: 200px; height: 200px;
-    border-radius: 50%;
-    border: 2px solid var(--primary-neon);
-    position: relative;
-    display: flex; align-items: center; justify-content: center;
-}
-
-.radar-scan::before {
-    content: "";
-    position: absolute;
-    width: 100%; height: 100%;
-    border: 1px solid var(--primary-neon);
-    border-radius: 50%;
-    animation: pulse-out 2s infinite;
-}
-
-@keyframes pulse-out {
-    0% { transform: scale(1); opacity: 0.8; }
-    100% { transform: scale(1.8); opacity: 0; }
-}
-
-/* تصميم الخطوات (آلية العمل) */
-.workflow-nav .step {
-    padding: 1.2rem;
-    margin-bottom: 1rem;
-    border-radius: 18px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid transparent;
-    transition: 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    opacity: 0.5;
-}
-
-.workflow-nav .step.active {
-    opacity: 1;
-    background: rgba(0, 242, 255, 0.05);
-    border-color: var(--primary-neon);
-    transform: translateX(-10px);
-}
-
-/* أزرار التشغيل */
-.btn-main {
-    background: linear-gradient(45deg, #0062ff, #00f2ff);
-    color: white;
-    padding: 1.5rem 3rem;
-    border-radius: 20px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    border: none;
-    box-shadow: 0 10px 30px rgba(0, 98, 255, 0.4);
-    transition: 0.4s;
-}
-
-.btn-main:hover {
-    transform: scale(1.05);
-    box-shadow: 0 15px 40px rgba(0, 242, 255, 0.6);
-}
-
-/* تخصيص السكرول بار */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-thumb { background: var(--primary-neon); border-radius: 10px; }
+.animate-in { animation: fadeInUp 0.5s ease-out; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
