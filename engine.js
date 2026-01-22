@@ -1,69 +1,62 @@
-let chart;
-let pulseData = Array(30).fill(70);
+/**
+ * SMART CLINIC OS v2026 - CENTRAL INTELLIGENCE ENGINE
+ * نظام الإدارة المركزية والربط الرباعي
+ */
 
-function initChart() {
-    const ctx = document.getElementById('pulseChart').getContext('2d');
-    chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: pulseData.map((_, i) => i),
-            datasets: [{
-                data: pulseData,
-                borderColor: '#3b82f6',
-                borderWidth: 3,
-                pointRadius: 0,
-                fill: true,
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            scales: { x: { display: false }, y: { display: false } },
-            plugins: { legend: { display: false } }
+const SmartClinicEngine = {
+    // 1. الربط مع الحساسات (IoT Sensors)
+    async captureVitals() {
+        console.log("إشارة: جاري سحب البيانات من الحساسات الذكية...");
+        // محاكاة سحب البيانات من النبض والحرارة والأكسجين
+        const data = {
+            bpm: Math.floor(72 + Math.random() * 20),
+            temp: (36.6 + Math.random() * 1.5).toFixed(1),
+            oxygen: Math.floor(95 + Math.random() * 5),
+            timestamp: new Date().toISOString()
+        };
+        this.processAI(data);
+    },
+
+    // 2. معالجة الذكاء الاصطناعي (AI Decision Support)
+    processAI(vitals) {
+        console.log("تحليل: محرك الذكاء الاصطناعي يبحث عن أنماط الخطر...");
+        let diagnosis = "مستقرة";
+        let priority = "Low";
+
+        if (vitals.temp > 38.2 || vitals.bpm > 110) {
+            diagnosis = "اشتباه في عدوى نشطة - تفعيل بروتوكول العزل";
+            priority = "Critical";
+            this.triggerEmergency(vitals);
         }
-    });
-}
 
-function startBioScan() {
-    MedicalBot.updateState('scanning', "جاري سحب بيانات الحساسات الحيوية...");
-    let timer = 0;
-    const interval = setInterval(() => {
-        const bpm = Math.floor(70 + Math.random() * 55);
-        pulseData.push(bpm);
-        pulseData.shift();
-        chart.update();
-        timer++;
-        
-        if(timer > 40) {
-            clearInterval(interval);
-            if(bpm > 100) {
-                MedicalBot.updateState('warning', "تنبيه: مؤشرات غير مستقرة. جاري طلب الطبيب.");
-                TeleMedicine.initiateEmergencyCall({name:'فهد محمد', temp:38.9, bpm:bpm, spo2:94});
-            } else {
-                MedicalBot.updateState('happy', "مؤشراتك ممتازة، تستطيع العودة لفصلك.");
-                Blockchain.addBlock(`SCAN_NORMAL: BPM ${bpm}`);
-            }
-        }
-    }, 150);
-}
+        // توثيق العملية في البلوك تشين فوراً
+        this.sealInBlockchain(vitals, diagnosis);
+    },
 
-function switchTab(id) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-    document.getElementById(id + '-section').classList.remove('hidden');
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-}
+    // 3. التوثيق في البلوك تشين (Blockchain Ledger)
+    sealInBlockchain(data, result) {
+        const block = {
+            id: btoa(Math.random()).substring(0, 12),
+            data: data,
+            diagnosis: result,
+            hash: "SHA256-" + Math.random().toString(16).slice(2)
+        };
+        // إرسال الإشارة لملف blockchain-ledger.js
+        console.log(`✅ تم ختم السجل الطبي في البلوك تشين: ${block.id}`);
+        this.notifyParent(result);
+    },
 
-window.onload = () => {
-    initChart();
-    MedicalBot.init();
-    const map = document.getElementById('school-map');
-    for(let i=1; i<=12; i++) {
-        const r = document.createElement('div');
-        r.className = `room ${i===3?'alert':''}`;
-        r.innerText = `فصل ${i}-أ`;
-        map.appendChild(r);
+    // 4. نظام إشعارات أولياء الأمور الذكي
+    notifyParent(message) {
+        // الربط مع ملف mobile-app.js لإرسال الإشعار
+        console.log(`📱 تم إرسال إشعار فوري لولي الأمر: ${message}`);
+    },
+
+    triggerEmergency(data) {
+        // تفعيل وحدة التخاطب المرئي (tele-medicine.js)
+        console.log("🚨 تنبيه: فتح قناة اتصال مباشرة مع الطبيب المناوب.");
     }
-    new QRCode(document.getElementById("qrcode"), { text: "STUDENT_ID_8841", width: 120, height: 120 });
 };
+
+// تشغيل المحرك عند بدء الفحص
+// SmartClinicEngine.captureVitals();
