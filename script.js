@@ -1,125 +1,172 @@
-// بيانات النظام والخدمات
-const portals = {
-    school: {
-        title: "إدارة المدرسة", color: "#3b82f6", icon: 'fa-school',
-        menu: [
-            { id: 'map', name: 'خريطة الرصد اللحظي', icon: 'fa-map-marked-alt' },
-            { id: 'impact', name: 'مؤشرات الأثر الدراسي', icon: 'fa-chart-line' }
-        ]
-    },
-    doctor: {
-        title: "بوابة الطبيب", color: "#10b981", icon: 'fa-user-md',
-        menu: [
-            { id: 'triage', name: 'الفرز الذكي (AI)', icon: 'fa-stethoscope' },
-            { id: 'patients', name: 'سجلات Blockchain', icon: 'fa-link' }
-        ]
-    },
-    student: {
-        title: "بوابة الطالب", color: "#a855f7", icon: 'fa-user-graduate',
-        menu: [
-            { id: 'health-id', name: 'هويتي الصحية الرقمية', icon: 'fa-id-card' },
-            { id: 'ar-edu', name: 'الواقع المعزز AR', icon: 'fa-vr-cardboard' }
-        ]
-    },
-    parent: {
-        title: "بوابة ولي الأمر", color: "#f59e0b", icon: 'fa-family',
-        menu: [
-            { id: 'live-track', name: 'متابعة الحالة الآن', icon: 'fa-heartbeat' },
-            { id: 'history', name: 'التقارير الطبية', icon: 'fa-file-alt' }
-        ]
+/* =========================================================
+   Smart School Clinic — Script Controller
+   Static / Demo / GitHub Pages Ready
+   ========================================================= */
+
+(() => {
+  "use strict";
+
+  /* ---------------- Helpers ---------------- */
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const rand = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+  const now = () => new Date();
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const timeStr = () => `${pad2(now().getHours())}:${pad2(now().getMinutes())}`;
+
+  /* ---------------- State ---------------- */
+  const state = {
+    cases: [],
+    alerts: [],
+    lastCase: null
+  };
+
+  /* ---------------- Navigation ---------------- */
+  function initNav() {
+    $$(".nav-item").forEach(btn => {
+      btn.addEventListener("click", () => {
+        $$(".nav-item").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        const view = btn.dataset.view;
+        $$(".view").forEach(v => v.classList.remove("show"));
+        $("#view-" + view)?.classList.add("show");
+      });
+    });
+  }
+
+  /* ---------------- Demo Seed ---------------- */
+  function seedCases() {
+    const demo = [
+      { student: "طالب #23", reason: "صداع", priority: "LOW", status: "تم" },
+      { student: "طالبة #41", reason: "حمّى", priority: "MED", status: "متابعة" },
+      { student: "طالب #18", reason: "ضيق تنفس", priority: "HIGH", status: "تنبيه" }
+    ];
+
+    state.cases = demo.map(c => ({
+      id: Math.random().toString(36).slice(2, 8),
+      time: timeStr(),
+      ...c
+    }));
+
+    state.lastCase = state.cases[0];
+    renderCases();
+  }
+
+  /* ---------------- Renderers ---------------- */
+  function renderCases() {
+    const box = $("#caseRows");
+    if (!box) return;
+
+    box.innerHTML = state.cases.slice(0, 6).map(c => `
+      <div class="trow">
+        <div class="muted">${c.time}</div>
+        <div><b>${c.student}</b></div>
+        <div>${c.reason}</div>
+        <div>${badgePriority(c.priority)}</div>
+        <div>${badgeStatus(c.status)}</div>
+      </div>
+    `).join("");
+  }
+
+  function renderAlerts() {
+    const box = $("#alertsList");
+    if (!box) return;
+
+    if (!state.alerts.length) {
+      box.innerHTML = `<div class="empty">لا توجد تنبيهات حالياً</div>`;
+      return;
     }
-};
 
-let notifications = [
-    { id: 1, type: 'warning', title: 'تنبيه AI', msg: 'ارتفاع حرارة فصل 1-B', time: 'منذ دقيقة' }
-];
-
-// فتح بوابة محددة
-function openPortal(type) {
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('main-interface').classList.remove('hidden');
-    document.getElementById('noti-center').classList.remove('hidden');
-    
-    const portal = portals[type];
-    document.getElementById('portal-title').innerText = portal.title;
-    document.getElementById('user-avatar').innerHTML = `<i class="fas ${portal.icon} text-3xl" style="color:${portal.color}"></i>`;
-    document.getElementById('user-avatar').style.borderColor = portal.color;
-
-    renderSidebar(type);
-    loadPage(type, portal.menu[0].id);
-    renderNotifications();
-}
-
-function renderSidebar(type) {
-    const nav = document.getElementById('sidebar-nav');
-    nav.innerHTML = portals[type].menu.map(item => `
-        <button onclick="loadPage('${type}', '${item.id}')" class="nav-btn" id="btn-${item.id}">
-            <i class="fas ${item.icon}"></i> <span>${item.name}</span>
-        </button>
-    `).join('');
-}
-
-function loadPage(type, pageId) {
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('btn-' + pageId)?.classList.add('active');
-    
-    const view = document.getElementById('portal-content');
-    const title = document.getElementById('view-title');
-    title.innerText = portals[type].menu.find(m => m.id === pageId).name;
-
-    // عرض المحتوى بناء على الصفحة
-    if (pageId === 'map') renderMap(view);
-    else if (pageId === 'triage') renderTriage(view);
-    else if (pageId === 'ar-edu') renderAR(view);
-    else if (pageId === 'live-track') renderParentTrack(view);
-    else view.innerHTML = `<div class="p-20 text-center glass rounded-3xl">جاري تحميل البيانات الرقمية...</div>`;
-}
-
-// محاكاة الخريطة
-function renderMap(container) {
-    container.innerHTML = `
-        <div class="school-map">
-            <div class="classroom safe"><span>فصل 1-A</span><p class="text-[10px] mt-2 text-emerald-500">مستقر</p></div>
-            <div class="classroom warning"><span>فصل 1-B</span><p class="text-[10px] mt-2 text-orange-500">تنبيه حرارة</p></div>
-            <div class="classroom safe"><span>فصل 2-A</span><p class="text-[10px] mt-2 text-emerald-500">مستقر</p></div>
-            <div class="classroom safe"><span>فصل 2-B</span><p class="text-[10px] mt-2 text-emerald-500">مستقر</p></div>
+    box.innerHTML = state.alerts.map(a => `
+      <div class="alert ${a.level}">
+        <div class="a-top">
+          <div class="a-title">${a.title}</div>
+          <div class="muted">${a.time}</div>
         </div>
-    `;
-}
+        <div class="a-body">${a.body}</div>
+      </div>
+    `).join("");
+  }
 
-// محاكاة الفرز الذكي
-function renderTriage(container) {
-    container.innerHTML = `
-        <div class="max-w-xl mx-auto glass-main p-10 rounded-[3rem] text-center">
-            <div class="w-24 h-24 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-            <h3 class="text-xl font-bold mb-4">في انتظار مسح الطالب (IoT)</h3>
-            <button onclick="simulateAI()" class="bg-blue-600 px-10 py-4 rounded-2xl font-black shadow-lg">محاكاة فحص AI</button>
-        </div>
-    `;
-}
+  /* ---------------- Badges ---------------- */
+  function badgePriority(p) {
+    const map = {
+      LOW: "low",
+      MED: "med",
+      HIGH: "high",
+      CRIT: "crit"
+    };
+    return `<span class="pr ${map[p]}">${p}</span>`;
+  }
 
-function simulateAI() {
-    sendNewNotification('اكتشاف حالة', 'تم رصد ارتفاع حرارة طالب (38.8) - نظام الفرز أصدر قرار العزل', 'warning');
-    alert("AI Result: Fever Detected. Parent notified. Data stored in Blockchain.");
-}
+  function badgeStatus(s) {
+    const map = {
+      "تم": "done",
+      "متابعة": "follow",
+      "تنبيه": "alert"
+    };
+    return `<span class="st ${map[s]}">${s}</span>`;
+  }
 
-// إدارة التنبيهات
-function toggleNotifications() {
-    document.getElementById('noti-dropdown').classList.toggle('hidden');
-}
+  /* ---------------- Actions ---------------- */
+  function bindActions() {
+    $("#btnQuickDemo")?.addEventListener("click", () => {
+      const c = createRandomCase();
+      state.cases.unshift(c);
+      state.lastCase = c;
+      renderCases();
+      simulateAlert(c);
+    });
 
-function renderNotifications() {
-    const list = document.getElementById('noti-list');
-    list.innerHTML = notifications.map(n => `
-        <div class="noti-item ${n.type}">
-            <p class="text-[10px] font-bold uppercase">${n.title}</p>
-            <p class="text-xs text-slate-400">${n.msg}</p>
-        </div>
-    `).join('');
-    document.getElementById('noti-count').innerText = notifications.length;
-}
+    $("#btnSimAlert")?.addEventListener("click", () => {
+      simulateAlert(state.lastCase || createRandomCase());
+    });
 
-function sendNewNotification(title, msg, type) {
-    notifications.unshift({ id: Date.now(), type, title, msg, time: 'الآن' });
-    renderNotifications();
-}
+    $("#btnClearAlerts")?.addEventListener("click", () => {
+      state.alerts = [];
+      renderAlerts();
+    });
+  }
+
+  function createRandomCase() {
+    const priorities = ["LOW", "MED", "HIGH"];
+    const reasons = ["صداع", "حمّى", "إجهاد", "ألم بطن"];
+    const priority = priorities[rand(0, 2)];
+
+    return {
+      id: Math.random().toString(36).slice(2, 8),
+      time: timeStr(),
+      student: `طالب #${rand(10, 99)}`,
+      reason: reasons[rand(0, reasons.length - 1)],
+      priority,
+      status: priority === "HIGH" ? "تنبيه" : priority === "MED" ? "متابعة" : "تم"
+    };
+  }
+
+  function simulateAlert(caseObj) {
+    if (!caseObj || caseObj.priority === "LOW") return;
+
+    const alert = {
+      time: timeStr(),
+      level: caseObj.priority === "HIGH" ? "high" : "crit",
+      title: "تنبيه صحي",
+      body: `حالة ${caseObj.student} تتطلب انتباه`
+    };
+
+    state.alerts.unshift(alert);
+    state.alerts = state.alerts.slice(0, 5);
+    renderAlerts();
+  }
+
+  /* ---------------- Init ---------------- */
+  function init() {
+    initNav();
+    seedCases();
+    bindActions();
+    renderAlerts();
+    console.log("Smart School Clinic — script.js ready");
+  }
+
+  init();
+})();
