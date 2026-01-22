@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Clinic OS — بوابة الطالب</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">SC</div>
+      <div>
+        <div class="brand-title">Smart Clinic OS</div>
+        <div class="brand-sub">Student Portal — بوابة الطالب</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button class="btn ghost" id="btnTheme" title="تبديل الوضع">🌓</button>
+      <button class="btn ghost" id="btnQuickRequest">طلب سريع</button>
+      <button class="btn" id="btnSOS" title="تنبيه عاجل (Demo)">🆘</button>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="nav-title">القائمة</div>
+      <nav class="nav" id="stuNav">
+        <button class="nav-item active" data-view="home"><span class="ico">🏠</span><span>الرئيسية</span></button>
+        <button class="nav-item" data-view="request"><span class="ico">📝</span><span>طلب زيارة</span></button>
+        <button class="nav-item" data-view="status"><span class="ico">📍</span><span>متابعة الطلب</span></button>
+        <button class="nav-item" data-view="learn"><span class="ico">🎓</span><span>تعليم صحي</span></button>
+        <button class="nav-item" data-view="history"><span class="ico">🗂️</span><span>السجل</span></button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="pill">
+          <span class="dot" id="dotLive"></span>
+          <div>
+            <div style="font-weight:1000;">System</div>
+            <div class="muted small" id="sysStatus">System: Ready</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <div class="muted small">
+          * هذه نسخة تجريبية للعرض. لا يتم إرسال بيانات حقيقية.
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+
+      <!-- Hero -->
+      <section class="hero">
+        <div class="hero-left">
+          <div class="kicker">🎓 Student</div>
+          <h1>مرحبًا بك</h1>
+          <p class="hero-desc">
+            اطلب زيارة للعيادة، تابع الحالة، وتعلّم بسرعة كيف تتصرف عند الأعراض الشائعة.
+          </p>
+
+          <div class="hero-cta">
+            <button class="btn" id="btnGoRequest">اطلب زيارة الآن</button>
+            <button class="btn ghost" id="btnGoLearn">تعليم صحي سريع</button>
+          </div>
+
+          <div class="hero-badges">
+            <span class="badge">RBAC: Student</span>
+            <span class="badge ghost">Privacy-first</span>
+            <span class="badge">Local Demo</span>
+          </div>
+        </div>
+
+        <div class="hero-right">
+          <div class="scorecard">
+            <div class="scorecard-head">
+              <div>
+                <div class="score-title">آخر توصية</div>
+                <div class="score-sub">مختصر للطالب</div>
+              </div>
+              <div class="ring">
+                <div class="ring-inner">
+                  <div class="ring-num" id="lastScore">✔</div>
+                  <div class="ring-lbl">OK</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="scorecard-grid">
+              <div class="mini">
+                <div class="mini-k">الحالة</div>
+                <div class="mini-v" id="lastStatus">مستقرة</div>
+              </div>
+              <div class="mini">
+                <div class="mini-k">توصية</div>
+                <div class="mini-v" id="lastAdvice">ماء + راحة</div>
+              </div>
+              <div class="mini">
+                <div class="mini-k">متابعة</div>
+                <div class="mini-v" id="lastFollow">إن لزم</div>
+              </div>
+              <div class="mini">
+                <div class="mini-k">اليوم</div>
+                <div class="mini-v" id="today">—</div>
+              </div>
+            </div>
+
+            <div class="scorecard-foot muted small">* بيانات تجريبية.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Views -->
+      <section class="views">
+
+        <!-- HOME -->
+        <section class="view show" id="view-home">
+          <div class="section-head">
+            <div>
+              <h2>الرئيسية</h2>
+              <div class="muted">اختصارات سريعة + تعليمات</div>
+            </div>
+            <div class="section-actions">
+              <button class="btn ghost" id="btnRefresh">تحديث</button>
+              <button class="btn" id="btnOpenStatus">متابعة الطلب</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <h3>اختصارات</h3>
+                <div class="muted small">Quick actions</div>
+              </div>
+
+              <div class="quickGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <button class="btn ghost" id="qHeadache">🤕 صداع</button>
+                <button class="btn ghost" id="qFever">🌡️ حرارة</button>
+                <button class="btn ghost" id="qStomach">🤢 ألم بطن</button>
+                <button class="btn ghost" id="qBreath">😮‍💨 ضيق تنفس</button>
+              </div>
+
+              <div class="divider"></div>
+              <div class="muted small" id="quickHint">اختر عرضًا لتظهر خطوات سريعة.</div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <h3>إرشاد فوري</h3>
+                <div class="muted small">What to do now</div>
+              </div>
+
+              <div class="tips" id="tipsBox" style="display:grid; gap:10px;">
+                <div class="tip">💧 اشرب ماء الآن</div>
+                <div class="tip">😴 خذ راحة قصيرة</div>
+                <div class="tip">😷 إذا كانت أعراض عدوى: ابتعد عن الآخرين وبلّغ المعلم</div>
+                <div class="tip">📝 لو استمرت الأعراض: اطلب زيارة للعيادة</div>
+              </div>
+
+              <div class="card-actions">
+                <button class="btn" id="btnMakeRequest">طلب زيارة</button>
+                <button class="btn ghost" id="btnSeeLearn">فتح التعليم الصحي</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- REQUEST -->
+        <section class="view" id="view-request">
+          <div class="section-head">
+            <div>
+              <h2>طلب زيارة للعيادة</h2>
+              <div class="muted">املأ بيانات مختصرة (Demo)</div>
+            </div>
+            <div class="section-actions">
+              <button class="btn ghost" id="btnBackHome">← رجوع</button>
+              <button class="btn" id="btnSubmitReq">إرسال الطلب</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <h3>بيانات الطالب</h3>
+                <div class="muted small">Student info</div>
+              </div>
+
+              <div class="form">
+                <div class="row">
+                  <div>
+                    <label>Student ID (Demo)</label>
+                    <input id="studentId" placeholder="STD-23" />
+                  </div>
+                  <div>
+                    <label>الاسم</label>
+                    <input id="studentName" placeholder="طالب #23" />
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div>
+                    <label>العمر</label>
+                    <input id="age" type="number" min="5" max="20" placeholder="12" />
+                  </div>
+                  <div>
+                    <label>الصف/الفصل</label>
+                    <input id="classRoom" placeholder="6/ب" />
+                  </div>
+                </div>
+
+                <label>العرض الرئيسي</label>
+                <select id="symptom">
+                  <option value="">— اختر —</option>
+                  <option value="headache">صداع</option>
+                  <option value="fever">حرارة</option>
+                  <option value="stomach">ألم بطن</option>
+                  <option value="cough">سعال</option>
+                  <option value="breath">ضيق تنفس</option>
+                  <option value="injury">إصابة/جرح</option>
+                </select>
+
+                <label>وصف مختصر</label>
+                <textarea id="desc" rows="4" placeholder="متى بدأ؟ شدته؟ أي شيء مهم…"></textarea>
+
+                <label>درجة الإلحاح (حسب شعورك)</label>
+                <select id="urgency">
+                  <option value="low">منخفض</option>
+                  <option value="med" selected>متوسط</option>
+                  <option value="high">عالي</option>
+                </select>
+              </div>
+
+              <div class="card-actions">
+                <button class="btn ghost" id="btnAutoFill">تعبئة سريعة</button>
+                <button class="btn" id="btnSubmitReq2">إرسال</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <h3>ماذا سيحدث بعد الإرسال؟</h3>
+                <div class="muted small">Flow</div>
+              </div>
+
+              <ul class="bullets">
+                <li>سيظهر الطلب في العيادة (Demo).</li>
+                <li>قد يتم استدعاؤك أو طلب متابعة.</li>
+                <li>قد يتم إشعار ولي الأمر عند الحاجة.</li>
+                <li>خصوصية الطالب محفوظة حسب الدور.</li>
+              </ul>
+
+              <div class="divider"></div>
+              <div class="muted small">
+                * في النسخة الحقيقية يمكن ربط الطلب بـ (نفاذ/أبشر) وتوثيق ولي الأمر.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STATUS -->
+        <section class="view" id="view-status">
+          <div class="section-head">
+            <div>
+              <h2>متابعة الطلب</h2>
+              <div class="muted">Tracking (Demo)</div>
+            </div>
+            <div class="section-actions">
+              <button class="btn ghost" id="btnBackHome2">← رجوع</button>
+              <button class="btn" id="btnAdvance">تقدم الحالة (Demo)</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <h3>حالة الطلب الحالية</h3>
+                <div class="muted small" id="reqId">Request: —</div>
+              </div>
+
+              <div class="statusBox" style="display:grid; gap:10px;">
+                <div class="kvrow"><span class="muted">المرحلة:</span><b id="stStage">—</b></div>
+                <div class="kvrow"><span class="muted">الوقت:</span><b id="stTime">—</b></div>
+                <div class="kvrow"><span class="muted">ملاحظة:</span><b id="stNote">—</b></div>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="card-actions">
+                <button class="btn" id="btnCancel">إلغاء الطلب</button>
+                <button class="btn ghost" id="btnOpenReq">فتح نموذج الطلب</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <h3>نصائح أثناء الانتظار</h3>
+                <div class="muted small">While waiting</div>
+              </div>
+
+              <div class="tips" style="display:grid; gap:10px;">
+                <div class="tip">🪑 اجلس في مكان آمن وهادئ</div>
+                <div class="tip">💧 اشرب ماء</div>
+                <div class="tip">🧑‍🏫 أخبر المعلم إذا ساءت الأعراض</div>
+                <div class="tip">🚑 للطوارئ استخدم زر SOS</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- LEARN -->
+        <section class="view" id="view-learn">
+          <div class="section-head">
+            <div>
+              <h2>تعليم صحي تفاعلي</h2>
+              <div class="muted">Micro-lessons + Quiz</div>
+            </div>
+            <div class="section-actions">
+              <button class="btn ghost" id="btnBackHome3">← رجوع</button>
+              <button class="btn" id="btnQuiz">اختبار سريع</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <h3>دروس قصيرة</h3>
+                <div class="muted small">Pick one</div>
+              </div>
+
+              <div class="quickGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <button class="btn ghost lbtn" data-l="wash">🧼 غسل اليدين</button>
+                <button class="btn ghost lbtn" data-l="hydr">💧 الترطيب</button>
+                <button class="btn ghost lbtn" data-l="sleep">😴 النوم</button>
+                <button class="btn ghost lbtn" data-l="mask">😷 الوقاية</button>
+              </div>
+
+              <div class="divider"></div>
+              <div class="muted" id="lessonBox" style="line-height:1.9;">
+                اختر درسًا لعرضه هنا.
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <h3>تحدي اليوم</h3>
+                <div class="muted small">Daily challenge</div>
+              </div>
+
+              <div class="tip" style="line-height:1.9;">
+                ✅ اشرب كوب ماء الآن، ثم سجّل “تم” في السجل.
+              </div>
+
+              <div class="card-actions">
+                <button class="btn" id="btnMarkDone">تم ✅</button>
+                <button class="btn ghost" id="btnOpenHistory">فتح السجل</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- HISTORY -->
+        <section class="view" id="view-history">
+          <div class="section-head">
+            <div>
+              <h2>السجل</h2>
+              <div class="muted">Requests + Activity (local demo)</div>
+            </div>
+            <div class="section-actions">
+              <button class="btn ghost" id="btnClear">مسح السجل</button>
+              <button class="btn" id="btnExport">تصدير JSON</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>آخر الأنشطة</h3>
+              <div class="muted small">Local history</div>
+            </div>
+            <div class="table" id="histTable"></div>
+          </div>
+        </section>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="engine.js"></script>
+  <script src="rbac.js"></script>
+  <script src="auth-demo.js"></script>
+  <script src="audit-users.js"></script>
+
+  <script>
+    (function(){
+      const ROLE_KEY = "sc_role";
+      const HKEY = "sc_student_history";
+      const RKEY = "sc_student_request";
+
+      const $ = (s,r=document)=>r.querySelector(s);
+      const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
+      const pad2 = (n)=>String(n).padStart(2,"0");
+      const time = ()=>{
+        const d=new Date();
+        return pad2(d.getHours())+":"+pad2(d.getMinutes())+":"+pad2(d.getSeconds());
+      };
+      const today = new Date().toLocaleDateString("ar-SA");
+
+      // Force role
+      try{
+        localStorage.setItem(ROLE_KEY, "student");
+        window.SCRBAC?.applyRBAC?.();
+        window.SCAUDIT?.audit?.("PAGE_OPEN", { page:"student.html" });
+      }catch(_){}
+
+      // Theme toggle
+      $("#btnTheme")?.addEventListener("click", ()=>{
+        const html = document.documentElement;
+        const next = html.dataset.theme === "light" ? "dark" : "light";
+        html.dataset.theme = next;
+        try{ window.SCAUDIT?.audit?.("THEME_TOGGLE", { to: next }); }catch(_){}
+      });
+
+      // nav
+      function openView(view){
+        $$("#stuNav .nav-item").forEach(b=>b.classList.remove("active"));
+        $(`#stuNav .nav-item[data-view="${view}"]`)?.classList.add("active");
+        $$(".view").forEach(v=>v.classList.remove("show"));
+        $(`#view-${view}`)?.classList.add("show");
+        try{ window.SCAUDIT?.audit?.("NAV_OPEN", { view }); }catch(_){}
+      }
+      $$("#stuNav .nav-item").forEach(btn=>{
+        btn.addEventListener("click", ()=> openView(btn.dataset.view));
+      });
+
+      // Home buttons
+      $("#today").textContent = today;
+      $("#btnGoRequest")?.addEventListener("click", ()=> openView("request"));
+      $("#btnMakeRequest")?.addEventListener("click", ()=> openView("request"));
+      $("#btnSeeLearn")?.addEventListener("click", ()=> openView("learn"));
+      $("#btnGoLearn")?.addEventListener("click", ()=> openView("learn"));
+      $("#btnOpenStatus")?.addEventListener("click", ()=> openView("status"));
+      $("#btnBackHome")?.addEventListener("click", ()=> openView("home"));
+      $("#btnBackHome2")?.addEventListener("click", ()=> openView("home"));
+      $("#btnBackHome3")?.addEventListener("click", ()=> openView("home"));
+
+      // Quick hints
+      function setQuick(msg){
+        $("#quickHint").textContent = msg;
+      }
+      $("#qHeadache")?.addEventListener("click", ()=> setQuick("للصداع: اشرب ماء + راحة 10 دقائق + تجنب الشاشات. إذا استمر اطلب زيارة."));
+      $("#qFever")?.addEventListener("click", ()=> setQuick("للحرارة: سوائل + إبلاغ المعلم + اطلب زيارة للعيادة. تجنب مخالطة الآخرين."));
+      $("#qStomach")?.addEventListener("click", ()=> setQuick("لألم البطن: اجلس بهدوء + ماء رشفات + اطلب زيارة إذا الألم قوي أو مستمر."));
+      $("#qBreath")?.addEventListener("click", ()=> setQuick("لضيق التنفس: أخبر المعلم فورًا + استخدم SOS إذا ساءت الأعراض."));
+
+      // Learn lessons
+      const lessons = {
+        wash: "غسل اليدين: 20 ثانية بالماء والصابون، خصوصًا قبل الأكل وبعد السعال/العطس.",
+        hydr: "الترطيب: الماء يقلل الصداع والإرهاق. خلك قريب من قنينة ماء.",
+        sleep: "النوم: 8–9 ساعات تساعد المناعة والتركيز وتقلل التوتر.",
+        mask: "الوقاية: غطِ الفم عند السعال، وابتعد عن الآخرين إذا عندك أعراض."
+      };
+      $$(".lbtn").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          $("#lessonBox").textContent = lessons[b.dataset.l] || "—";
+          addHist("LESSON_OPEN", { lesson: b.dataset.l });
+        });
+      });
+
+      // Quiz
+      $("#btnQuiz")?.addEventListener("click", ()=>{
+        const ok = confirm("سؤال سريع: هل غسل اليدين 20 ثانية مهم؟");
+        addHist("QUIZ", { answer: ok ? "yes" : "no" });
+        alert(ok ? "صح ✅" : "مو مشكلة… تعلمنا اليوم 😄");
+      });
+
+      // History
+      function loadHist(){
+        try{ return JSON.parse(localStorage.getItem(HKEY) || "[]"); }catch(_){ return []; }
+      }
+      function saveHist(rows){
+        localStorage.setItem(HKEY, JSON.stringify(rows.slice(0,200)));
+      }
+      function addHist(type, meta={}){
+        const rows = loadHist();
+        rows.unshift({ t: time(), type, meta });
+        saveHist(rows);
+        renderHist();
+        try{ window.SCAUDIT?.audit?.("STUDENT_EVENT", { type, meta }); }catch(_){}
+      }
+      function renderHist(){
+        const box = $("#histTable");
+        if(!box) return;
+        const rows = loadHist().slice(0,50);
+        if(!rows.length){
+          box.innerHTML = `<div class="empty">لا يوجد سجل بعد</div>`;
+          return;
+        }
+        box.innerHTML = `
+          <div class="trow thead"><div>الوقت</div><div>النوع</div><div colspan="3">تفاصيل</div></div>
+          ${rows.map(r=>`
+            <div class="trow">
+              <div class="muted">${r.t}</div>
+              <div><b>${r.type}</b></div>
+              <div class="muted" style="grid-column:3 / -1;">${short(JSON.stringify(r.meta||{}))}</div>
+            </div>
+          `).join("")}
+        `;
+      }
+      function short(s){ return s.length>120 ? s.slice(0,120)+"…" : s; }
+
+      // Request tracking model
+      const stages = [
+        { s:"SENT", note:"تم إرسال الطلب ✅" },
+        { s:"QUEUED", note:"تمت إضافته لقائمة العيادة" },
+        { s:"CALLED", note:"قد يتم استدعاؤك الآن" },
+        { s:"IN_CLINIC", note:"داخل العيادة (Demo)" },
+        { s:"DONE", note:"تم إغلاق الطلب" }
+      ];
+
+      function loadReq(){
+        try{ return JSON.parse(localStorage.getItem(RKEY) || "null"); }catch(_){ return null; }
+      }
+      function saveReq(req){
+        localStorage.setItem(RKEY, JSON.stringify(req));
+      }
+      function renderReq(){
+        const req = loadReq();
+        if(!req){
+          $("#reqId").textContent = "Request: —";
+          $("#stStage").textContent = "لا يوجد طلب";
+          $("#stTime").textContent = "—";
+          $("#stNote").textContent = "اذهب لطلب زيارة لإرسال طلب جديد.";
+          return;
+        }
+        $("#reqId").textContent = "Request: " + req.id;
+        $("#stStage").textContent = req.stage;
+        $("#stTime").textContent = req.t;
+        $("#stNote").textContent = req.note;
+      }
+
+      function submitReq(){
+        const req = {
+          id: "REQ-" + Math.random().toString(36).slice(2,8).toUpperCase(),
+          t: time(),
+          stage: "SENT",
+          note: "تم إرسال الطلب ✅",
+          studentId: ($("#studentId").value||"").trim(),
+          studentName: ($("#studentName").value||"").trim(),
+          age: ($("#age").value||"").trim(),
+          classRoom: ($("#classRoom").value||"").trim(),
+          symptom: $("#symptom").value || "",
+          desc: ($("#desc").value||"").trim(),
+          urgency: $("#urgency").value || "med"
+        };
+        saveReq(req);
+        addHist("REQUEST_SENT", { id:req.id, symptom:req.symptom, urgency:req.urgency });
+        alert("تم إرسال الطلب (Demo) ✅");
+        openView("status");
+        renderReq();
+      }
+
+      function advanceReq(){
+        const req = loadReq();
+        if(!req){ alert("لا يوجد طلب بعد"); return; }
+        const idx = stages.findIndex(x=>x.s===req.stage);
+        const next = stages[Math.min(stages.length-1, idx+1)];
+        req.stage = next.s;
+        req.note = next.note;
+        req.t = time();
+        saveReq(req);
+        addHist("REQUEST_STAGE", { id:req.id, stage:req.stage });
+        renderReq();
+      }
+
+      function cancelReq(){
+        const req = loadReq();
+        if(!req){ return; }
+        if(!confirm("متأكد تبغى تلغي الطلب؟")) return;
+        localStorage.removeItem(RKEY);
+        addHist("REQUEST_CANCELED", { id:req.id });
+        renderReq();
+      }
+
+      // Buttons
+      $("#btnSubmitReq")?.addEventListener("click", submitReq);
+      $("#btnSubmitReq2")?.addEventListener("click", submitReq);
+      $("#btnAdvance")?.addEventListener("click", advanceReq);
+      $("#btnCancel")?.addEventListener("click", cancelReq);
+      $("#btnOpenReq")?.addEventListener("click", ()=> openView("request"));
+
+      $("#btnAutoFill")?.addEventListener("click", ()=>{
+        $("#studentId").value = "STD-" + (Math.floor(Math.random()*90)+10);
+        $("#studentName").value = "طالب #" + (Math.floor(Math.random()*90)+10);
+        $("#age").value = String(Math.floor(Math.random()*7)+10);
+        $("#classRoom").value = (Math.floor(Math.random()*6)+1) + "/" + ["أ","ب","ج"][Math.floor(Math.random()*3)];
+        $("#symptom").value = ["headache","fever","stomach","cough"][Math.floor(Math.random()*4)];
+        $("#desc").value = "بدأت الأعراض قبل " + (Math.floor(Math.random()*6)+1) + " ساعة. (Demo)";
+        $("#urgency").value = ["low","med","high"][Math.floor(Math.random()*3)];
+        addHist("AUTOFILL", {});
+      });
+
+      // Quick request
+      $("#btnQuickRequest")?.addEventListener("click", ()=>{
+        openView("request");
+        $("#btnAutoFill")?.click();
+      });
+
+      // SOS (demo)
+      $("#btnSOS")?.addEventListener("click", ()=>{
+        addHist("SOS", { note:"Emergency demo pressed" });
+        try{ window.SCAUDIT?.audit?.("SOS_PRESSED", { by:"student" }); }catch(_){}
+        alert("تم إرسال تنبيه عاجل للعيادة (Demo) 🆘");
+        $("#dotLive")?.classList.add("pulse");
+        setTimeout(()=>$("#dotLive")?.classList.remove("pulse"), 900);
+      });
+
+      $("#btnMarkDone")?.addEventListener("click", ()=>{
+        addHist("CHALLENGE_DONE", { date: today });
+        alert("ممتاز ✅ سجلناها في السجل");
+      });
+
+      $("#btnOpenHistory")?.addEventListener("click", ()=> openView("history"));
+
+      $("#btnClear")?.addEventListener("click", ()=>{
+        if(!confirm("مسح السجل بالكامل؟")) return;
+        localStorage.setItem(HKEY, "[]");
+        addHist("HISTORY_CLEARED", {});
+        renderHist();
+      });
+
+      $("#btnExport")?.addEventListener("click", ()=>{
+        const rows = loadHist();
+        const blob = new Blob([JSON.stringify(rows, null, 2)], {type:"application/json;charset=utf-8"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = "student-history.json";
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url), 600);
+        addHist("HISTORY_EXPORTED", { count: rows.length });
+      });
+
+      $("#btnRefresh")?.addEventListener("click", ()=>{
+        $("#dotLive")?.classList.add("pulse");
+        setTimeout(()=>$("#dotLive")?.classList.remove("pulse"), 900);
+        addHist("REFRESH", {});
+      });
+
+      // Init
+      renderHist();
+      renderReq();
+    })();
+  </script>
+
+</body>
+</html>
