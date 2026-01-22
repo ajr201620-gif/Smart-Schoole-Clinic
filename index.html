@@ -2,170 +2,177 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>SMART CLINIC OS | NEURAL CORE 2026</title>
+    <title>SMART CLINIC OS v2026 | المنظومة المتكاملة</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Tajawal:wght@300;700;900&display=swap');
-        
-        :root { --neon-blue: #00f3ff; --neon-red: #ff003c; --bg-dark: #050a10; }
-        body { background: var(--bg-dark); color: white; font-family: 'Tajawal', sans-serif; overflow: hidden; height: 100vh; }
+        :root { --neon-blue: #00f3ff; --safe-green: #10b981; --warn-yellow: #fbbf24; --danger-red: #ef4444; }
+        body { background: #020617; color: white; font-family: 'Tajawal', sans-serif; overflow: hidden; height: 100vh; }
         .cyber-font { font-family: 'Orbitron', sans-serif; }
-        
-        /* تأثيرات الإضاءة والزجاج */
-        .glass-panel { background: rgba(10, 20, 30, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(0, 243, 255, 0.1); border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        .neon-border { border: 1px solid var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue); }
-        .neon-text { text-shadow: 0 0 10px var(--neon-blue); }
-
-        /* الأنيميشن */
-        .scan-line { width: 100%; height: 2px; background: var(--neon-blue); position: absolute; top: 0; left: 0; animation: scanning 3s linear infinite; box-shadow: 0 0 15px var(--neon-blue); z-index: 10; opacity: 0.5; }
-        @keyframes scanning { 100% { top: 100%; } }
-        
-        .grid-bg { background-image: linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px); background-size: 30px 30px; }
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); border-radius: 1.5rem; }
+        .triage-card { transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .pulse-ring { position: absolute; width: 100%; height: 100%; border: 2px solid var(--neon-blue); border-radius: 50%; animation: ring-pulse 2s infinite; }
+        @keyframes ring-pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
     </style>
 </head>
-<body class="grid-bg flex p-4 gap-4">
+<body class="p-4 grid grid-cols-12 gap-4 h-screen">
 
-    <aside class="w-1/4 flex flex-col gap-4">
-        <div class="glass-panel p-6 flex-1 relative overflow-hidden">
-            <div class="scan-line"></div>
-            <h2 class="cyber-font text-sm neon-text mb-4 uppercase">System Ledger (Blockchain)</h2>
-            <div id="blockchain-live" class="space-y-3 text-[10px] font-mono opacity-70">
-                </div>
+    <aside class="col-span-3 flex flex-col gap-4">
+        <div class="glass p-6 flex-1 flex flex-col items-center">
+            <div class="w-24 h-24 bg-blue-600 rounded-2xl flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(37,99,235,0.4)]">
+                <span class="cyber-font text-3xl font-black">SC</span>
+            </div>
+            <h1 class="text-xl font-black text-center mb-1">العيادة المدرسية الذكية</h1>
+            <p class="text-[10px] cyber-font opacity-40 mb-6 uppercase tracking-widest">Autonomous Health Grid</p>
+            
+            <nav class="w-full space-y-2">
+                <div class="p-3 rounded-xl bg-blue-500/10 border-r-4 border-blue-500 text-sm font-bold">وحدة الفرز (AI Triage)</div>
+                <div onclick="window.open('admin-stats.html')" class="p-3 rounded-xl hover:bg-white/5 cursor-pointer text-sm opacity-60">لوحة تحليل البيانات (Dashboards)</div>
+                <div onclick="window.open('ar-vision.html')" class="p-3 rounded-xl hover:bg-white/5 cursor-pointer text-sm opacity-60">المعاينة الجزيئية (Digital Twin)</div>
+            </nav>
         </div>
-        <div class="glass-panel p-6 h-48 flex flex-col items-center justify-center">
-            <div id="qrcode" class="p-2 bg-white rounded-lg"></div>
-            <span class="text-[9px] mt-2 cyber-font opacity-50">SECURE ID: ALPHA-2026</span>
+
+        <div class="glass p-4 h-64 overflow-hidden relative">
+            <h3 class="text-[10px] cyber-font text-cyan-400 mb-3 tracking-widest">BLOCKCHAIN LEDGER (SECURE)</h3>
+            <div id="ledger-stream" class="space-y-2 text-[9px] font-mono opacity-50">
+                </div>
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col gap-4">
-        <div class="glass-panel flex-[2] p-8 relative">
-            <div class="flex justify-between items-center mb-6">
+    <main class="col-span-6 flex flex-col gap-4">
+        <div class="glass flex-[2] p-8 relative overflow-hidden">
+            <div class="flex justify-between items-start mb-8">
                 <div>
-                    <h1 class="text-4xl font-black italic tracking-tighter">SMART CLINIC <span class="text-cyan-400">OS</span></h1>
-                    <p class="text-[10px] cyber-font opacity-40 uppercase">National Health Security Infrastructure</p>
+                    <span class="text-[10px] bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full font-bold">نظام المسح الحيوي (IoT Hub)</span>
+                    <h2 class="text-3xl font-black mt-2">وحدة الفحص اللحظي</h2>
                 </div>
-                <div class="text-right">
-                    <div class="text-xs font-bold text-cyan-400 cyber-font animate-pulse">● LIVE TELEMETRY</div>
-                    <div class="text-[9px] opacity-40">ENCRYPTION: AES-256-GCM</div>
+                <div id="triage-status" class="px-6 py-2 rounded-lg border border-white/10 text-xs font-bold cyber-font">STATUS: IDLE</div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <div class="glass p-4 border-r-4 border-red-500">
+                    <div class="text-[10px] opacity-50 mb-1">معدل النبض (BPM)</div>
+                    <div id="val-bpm" class="text-4xl font-black cyber-font text-red-500">--</div>
+                </div>
+                <div class="glass p-4 border-r-4 border-orange-400">
+                    <div class="text-[10px] opacity-50 mb-1">الحرارة (TEMP)</div>
+                    <div id="val-temp" class="text-4xl font-black cyber-font text-orange-400">--.-</div>
+                </div>
+                <div class="glass p-4 border-r-4 border-emerald-500">
+                    <div class="text-[10px] opacity-50 mb-1">نسبة الأكسجين (SPO2)</div>
+                    <div id="val-oxy" class="text-4xl font-black cyber-font text-emerald-500">--%</div>
+                </div>
+                <div class="glass p-4 border-r-4 border-blue-500">
+                    <div class="text-[10px] opacity-50 mb-1">الضغط (BP)</div>
+                    <div id="val-bp" class="text-4xl font-black cyber-font text-blue-500">120/80</div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-3 gap-6 mb-8">
-                <div class="glass-panel p-4 border-l-4 border-cyan-500">
-                    <span class="text-[10px] block opacity-50">TEMPERATURE</span>
-                    <h3 id="v-temp" class="text-3xl font-black cyber-font">--.-°C</h3>
-                </div>
-                <div class="glass-panel p-4 border-l-4 border-red-500">
-                    <span class="text-[10px] block opacity-50">HEART RATE</span>
-                    <h3 id="v-bpm" class="text-3xl font-black cyber-font text-red-500">-- BPM</h3>
-                </div>
-                <div class="glass-panel p-4 border-l-4 border-emerald-500">
-                    <span class="text-[10px] block opacity-50">OXYGEN (SPO2)</span>
-                    <h3 id="v-oxy" class="text-3xl font-black cyber-font text-emerald-500">--%</h3>
-                </div>
-            </div>
-
-            <div class="h-48 relative glass-panel bg-black/20 p-4">
-                <canvas id="livePulseChart"></canvas>
-            </div>
-
-            <button onclick="masterScan()" class="w-full mt-6 py-5 neon-border bg-cyan-500/10 hover:bg-cyan-500/20 transition-all font-black text-lg tracking-[0.5em] uppercase cyber-font">Initialize Quantum Scan</button>
+            <button onclick="startAIFiling()" class="w-full py-5 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl font-black text-lg shadow-xl hover:scale-[1.02] transition-transform">بدء المسح ورفع البيانات للنظام</button>
         </div>
 
-        <div class="glass-panel flex-1 p-6 grid grid-cols-4 gap-4" id="map-grid">
-            </div>
+        <div id="ai-recommendation" class="glass flex-1 p-6 border-t-4 border-transparent transition-all duration-500">
+            <h3 class="text-sm font-black mb-2 flex items-center gap-2">
+                <i class="fas fa-brain"></i> محرك دعم القرار الطبي (AI Engine)
+            </h3>
+            <p id="ai-text" class="text-sm opacity-60 italic">في انتظار نتائج المسح الحيوي...</p>
+        </div>
     </main>
 
-    <div id="doctor-portal" class="fixed inset-0 bg-black/95 hidden z-50 p-12">
-        <div class="h-full w-full flex gap-8">
-            <div class="flex-1 glass-panel p-2 relative overflow-hidden">
-                <img src="https://img.freepik.com/free-photo/doctor-with-stethoscope-hands-hospital-background_1150-12940.jpg" class="w-full h-full object-cover opacity-60">
-                <div class="absolute bottom-8 left-8 p-6 glass-panel border-cyan-500">
-                    <h2 class="text-2xl font-black mb-2">د. خالد العتيبي</h2>
-                    <p class="text-sm opacity-70 italic">استشاري الطب الاتصالي - مركز القيادة</p>
-                </div>
-            </div>
-            <div class="w-1/3 flex flex-col gap-6">
-                <div class="glass-panel p-6 flex-1">
-                    <h3 class="cyber-font text-cyan-400 mb-4">Diagnosis Engine</h3>
-                    <div id="ai-analysis" class="text-sm leading-relaxed opacity-80">جاري انتظار البيانات...</div>
-                </div>
-                <button onclick="closePortal()" class="py-6 bg-red-600 font-black uppercase cyber-font">Terminate Session</button>
+    <aside class="col-span-3 flex flex-col gap-4">
+        <div class="glass p-6 flex flex-col items-center justify-center">
+            <div id="qrcode" class="p-2 bg-white rounded-xl mb-4"></div>
+            <p class="text-[10px] font-bold opacity-40 cyber-font">DIGITAL HEALTH PASSPORT</p>
+        </div>
+
+        <div class="glass p-6 flex-1">
+            <h3 class="text-sm font-black mb-6">إشعارات أولياء الأمور</h3>
+            <div id="parent-notifs" class="space-y-4">
+                <div class="text-[10px] opacity-30 text-center py-10">لا توجد إشعارات مرسلة حالياً</div>
             </div>
         </div>
-    </div>
+    </aside>
 
     <script>
-        // محرك البيانات والرسومات
-        let chart;
-        let pData = Array(40).fill(70);
+        const bc = new BroadcastChannel('clinic_network');
         
-        function initChart() {
-            const ctx = document.getElementById('livePulseChart').getContext('2d');
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: pData.map((_, i) => i),
-                    datasets: [{
-                        data: pData,
-                        borderColor: '#00f3ff',
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        fill: true,
-                        backgroundColor: 'rgba(0, 243, 255, 0.05)',
-                        tension: 0.4
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, scales: { x: {display: false}, y: {display: false} }, plugins: {legend: {display: false}} }
-            });
-        }
-
-        function masterScan() {
+        function startAIFiling() {
             let i = 0;
+            const status = document.getElementById('triage-status');
+            status.innerText = "SCANNING...";
+            status.style.color = "#00f3ff";
+
             const timer = setInterval(() => {
-                const bpm = Math.floor(70 + Math.random() * 60);
-                pData.push(bpm); pData.shift(); chart.update('none');
+                const bpm = Math.floor(70 + Math.random() * 55);
+                const temp = (36.5 + Math.random() * 3).toFixed(1);
                 
-                document.getElementById('v-bpm').innerText = bpm;
-                document.getElementById('v-temp').innerText = (36.5 + Math.random() * 3).toFixed(1) + "°C";
-                document.getElementById('v-oxy').innerText = Math.floor(95 + Math.random() * 5) + "%";
-                
-                if(i++ > 50) {
+                document.getElementById('val-bpm').innerText = bpm;
+                document.getElementById('val-temp').innerText = temp + "°";
+                document.getElementById('val-oxy').innerText = Math.floor(94 + Math.random() * 6) + "%";
+
+                if(i++ > 30) {
                     clearInterval(timer);
-                    addBlock("HEALTH_SCAN_ID_" + Math.random().toString(36).substr(2,9).toUpperCase());
-                    if(bpm > 100) openPortal();
+                    processAIDecision(bpm, temp);
                 }
             }, 100);
         }
 
-        function addBlock(hash) {
-            const ledger = document.getElementById('blockchain-live');
-            const entry = document.createElement('div');
-            entry.className = "p-2 border-r-2 border-cyan-500 bg-white/5 animate-pulse";
-            entry.innerHTML = `BLOCK: ${hash}<br>TIMESTAMP: ${new Date().toLocaleTimeString()}`;
-            ledger.prepend(entry);
+        function processAIDecision(bpm, temp) {
+            const aiBox = document.getElementById('ai-recommendation');
+            const aiText = document.getElementById('ai-text');
+            const status = document.getElementById('triage-status');
+            const notifBox = document.getElementById('parent-notifs');
+
+            let category = "";
+            let color = "";
+            let msg = "";
+
+            if (temp > 38.5 || bpm > 115) {
+                category = "حالة تستدعي تدخلاً فورياً";
+                color = "border-red-500";
+                msg = "تنبيه: تم رصد علامات حيوية حرجة. يوصى باستشارة فورية عن بُعد وإبلاغ ولي الأمر بضرورة الحضور.";
+                status.innerText = "TRIAGE: CRITICAL";
+                status.style.color = "#ef4444";
+                sendParentNotif("🚨 تنبيه طوارئ", "تم رصد علامات غير طبيعية، يرجى الدخول للجلسة المرئية.");
+            } else {
+                category = "حالة بسيطة";
+                color = "border-emerald-500";
+                msg = "المؤشرات ضمن النطاق الطبيعي. يوصى بالراحة لمدة 15 دقيقة والعودة للفصل.";
+                status.innerText = "TRIAGE: NORMAL";
+                status.style.color = "#10b981";
+                sendParentNotif("✅ إشعار روتيني", "ابنكم زار العيادة وحالته مستقرة ولله الحمد.");
+            }
+
+            aiBox.className = `glass flex-1 p-6 border-t-4 transition-all duration-500 ${color}`;
+            aiText.innerHTML = `<strong>التصنيف: ${category}</strong><br>${msg}`;
+            
+            // تسجيل في البلوك تشين
+            addBlockchainBlock(`DEPOSITED: ${category} | TEMP: ${temp}`);
+            
+            // تزامن مع الشاشات الأخرى
+            bc.postMessage({ type: 'SCAN_COMPLETE', data: { bpm: bpm, temp: temp, category: category } });
         }
 
-        function openPortal() { 
-            document.getElementById('doctor-portal').style.display = 'flex'; 
-            document.getElementById('ai-analysis').innerHTML = "تحذير: نبضات قلب الطالب غير منتظمة (Tachycardia). تم رصد ارتفاع ملحوظ في الحرارة. يوصى بالعزل الفوري وصرف وصفة خافض حرارة.";
-        }
-        function closePortal() { document.getElementById('doctor-portal').style.display = 'none'; }
-
-        // إنشاء خريطة المدرسة
-        const grid = document.getElementById('map-grid');
-        for(let i=1; i<=12; i++) {
-            const r = document.createElement('div');
-            r.className = `glass-panel flex items-center justify-center text-[10px] font-bold ${i===3?'border-red-500 text-red-500 bg-red-500/10':''}`;
-            r.innerText = `UNIT ${i}-A`;
-            grid.appendChild(r);
+        function sendParentNotif(title, text) {
+            const box = document.getElementById('parent-notifs');
+            if(box.innerText.includes("لا توجد")) box.innerHTML = "";
+            const n = document.createElement('div');
+            n.className = "p-3 bg-white/5 rounded-xl border-l-2 border-blue-500 animate-bounce";
+            n.innerHTML = `<div class="text-[10px] font-black text-blue-400">${title}</div><div class="text-[9px] opacity-60">${text}</div>`;
+            box.prepend(n);
         }
 
-        initChart();
-        new QRCode(document.getElementById("qrcode"), { text: "ALPHA-SECURE-ID-2026", width: 120, height: 120, colorDark: "#050a10" });
+        function addBlockchainBlock(data) {
+            const stream = document.getElementById('ledger-stream');
+            const b = document.createElement('div');
+            b.className = "p-2 bg-white/5 border-r-2 border-cyan-500";
+            b.innerHTML = `TX: ${Math.random().toString(36).substr(2,8).toUpperCase()}<br>${data}`;
+            stream.prepend(b);
+        }
+
+        new QRCode(document.getElementById("qrcode"), { text: "STUDENT_RECORD_2026", width: 120, height: 120, colorDark: "#020617" });
     </script>
 </body>
 </html>
