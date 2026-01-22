@@ -1,10 +1,12 @@
+/** محرك التحليل الصوتي **/
 const VoiceAI = {
-    speak(text) {
-        if ('speechSynthesis' in window) {
-            const msg = new SpeechSynthesisUtterance();
-            msg.text = text;
-            msg.lang = 'ar-SA';
-            window.speechSynthesis.speak(msg);
-        }
+    startListening() {
+        console.log("🎤 العيادة تستمع لشكوى الطالب...");
+        // محاكاة تحويل الصوت لنص ومعالجته ببروتوكول الفرز (Triage) [cite: 2026-01-22]
+        const mockTranscript = "أشعر بألم في رأسي وحرارة شديدة";
+        this.processTriage(mockTranscript);
+    },
+    processTriage(text) {
+        console.log("🧠 الذكاء الاصطناعي يحلل الكلمات المفتاحية:", text);
     }
 };
