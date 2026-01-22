@@ -1,90 +1,84 @@
-// --- إدارة التنقل بين الأقسام ---
-function showSection(sectionId) {
-    document.querySelectorAll('.content-section').forEach(sec => sec.classList.add('hidden'));
-    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-    
-    document.getElementById(sectionId).classList.remove('hidden');
-    event.target.classList.add('active');
+/* Smart Clinic Core Logic - v5.0
+   System: جمع -> تحليل -> قرار -> استجابة -> متابعة
+*/
 
-    if(sectionId === 'analytics') initChart();
+// بيانات الطلاب الافتراضية المحمية (Blockchain Simulation)
+const studentDB = {
+    "12345": { name: "أحمد محمد", history: "حساسية موسمية", blood: "O+", parentID: "96650XXXXXXX" }
+};
+
+// وظيفة بدء المنظومة
+function initSystem() {
+    console.log("System Initialized: Smart Clinic AI is Online.");
+    playAmbientSound(); // محاكاة صوت تقني
 }
 
-// --- محاكاة آلية العمل المكونة من 6 خطوات ---
-function proceedToStep(step) {
-    const monitor = document.getElementById('ui-interactive-area');
+// 1. تسجيل الدخول والتعرف على الطالب
+function loginStudent() {
+    updateWorkflowUI(1);
+    const mainDisplay = document.getElementById('main-content');
+    mainDisplay.innerHTML = `<div class="loader"></div> <p class="tech-text">جاري استدعاء الملف من البلوك تشين...</p>`;
     
-    // الخطوة 2: قياس العلامات تلقائياً (IoT)
-    if(step === 2) {
-        updateStepUI(2);
-        monitor.innerHTML = `
-            <div class="animate-fade-in text-center">
-                <i class="fas fa-wave-square text-5xl text-blue-500 mb-6 animate-pulse"></i>
-                <h2 class="text-2xl font-black text-white mb-4 italic">2. قياس العلامات الحيوية تلقائياً</h2>
-                <p class="text-slate-400 mb-8">يتم الآن سحب البيانات من الحساسات الذكية (IoT) ومعالجتها فورياً...</p>
-                <div class="h-1 w-64 bg-slate-800 mx-auto rounded-full overflow-hidden">
-                    <div class="h-full bg-blue-500 animate-[loading_2s_ease-in-out]"></div>
+    setTimeout(() => {
+        showVitalsScanner();
+    }, 2000);
+}
+
+// 2. قياس العلامات الحيوية (IoT Simulation)
+function showVitalsScanner() {
+    updateWorkflowUI(2);
+    const mainDisplay = document.getElementById('main-content');
+    mainDisplay.innerHTML = `
+        <div class="radar-section animate-in">
+            <div class="radar-scan">
+                <i class="fas fa-user-shield text-4xl text-cyan-400 animate-pulse"></i>
+            </div>
+            <h2 class="mt-8 text-2xl font-black italic">رصد المؤشرات الحيوية (IoT)</h2>
+            <div class="grid grid-cols-2 gap-4 mt-6">
+                <div class="vital-mini">Temp: <span id="t-live">--</span></div>
+                <div class="vital-mini">Pulse: <span id="p-live">--</span></div>
+            </div>
+        </div>
+    `;
+
+    // محاكاة تدفق بيانات IoT اللحظي
+    let t = 36.0;
+    let p = 70;
+    const interval = setInterval(() => {
+        t += (Math.random() * 0.2);
+        p += Math.floor(Math.random() * 5);
+        document.getElementById('t-live').innerText = t.toFixed(1) + "°";
+        document.getElementById('p-live').innerText = p + " bpm";
+        if(t >= 37.5) {
+            clearInterval(interval);
+            triggerAIAnalysis(t, p);
+        }
+    }, 100);
+}
+
+// 4. الفرز الطبي الذكي (AI Analysis)
+function triggerAIAnalysis(temp, pulse) {
+    updateWorkflowUI(4);
+    const mainDisplay = document.getElementById('main-content');
+    
+    mainDisplay.innerHTML = `
+        <div class="ai-box p-8 glass-panel border-cyan-500/50">
+            <h3 class="text-xl font-bold text-cyan-400 mb-4 italic">
+                <i class="fas fa-brain"></i> نتائج الفرز الذكي (AI Triage)
+            </h3>
+            <div class="space-y-4">
+                <p class="text-white">تحليل النمط: <span class="text-orange-400">ارتفاع طفيف في درجة الحرارة</span></p>
+                <p class="text-white italic text-sm">التنبؤ بالمخاطر: احتمال بداية أعراض زكام (Risk: 15%)</p>
+                <div class="p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                    <p class="text-xs text-emerald-400">القرار الوقائي: إرسال تنبيه فوري للمنصة الموحدة ولولي الأمر.</p>
                 </div>
             </div>
-        `;
-        
-        // محاكاة وصول بيانات IoT
-        setTimeout(() => {
-            document.getElementById('v-temp').innerText = "36.8°C";
-            document.getElementById('v-pulse').innerText = "72 bpm";
-            document.getElementById('v-ox').innerText = "98 %";
-            document.getElementById('v-weight').innerText = "65 kg";
-            proceedToStep(4); // الانتقال التلقائي للفرز الذكي
-        }, 2500);
-    }
-
-    // الخطوة 4: الفرز الطبي الذكي (AI)
-    if(step === 4) {
-        updateStepUI(4);
-        setTimeout(() => {
-            monitor.innerHTML = `
-                <div class="animate-fade-in text-right p-8 bg-blue-500/5 border border-blue-500/20 rounded-[2.5rem] w-full max-w-xl">
-                    <h3 class="text-xl font-black text-blue-400 mb-4 italic"><i class="fas fa-robot ml-2"></i> 4. الفرز الطبي الذكي (AI)</h3>
-                    <p class="text-white text-sm leading-relaxed mb-6 font-bold">بناءً على تحليل البيانات الصحية: <br> • الحالة: مستقرة (خضراء) <br> • التوصية: إجهاد بسيط، يوصى بالراحة والعودة للفصل الدراسي بعد 15 دقيقة.</p>
-                    <button onclick="proceedToStep(6)" class="w-full bg-blue-600 py-4 rounded-2xl font-black shadow-lg">6. اتخاذ القرار وتوثيق السجل (Blockchain)</button>
-                </div>
-            `;
-        }, 1000);
-    }
-
-    // الخطوة 6: التوثيق النهائي
-    if(step === 6) {
-        updateStepUI(6);
-        alert("تم توثيق القرار الطبي بنجاح في سجل الطالب المحمي بالبلوك تشين ✅\nتم إرسال إشعار فوري لولي الأمر والجهات الصحية.");
-        location.reload();
-    }
+            <button onclick="document.location.reload()" class="btn-main mt-6 w-full">6. توثيق السجل الصحي (Blockchain)</button>
+        </div>
+    `;
 }
 
-function updateStepUI(stepNum) {
-    document.querySelectorAll('.step-item').forEach(el => el.classList.remove('active'));
-    document.getElementById('s' + stepNum).classList.add('active');
-}
-
-// --- محاكاة الرسوم البيانية للتحليل اللحظي ---
-function initChart() {
-    const ctx = document.getElementById('healthChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'],
-            datasets: [{
-                label: 'معدل الحالات المكتشفة مبكراً',
-                data: [12, 19, 15, 25, 22],
-                borderColor: '#3b82f6',
-                tension: 0.4,
-                fill: true,
-                backgroundColor: 'rgba(59, 130, 246, 0.1)'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } }
-        }
-    });
+function updateWorkflowUI(step) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step-' + step).classList.add('active');
 }
