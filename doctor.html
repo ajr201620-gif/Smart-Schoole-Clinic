@@ -991,3 +991,15 @@ window.addEventListener("sc:bus:update", ()=>{
   // renderAlertsFromBus();
   // renderCasesFromBus();
 });
+document.getElementById("btnGoReport")?.addEventListener("click", (e)=>{
+  // لو ما عندك BUS لا تسوي شي (بيفتح report.html بالوضع الافتراضي)
+  const bus = window.SCBUS?.load?.();
+  const latest = bus?.cases?.[0];
+
+  if(latest?.id){
+    e.preventDefault();
+    // افتح التقرير على نفس الحالة مباشرة
+    location.href = `report.html#case=${encodeURIComponent(latest.id)}`;
+    try{ window.SCBUS?.audit?.("OPEN_REPORT_FROM_DOCTOR", { caseId: latest.id }); }catch(_){}
+  }
+});
