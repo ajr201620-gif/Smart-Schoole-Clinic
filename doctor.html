@@ -1,0 +1,985 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Clinic OS — واجهة العيادة (طبيب/تمريض)</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">SC</div>
+      <div>
+        <div class="brand-title">Smart Clinic OS</div>
+        <div class="brand-sub">Clinic Staff Console — واجهة العيادة (طبيب/تمريض)</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button class="btn ghost" id="btnTheme" title="تبديل الوضع">🌓</button>
+      <button class="btn ghost" id="btnNewCase">حالة جديدة</button>
+      <button class="btn" id="btnFinalize">اعتماد التقرير</button>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="nav-title">القائمة</div>
+      <nav class="nav" id="docNav">
+        <button class="nav-item active" data-view="triage"><span class="ico">🩺</span><span>Triage</span></button>
+        <button class="nav-item" data-view="diagnosis"><span class="ico">🧠</span><span>تشخيص/قرار</span></button>
+        <button class="nav-item" data-view="media"><span class="ico">🎥</span><span>صوت/صورة</span></button>
+        <button class="nav-item" data-view="report"><span class="ico">🧾</span><span>تقرير الحالة</span></button>
+        <button class="nav-item" data-view="alerts"><span class="ico">🔔</span><span>تنبيهات/إبلاغ</span></button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="pill">
+          <span class="dot" id="dotLive"></span>
+          <div>
+            <div style="font-weight:1000;">System</div>
+            <div class="muted small" id="sysStatus">System: Ready</div>
+          </div>
+        </div>
+
+        <button class="btn ghost" id="btnSyncSensors">Sync حساسات (Demo)</button>
+
+        <div class="divider"></div>
+        <div class="muted small">
+          هذه نسخة عرض. القراءات والتشخيص هنا لأغراض تجريبية فقط.
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+
+      <!-- Hero -->
+      <section class="hero">
+        <div class="hero-left">
+          <div class="kicker">👨‍⚕️ Clinic Staff</div>
+          <h1>حالة سريرية — إدارة كاملة</h1>
+          <p class="hero-desc">
+            فتح حالة → قراءات → تشخيص/قرار → تقرير → إبلاغ ولي الأمر/الإدارة (Demo).
+          </p>
+
+          <div class="hero-cta">
+            <button class="btn" id="btnQuickTriage">فحص سريع (Demo)</button>
+            <button class="btn ghost" id="btnExportCase">تصدير الحالة JSON</button>
+          </div>
+
+          <div class="hero-badges">
+            <span class="badge">RBAC: Staff</span>
+            <span class="badge ghost">Audit Log Enabled</span>
+            <span class="badge">Media Capture (Browser)</span>
+          </div>
+        </div>
+
+        <div class="hero-right">
+          <div class="scorecard">
+            <div class="scorecard-head">
+              <div>
+                <div class="score-title">Risk Score</div>
+                <div class="score-sub">تقييم تجريبي للحالة</div>
+              </div>
+              <div class="ring">
+                <div class="ring-inner">
+                  <div class="ring-num" id="riskScore">18</div>
+                  <div class="ring-lbl">/100</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="scorecard-grid">
+              <div class="mini">
+                <div class="mini-k">Priority</div>
+                <div class="mini-v" id="prioTxt">LOW</div>
+              </div>
+              <div class="mini">
+                <div class="mini-k">Decision</div>
+                <div class="mini-v" id="decisionTxt">—</div>
+              </div>
+              <div class="mini">
+                <div class="mini-k">Follow-up</div>
+                <div class="mini-v" id="followTxt">—</div>
+              </div>
+              <div class="mini">
+                <div class="mini-k">Notify</div>
+                <div class="mini-v" id="notifyTxt">—</div>
+              </div>
+            </div>
+
+            <div class="scorecard-foot muted small">* تقديرات ديمو.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Views -->
+      <section class="views">
+
+        <!-- TRIAGE -->
+        <section class="view show" id="view-triage">
+          <div class="section-head">
+            <div>
+              <h2>Triage</h2>
+              <div class="muted">بيانات أولية + قراءات (Demo)</div>
+            </div>
+            <div class="section-actions">
+              <button class="btn ghost" id="btnAutoVitals">تعبئة قراءات (Demo)</button>
+              <button class="btn" id="btnToDiagnosis">التالي → تشخيص</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <h3>بيانات الحالة</h3>
+                <div class="muted small" id="caseId">Case: —</div>
+              </div>
+
+              <div class="form">
+                <div class="row">
+                  <div>
+                    <label>هوية الطالب (Demo)</label>
+                    <input id="studentId" placeholder="مثال: STD-23" />
+                  </div>
+                  <div>
+                    <label>الاسم (اختياري للعرض)</label>
+                    <input id="studentName" placeholder="طالب #23" />
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div>
+                    <label>العمر</label>
+                    <input id="age" type="number" min="5" max="20" placeholder="12" />
+                  </div>
+                  <div>
+                    <label>الصف/الفصل</label>
+                    <input id="classRoom" placeholder="6/ب" />
+                  </div>
+                </div>
+
+                <label>سبب الزيارة</label>
+                <input id="chiefComplaint" placeholder="صداع / حرارة / ألم بطن..." />
+
+                <label>ملاحظات أولية</label>
+                <textarea id="initialNotes" rows="3" placeholder="متى بدأت الأعراض؟ هل هناك حساسية؟"></textarea>
+              </div>
+
+              <div class="card-actions">
+                <button class="btn ghost" id="btnSaveCase">حفظ</button>
+                <button class="btn" id="btnCreateCase">إنشاء حالة</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <h3>العلامات الحيوية</h3>
+                <div class="muted small">Vitals (Demo / IoT)</div>
+              </div>
+
+              <div class="vitals">
+                <div class="vital"><div class="v-k">Temperature</div><div class="v-v"><span id="vTemp">—</span> °C</div></div>
+                <div class="vital"><div class="v-k">Heart Rate</div><div class="v-v"><span id="vHr">—</span> bpm</div></div>
+                <div class="vital"><div class="v-k">SpO₂</div><div class="v-v"><span id="vSpo2">—</span> %</div></div>
+                <div class="vital"><div class="v-k">Blood Pressure</div><div class="v-v"><span id="vBp">—</span></div></div>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="risk">
+                <div>
+                  <div class="risk-k">Risk</div>
+                  <div class="risk-v low" id="riskTxt">LOW</div>
+                </div>
+                <div>
+                  <div class="risk-k">Progress</div>
+                  <div class="riskbar"><span id="riskBar" style="width:18%"></span></div>
+                </div>
+              </div>
+
+              <div class="card-actions">
+                <button class="btn ghost" id="btnCalcRisk">حساب Risk</button>
+                <button class="btn" id="btnLockVitals">تثبيت القراءات</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- DIAGNOSIS / DECISION -->
+        <section class="view" id="view-diagnosis">
+          <div class="section-head">
+            <div>
+              <h2>تشخيص / قرار</h2>
+              <div class="muted">تصنيف الحالة + خطة التعامل + إحالة</div>
+            </div>
+            <div class="section-actions">
+              <button class="btn ghost" id="btnBackTriage">← رجوع</button>
+              <button class="btn" id="btnToMedia">التالي → صوت/صورة</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <h3>تصنيف الحالة</h3>
+                <div class="muted small">Priority + Decision</div>
+              </div>
+
+              <div class="form">
+                <div class="row">
+                  <div>
+                    <label>Priority</label>
+                    <select id="priority">
+                      <option value="LOW">LOW — بسيط</option>
+                      <option value="MED">MED — متوسط</option>
+                      <option value="HIGH">HIGH — عالي</option>
+                      <option value="CRIT">CRIT — حرج</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>قرار التعامل</label>
+                    <select id="decision">
+                      <option value="">— اختر —</option>
+                      <option value="return_class">عودة للفصل</option>
+                      <option value="observe_followup">ملاحظة + متابعة</option>
+                      <option value="refer_hospital">إحالة (مركز صحي/مستشفى)</option>
+                      <option value="call_guardian">استدعاء ولي الأمر</option>
+                      <option value="emergency">طوارئ</option>
+                    </select>
+                  </div>
+                </div>
+
+                <label>اشتباه تشخيصي (Demo)</label>
+                <input id="dx" placeholder="مثال: عدوى تنفسية / إجهاد /..." />
+
+                <label>خطة مختصرة</label>
+                <textarea id="plan" rows="4" placeholder="سوائل/راحة/مراقبة/تعليمات..."></textarea>
+
+                <div class="row">
+                  <div>
+                    <label>متابعة بعد</label>
+                    <select id="followUp">
+                      <option value="">—</option>
+                      <option value="none">لا</option>
+                      <option value="2h">بعد ساعتين</option>
+                      <option value="tomorrow">غدًا</option>
+                      <option value="3d">بعد 3 أيام</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>إحالة إلى</label>
+                    <select id="refTo">
+                      <option value="">—</option>
+                      <option value="phc">مركز صحي</option>
+                      <option value="hospital">مستشفى</option>
+                      <option value="ems">إسعاف</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-actions">
+                <button class="btn ghost" id="btnAutoPlan">خطة جاهزة (Demo)</button>
+                <button class="btn" id="btnApplyDecision">تطبيق القرار</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <h3>ملاحظات سريرية</h3>
+                <div class="muted small">Clinical notes (Demo)</div>
+              </div>
+
+              <div class="form">
+                <label>ملاحظات الطبيب/التمريض</label>
+                <textarea id="clinicalNotes" rows="8" placeholder="أعراض/فحص/عوامل خطورة..."></textarea>
+                <label>أدوية/توصيات (اختياري)</label>
+                <input id="meds" placeholder="مثال: باراسيتامول حسب السياسة /..." />
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="card-actions">
+                <button class="btn ghost" id="btnStamp">ختم الوقت</button>
+                <button class="btn" id="btnToReport">إنشاء التقرير →</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- MEDIA -->
+        <section class="view" id="view-media">
+          <div class="section-head">
+            <div>
+              <h2>صوت / صورة داخل الحالة</h2>
+              <div class="muted">تشغيل كاميرا/مايك (Browser permissions)</div>
+            </div>
+            <div class="section-actions">
+              <button class="btn ghost" id="btnStopMedia">إيقاف</button>
+              <button class="btn" id="btnToReport2">التالي → التقرير</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <h3>الكاميرا</h3>
+                <div class="muted small">Video (Demo)</div>
+              </div>
+
+              <video id="cam" autoplay playsinline muted style="width:100%; border-radius:18px; border:1px solid var(--stroke); background:var(--panel);"></video>
+
+              <div class="card-actions">
+                <button class="btn" id="btnStartCam">تشغيل كاميرا</button>
+                <button class="btn ghost" id="btnSnap">التقاط صورة</button>
+              </div>
+
+              <div class="divider"></div>
+              <div class="muted small">الصور تُحفظ كـ DataURL داخل المتصفح (Demo) وتُرفق بالحالة.</div>
+              <img id="snapImg" alt="" style="display:none; margin-top:10px; width:100%; border-radius:18px; border:1px solid var(--stroke);" />
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <h3>الصوت</h3>
+                <div class="muted small">Audio note (Demo)</div>
+              </div>
+
+              <div class="muted">تسجيل ملاحظة صوتية قصيرة وإرفاقها بالحالة.</div>
+
+              <div class="divider"></div>
+
+              <div class="card-actions">
+                <button class="btn" id="btnStartRec">بدء تسجيل</button>
+                <button class="btn ghost" id="btnStopRec">إيقاف تسجيل</button>
+              </div>
+
+              <audio id="audioPlay" controls style="width:100%; margin-top:12px; display:none;"></audio>
+
+              <div class="divider"></div>
+              <div class="muted small">* يعتمد على دعم المتصفح لـ MediaRecorder.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- REPORT -->
+        <section class="view" id="view-report">
+          <div class="section-head">
+            <div>
+              <h2>تقرير الحالة</h2>
+              <div class="muted">تقرير قابل للتصدير (Demo)</div>
+            </div>
+            <div class="section-actions">
+              <button class="btn ghost" id="btnBackDiag">← رجوع</button>
+              <button class="btn" id="btnExportTxt">تصدير TXT</button>
+              <button class="btn" id="btnExportJson">تصدير JSON</button>
+            </div>
+          </div>
+
+          <div class="card report" id="reportBox">
+            <div class="report-title">Clinical Report — Demo</div>
+            <div class="report-meta">
+              <span id="rCase">Case: —</span> •
+              <span id="rStudent">Student: —</span> •
+              <span id="rTime">Time: —</span>
+            </div>
+            <div class="report-body" id="reportBody" style="line-height:1.9;"></div>
+            <div class="report-foot muted small">* هذا تقرير تجريبي للعرض والتحكيم.</div>
+          </div>
+        </section>
+
+        <!-- ALERTS / NOTIFY -->
+        <section class="view" id="view-alerts">
+          <div class="section-head">
+            <div>
+              <h2>تنبيهات / إبلاغ</h2>
+              <div class="muted">إبلاغ ولي الأمر أو الإدارة (Demo)</div>
+            </div>
+            <div class="section-actions">
+              <button class="btn ghost" id="btnToReport3">فتح التقرير</button>
+              <button class="btn" id="btnSendNotify">إرسال الإبلاغ</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <h3>قناة الإبلاغ</h3>
+                <div class="muted small">Select recipients</div>
+              </div>
+
+              <div class="form">
+                <label>إبلاغ إلى</label>
+                <select id="notifyTo">
+                  <option value="">—</option>
+                  <option value="parent">ولي الأمر</option>
+                  <option value="admin">إدارة المدرسة</option>
+                  <option value="both">ولي الأمر + الإدارة</option>
+                </select>
+
+                <label>مستوى التنبيه</label>
+                <select id="notifyLevel">
+                  <option value="LOW">LOW</option>
+                  <option value="MED">MED</option>
+                  <option value="HIGH">HIGH</option>
+                  <option value="CRIT">CRIT</option>
+                </select>
+
+                <label>نص الإبلاغ</label>
+                <textarea id="notifyMsg" rows="5" placeholder="ملخص مختصر + إجراء مطلوب..."></textarea>
+              </div>
+
+              <div class="card-actions">
+                <button class="btn ghost" id="btnAutoMsg">نص جاهز</button>
+                <button class="btn" id="btnLogAlert">تسجيل تنبيه</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <h3>سجل التنبيهات (محلي)</h3>
+                <div class="muted small">Local (Demo)</div>
+              </div>
+
+              <div class="alerts" id="alertsList">
+                <div class="empty">لا توجد تنبيهات بعد</div>
+              </div>
+
+              <div class="card-actions">
+                <button class="btn ghost" id="btnClearAlerts">مسح</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="engine.js"></script>
+  <script src="rbac.js"></script>
+  <script src="auth-demo.js"></script>
+  <script src="audit-users.js"></script>
+
+  <script>
+    (function(){
+      const $ = (s,r=document)=>r.querySelector(s);
+      const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
+      const rand = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+
+      // Force role to staff for this page
+      try{
+        localStorage.setItem("sc_role","staff");
+        window.SCRBAC?.applyRBAC?.();
+        window.SCAUDIT?.audit?.("PAGE_OPEN", { page:"doctor.html" });
+      }catch(_){}
+
+      // Theme toggle
+      $("#btnTheme")?.addEventListener("click", ()=>{
+        const html = document.documentElement;
+        const next = html.dataset.theme === "light" ? "dark" : "light";
+        html.dataset.theme = next;
+        try{ window.SCAUDIT?.audit?.("THEME_TOGGLE", { to: next }); }catch(_){}
+      });
+
+      // Nav switching
+      function openView(view){
+        $$("#docNav .nav-item").forEach(b=>b.classList.remove("active"));
+        $(`#docNav .nav-item[data-view="${view}"]`)?.classList.add("active");
+        $$(".view").forEach(v=>v.classList.remove("show"));
+        $(`#view-${view}`)?.classList.add("show");
+        try{ window.SCAUDIT?.audit?.("NAV_OPEN", { view }); }catch(_){}
+      }
+      $$("#docNav .nav-item").forEach(btn=>{
+        btn.addEventListener("click", ()=> openView(btn.dataset.view));
+      });
+
+      // --- Case model ---
+      const caseObj = {
+        id: null,
+        createdAt: null,
+        studentId: "",
+        studentName: "",
+        age: "",
+        classRoom: "",
+        chiefComplaint: "",
+        initialNotes: "",
+        vitals: { temp:null, hr:null, spo2:null, bp:null },
+        riskScore: 18,
+        priority: "LOW",
+        decision: "",
+        dx: "",
+        plan: "",
+        followUp: "",
+        refTo: "",
+        clinicalNotes: "",
+        meds: "",
+        media: { photo:null, audio:null },
+        notify: { to:"", level:"LOW", msg:"" },
+        alerts: []
+      };
+
+      function setTxt(id, val){
+        const el = $(id);
+        if(el) el.textContent = val;
+      }
+
+      function newCase(){
+        caseObj.id = "CASE-" + Math.random().toString(36).slice(2,8).toUpperCase();
+        caseObj.createdAt = new Date();
+        setTxt("#caseId", "Case: " + caseObj.id);
+        setTxt("#rCase", "Case: " + caseObj.id);
+        setTxt("#rTime", "Time: " + (caseObj.createdAt.toLocaleString("ar-SA")));
+        $("#studentId").value = "STD-" + rand(10,99);
+        $("#studentName").value = "طالب #" + rand(10,99);
+        $("#age").value = String(rand(9,16));
+        $("#classRoom").value = rand(1,6) + "/"+ ["أ","ب","ج"][rand(0,2)];
+        $("#chiefComplaint").value = ["صداع","حمّى","ألم بطن","سعال","إجهاد"][rand(0,4)];
+        $("#initialNotes").value = "مدة الأعراض: " + rand(1,6) + " ساعة. (Demo)";
+        try{ window.SCAUDIT?.audit?.("CASE_CREATED", { id: caseObj.id }); }catch(_){}
+      }
+
+      // Save form → object
+      function pullCase(){
+        caseObj.studentId = ($("#studentId")?.value || "").trim();
+        caseObj.studentName = ($("#studentName")?.value || "").trim();
+        caseObj.age = ($("#age")?.value || "").trim();
+        caseObj.classRoom = ($("#classRoom")?.value || "").trim();
+        caseObj.chiefComplaint = ($("#chiefComplaint")?.value || "").trim();
+        caseObj.initialNotes = ($("#initialNotes")?.value || "").trim();
+
+        caseObj.priority = $("#priority")?.value || caseObj.priority;
+        caseObj.decision = $("#decision")?.value || caseObj.decision;
+        caseObj.dx = ($("#dx")?.value || "").trim();
+        caseObj.plan = ($("#plan")?.value || "").trim();
+        caseObj.followUp = $("#followUp")?.value || "";
+        caseObj.refTo = $("#refTo")?.value || "";
+        caseObj.clinicalNotes = ($("#clinicalNotes")?.value || "").trim();
+        caseObj.meds = ($("#meds")?.value || "").trim();
+
+        caseObj.notify.to = $("#notifyTo")?.value || "";
+        caseObj.notify.level = $("#notifyLevel")?.value || "LOW";
+        caseObj.notify.msg = ($("#notifyMsg")?.value || "").trim();
+      }
+
+      // Risk
+      function computeRisk(){
+        // Demo logic based on vitals
+        const t = caseObj.vitals.temp ?? 36.8;
+        const hr = caseObj.vitals.hr ?? 85;
+        const spo2 = caseObj.vitals.spo2 ?? 98;
+
+        let score = 10;
+        if(t >= 38.0) score += 18;
+        if(hr >= 110) score += 18;
+        if(spo2 <= 94) score += 35;
+
+        score += Math.min(20, (caseObj.chiefComplaint?.length || 0));
+        score = Math.max(0, Math.min(100, score));
+        caseObj.riskScore = score;
+
+        // Priority mapping
+        let pr = "LOW";
+        if(score >= 65) pr = "CRIT";
+        else if(score >= 45) pr = "HIGH";
+        else if(score >= 28) pr = "MED";
+        caseObj.priority = pr;
+
+        setTxt("#riskScore", String(score));
+        setTxt("#prioTxt", pr);
+        setTxt("#riskTxt", pr);
+        const rb = $("#riskBar");
+        if(rb) rb.style.width = score + "%";
+        $("#riskTxt")?.classList.remove("low","med","high","crit");
+        $("#riskTxt")?.classList.add(pr==="LOW"?"low":pr==="MED"?"med":pr==="HIGH"?"high":"crit");
+
+        try{ window.SCAUDIT?.audit?.("RISK_COMPUTED", { score, priority: pr }); }catch(_){}
+      }
+
+      // Vitals auto
+      function fillVitalsFromEngine(){
+        let r = null;
+        try{ r = window.ClinicEngine?.syncSensors?.(); }catch(_){}
+        if(!r){
+          // fallback demo
+          r = { temperature: +(36.6+Math.random()*1.3).toFixed(1), heartRate: rand(70,110), spo2: rand(95,99), bp: rand(105,128)+"/"+rand(65,85) };
+        }
+        caseObj.vitals.temp = r.temperature;
+        caseObj.vitals.hr = r.heartRate;
+        caseObj.vitals.spo2 = r.spo2;
+        caseObj.vitals.bp = r.bp;
+
+        $("#vTemp").textContent = String(r.temperature);
+        $("#vHr").textContent = String(r.heartRate);
+        $("#vSpo2").textContent = String(r.spo2);
+        $("#vBp").textContent = String(r.bp);
+
+        try{ window.SCAUDIT?.audit?.("VITALS_FILLED", { temp:r.temperature, hr:r.heartRate, spo2:r.spo2, bp:r.bp }); }catch(_){}
+      }
+
+      // Decision apply
+      function applyDecision(){
+        pullCase();
+
+        setTxt("#prioTxt", caseObj.priority);
+        setTxt("#decisionTxt", caseObj.decision || "—");
+        setTxt("#followTxt", caseObj.followUp || "—");
+
+        // Suggest notify
+        let notify = "—";
+        if(caseObj.decision === "call_guardian" || caseObj.priority === "HIGH" || caseObj.priority === "CRIT") notify = "Parent";
+        if(caseObj.decision === "emergency") notify = "Parent+Admin";
+        setTxt("#notifyTxt", notify);
+
+        try{ window.SCAUDIT?.audit?.("DECISION_APPLIED", { priority:caseObj.priority, decision:caseObj.decision, followUp:caseObj.followUp, refTo:caseObj.refTo }); }catch(_){}
+        buildReport();
+      }
+
+      function autoPlan(){
+        const cc = ($("#chiefComplaint").value||"").trim();
+        $("#dx").value = cc.includes("سعال") ? "اشتباه عدوى تنفسية (Demo)"
+                  : cc.includes("حم") ? "حمّى/عدوى محتملة (Demo)"
+                  : cc.includes("بطن") ? "اضطراب هضمي (Demo)"
+                  : "إجهاد/صداع (Demo)";
+
+        $("#plan").value =
+`- تقييم أولي + قراءات.\n- سوائل + راحة.\n- توجيهات صحية.\n- متابعة حسب الحاجة.\n(هذه خطة تجريبية للعرض)`;
+
+        $("#clinicalNotes").value =
+`فحص مبدئي: لا توجد علامات خطورة واضحة (Demo).\nتقييم: حسب القراءات والأعراض.\n`;
+
+        try{ window.SCAUDIT?.audit?.("AUTO_PLAN_USED", {}); }catch(_){}
+      }
+
+      function stamp(){
+        const t = new Date().toLocaleString("ar-SA");
+        $("#clinicalNotes").value = ($("#clinicalNotes").value||"") + `\n[Stamp] ${t}\n`;
+        try{ window.SCAUDIT?.audit?.("STAMP_ADDED", { t }); }catch(_){}
+      }
+
+      // Report builder
+      function buildReport(){
+        pullCase();
+        const lines = [
+          `• الطالب: ${caseObj.studentName || "—"} (${caseObj.studentId || "—"})`,
+          `• العمر/الفصل: ${caseObj.age || "—"} — ${caseObj.classRoom || "—"}`,
+          `• سبب الزيارة: ${caseObj.chiefComplaint || "—"}`,
+          `• ملاحظات أولية: ${caseObj.initialNotes || "—"}`,
+          "",
+          `• القراءات: Temp=${caseObj.vitals.temp ?? "—"}°C | HR=${caseObj.vitals.hr ?? "—"} | SpO₂=${caseObj.vitals.spo2 ?? "—"}% | BP=${caseObj.vitals.bp ?? "—"}`,
+          `• Risk Score: ${caseObj.riskScore}/100`,
+          `• Priority: ${caseObj.priority}`,
+          "",
+          `• اشتباه تشخيصي: ${caseObj.dx || "—"}`,
+          `• القرار: ${caseObj.decision || "—"}`,
+          `• متابعة: ${caseObj.followUp || "—"}`,
+          `• إحالة إلى: ${caseObj.refTo || "—"}`,
+          "",
+          `• الخطة:`,
+          `${caseObj.plan || "—"}`,
+          "",
+          `• ملاحظات سريرية:`,
+          `${caseObj.clinicalNotes || "—"}`,
+          "",
+          `• أدوية/توصيات: ${caseObj.meds || "—"}`,
+          "",
+          `• وسائط: صورة=${caseObj.media.photo ? "مرفقة" : "لا"} | صوت=${caseObj.media.audio ? "مرفق" : "لا"}`,
+          `• إشعار: ${caseObj.notify.to || "—"} | مستوى=${caseObj.notify.level || "—"}`
+        ];
+
+        $("#rStudent").textContent = "Student: " + (caseObj.studentName || caseObj.studentId || "—");
+        $("#reportBody").innerHTML = lines.map(x => x ? `<div>${escapeHtml(x)}</div>` : `<div style="height:10px"></div>`).join("");
+
+        try{ window.SCAUDIT?.audit?.("REPORT_BUILT", { caseId: caseObj.id }); }catch(_){}
+      }
+
+      function escapeHtml(s){
+        return String(s).replace(/[&<>"']/g, m => ({
+          "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+        }[m]));
+      }
+
+      // Export helpers
+      function download(name, text, type="text/plain"){
+        const blob = new Blob([text], {type:type+";charset=utf-8"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = name;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url), 800);
+      }
+
+      function exportJSON(){
+        pullCase();
+        download((caseObj.id||"case")+"-demo.json", JSON.stringify(caseObj, null, 2), "application/json");
+        try{ window.SCAUDIT?.audit?.("CASE_EXPORTED_JSON", { id: caseObj.id }); }catch(_){}
+      }
+
+      function exportTXT(){
+        pullCase();
+        const txt =
+`Clinical Report (Demo)
+Case: ${caseObj.id}
+Student: ${caseObj.studentName} (${caseObj.studentId})
+Class: ${caseObj.classRoom} Age: ${caseObj.age}
+
+Chief Complaint: ${caseObj.chiefComplaint}
+Notes: ${caseObj.initialNotes}
+
+Vitals: Temp=${caseObj.vitals.temp} HR=${caseObj.vitals.hr} SpO2=${caseObj.vitals.spo2} BP=${caseObj.vitals.bp}
+Risk: ${caseObj.riskScore}/100 Priority: ${caseObj.priority}
+
+Dx: ${caseObj.dx}
+Decision: ${caseObj.decision}
+Follow-up: ${caseObj.followUp}
+Referral: ${caseObj.refTo}
+
+Plan:
+${caseObj.plan}
+
+Clinical Notes:
+${caseObj.clinicalNotes}
+
+Meds: ${caseObj.meds}
+
+Media: photo=${caseObj.media.photo?"yes":"no"} audio=${caseObj.media.audio?"yes":"no"}
+Notify: ${caseObj.notify.to} level=${caseObj.notify.level}
+`;
+        download((caseObj.id||"case")+"-report.txt", txt);
+        try{ window.SCAUDIT?.audit?.("CASE_EXPORTED_TXT", { id: caseObj.id }); }catch(_){}
+      }
+
+      // Alerts (local demo)
+      function renderAlerts(){
+        const box = $("#alertsList");
+        if(!box) return;
+        if(!caseObj.alerts.length){
+          box.innerHTML = `<div class="empty">لا توجد تنبيهات بعد</div>`;
+          return;
+        }
+        box.innerHTML = caseObj.alerts.map(a=>`
+          <div class="alert ${a.level==='CRIT'?'crit':a.level==='HIGH'?'high':''}">
+            <div class="a-top">
+              <div class="a-title">${a.title}</div>
+              <div class="muted">${a.time}</div>
+            </div>
+            <div class="a-body">${escapeHtml(a.body)}</div>
+          </div>
+        `).join("");
+      }
+
+      function logAlert(){
+        pullCase();
+        const to = caseObj.notify.to || "—";
+        const lvl = caseObj.notify.level || "LOW";
+        const msg = caseObj.notify.msg || "تنبيه تجريبي (Demo)";
+        const a = {
+          time: new Date().toLocaleTimeString("ar-SA"),
+          level: lvl,
+          title: "تنبيه/إبلاغ",
+          body: `إلى: ${to} | ${msg}`
+        };
+        caseObj.alerts.unshift(a);
+        caseObj.alerts = caseObj.alerts.slice(0,6);
+        renderAlerts();
+        setTxt("#notifyTxt", to === "both" ? "Parent+Admin" : to || "—");
+        try{ window.SCAUDIT?.audit?.("ALERT_LOGGED", { to, level:lvl }); }catch(_){}
+      }
+
+      function sendNotify(){
+        pullCase();
+        if(!caseObj.notify.to){
+          alert("اختر جهة الإبلاغ أولاً");
+          return;
+        }
+        // Demo: just audit + UI
+        try{ window.SCAUDIT?.audit?.("NOTIFY_SENT", { to:caseObj.notify.to, level:caseObj.notify.level, caseId:caseObj.id }); }catch(_){}
+        alert("تم إرسال الإبلاغ (Demo) ✅");
+        setTxt("#notifyTxt", caseObj.notify.to === "both" ? "Parent+Admin" : caseObj.notify.to);
+      }
+
+      // Media
+      let camStream = null;
+      let recStream = null;
+      let recorder = null;
+      let chunks = [];
+
+      async function startCam(){
+        try{
+          camStream = await navigator.mediaDevices.getUserMedia({ video:true, audio:false });
+          $("#cam").srcObject = camStream;
+          try{ window.SCAUDIT?.audit?.("CAM_STARTED", { caseId: caseObj.id }); }catch(_){}
+        }catch(e){
+          alert("تعذر تشغيل الكاميرا. تأكد من السماح بالصلاحية.");
+        }
+      }
+
+      function stopMedia(){
+        if(camStream){
+          camStream.getTracks().forEach(t=>t.stop());
+          camStream = null;
+        }
+        if(recStream){
+          recStream.getTracks().forEach(t=>t.stop());
+          recStream = null;
+        }
+        try{ window.SCAUDIT?.audit?.("MEDIA_STOPPED", { caseId: caseObj.id }); }catch(_){}
+      }
+
+      function snap(){
+        const v = $("#cam");
+        if(!v || !v.videoWidth) { alert("شغّل الكاميرا أولاً"); return; }
+        const c = document.createElement("canvas");
+        c.width = v.videoWidth; c.height = v.videoHeight;
+        const ctx = c.getContext("2d");
+        ctx.drawImage(v, 0, 0);
+        const data = c.toDataURL("image/jpeg", 0.85);
+        caseObj.media.photo = data;
+        const img = $("#snapImg");
+        img.src = data;
+        img.style.display = "";
+        try{ window.SCAUDIT?.audit?.("PHOTO_ATTACHED", { caseId: caseObj.id }); }catch(_){}
+      }
+
+      async function startRec(){
+        if(!window.MediaRecorder){ alert("جهازك/متصفحك لا يدعم MediaRecorder"); return; }
+        try{
+          recStream = await navigator.mediaDevices.getUserMedia({ audio:true, video:false });
+          recorder = new MediaRecorder(recStream);
+          chunks = [];
+          recorder.ondataavailable = (e)=>{ if(e.data.size>0) chunks.push(e.data); };
+          recorder.onstop = ()=>{
+            const blob = new Blob(chunks, { type: "audio/webm" });
+            const url = URL.createObjectURL(blob);
+            caseObj.media.audio = url; // demo: objectURL (جلسة المتصفح)
+            const a = $("#audioPlay");
+            a.src = url;
+            a.style.display = "";
+            try{ window.SCAUDIT?.audit?.("AUDIO_ATTACHED", { caseId: caseObj.id }); }catch(_){}
+          };
+          recorder.start();
+          try{ window.SCAUDIT?.audit?.("REC_STARTED", { caseId: caseObj.id }); }catch(_){}
+        }catch(e){
+          alert("تعذر تشغيل المايك. تأكد من السماح بالصلاحية.");
+        }
+      }
+
+      function stopRec(){
+        try{
+          recorder?.stop?.();
+          recStream?.getTracks?.().forEach(t=>t.stop());
+          recStream = null;
+          try{ window.SCAUDIT?.audit?.("REC_STOPPED", { caseId: caseObj.id }); }catch(_){}
+        }catch(_){}
+      }
+
+      // Wire buttons
+      $("#btnCreateCase")?.addEventListener("click", ()=>{ if(!caseObj.id) newCase(); pullCase(); buildReport(); });
+      $("#btnSaveCase")?.addEventListener("click", ()=>{ pullCase(); buildReport(); try{ window.SCAUDIT?.audit?.("CASE_SAVED", { id: caseObj.id }); }catch(_){}});
+
+      $("#btnAutoVitals")?.addEventListener("click", ()=>{ if(!caseObj.id) newCase(); pullCase(); fillVitalsFromEngine(); });
+      $("#btnAutoVitals")?.addEventListener("click", ()=> computeRisk());
+
+      $("#btnCalcRisk")?.addEventListener("click", ()=>{ pullCase(); computeRisk(); });
+      $("#btnLockVitals")?.addEventListener("click", ()=>{ pullCase(); alert("تم تثبيت القراءات (Demo)"); try{ window.SCAUDIT?.audit?.("VITALS_LOCKED", { id:caseObj.id }); }catch(_){}});
+
+      $("#btnToDiagnosis")?.addEventListener("click", ()=>{ pullCase(); computeRisk(); openView("diagnosis"); });
+      $("#btnBackTriage")?.addEventListener("click", ()=> openView("triage"));
+      $("#btnToMedia")?.addEventListener("click", ()=> openView("media"));
+      $("#btnToReport")?.addEventListener("click", ()=>{ applyDecision(); openView("report"); });
+      $("#btnToReport2")?.addEventListener("click", ()=>{ buildReport(); openView("report"); });
+      $("#btnToReport3")?.addEventListener("click", ()=> openView("report"));
+      $("#btnBackDiag")?.addEventListener("click", ()=> openView("diagnosis"));
+
+      $("#btnAutoPlan")?.addEventListener("click", autoPlan);
+      $("#btnStamp")?.addEventListener("click", stamp);
+      $("#btnApplyDecision")?.addEventListener("click", ()=>{ applyDecision(); alert("تم تطبيق القرار (Demo)"); });
+
+      $("#btnStartCam")?.addEventListener("click", startCam);
+      $("#btnStopMedia")?.addEventListener("click", stopMedia);
+      $("#btnSnap")?.addEventListener("click", snap);
+
+      $("#btnStartRec")?.addEventListener("click", startRec);
+      $("#btnStopRec")?.addEventListener("click", stopRec);
+
+      $("#btnAutoMsg")?.addEventListener("click", ()=>{
+        pullCase();
+        const pr = $("#priority").value || caseObj.priority;
+        const base = pr==="CRIT" ? "حالة حرجة — يلزم إجراء عاجل."
+                  : pr==="HIGH" ? "حالة عالية — متابعة مطلوبة."
+                  : pr==="MED" ? "حالة متوسطة — يرجى المتابعة."
+                  : "حالة بسيطة.";
+        $("#notifyMsg").value = `${base} السبب: ${$("#chiefComplaint").value||"—"}. (Demo)`;
+      });
+
+      $("#btnLogAlert")?.addEventListener("click", logAlert);
+      $("#btnClearAlerts")?.addEventListener("click", ()=>{ caseObj.alerts=[]; renderAlerts(); });
+
+      $("#btnSendNotify")?.addEventListener("click", sendNotify);
+
+      $("#btnExportJson")?.addEventListener("click", exportJSON);
+      $("#btnExportTxt")?.addEventListener("click", exportTXT);
+      $("#btnExportCase")?.addEventListener("click", exportJSON);
+
+      $("#btnQuickTriage")?.addEventListener("click", ()=>{
+        if(!caseObj.id) newCase();
+        fillVitalsFromEngine();
+        pullCase();
+        computeRisk();
+        autoPlan();
+        applyDecision();
+        openView("diagnosis");
+        $("#dotLive")?.classList.add("pulse");
+        setTimeout(()=>$("#dotLive")?.classList.remove("pulse"), 900);
+      });
+
+      $("#btnSyncSensors")?.addEventListener("click", ()=> {
+        fillVitalsFromEngine();
+        try{ window.SCAUDIT?.audit?.("SENSORS_SYNC_CLICK", { from:"doctor" }); }catch(_){}
+      });
+
+      $("#btnNewCase")?.addEventListener("click", ()=>{
+        stopMedia();
+        // reset minimal UI
+        Object.assign(caseObj, {
+          id:null, createdAt:null, media:{photo:null,audio:null}, alerts:[], decision:"", dx:"", plan:"", clinicalNotes:"", meds:""
+        });
+        $("#snapImg").style.display="none";
+        $("#audioPlay").style.display="none";
+        $("#vTemp").textContent="—"; $("#vHr").textContent="—"; $("#vSpo2").textContent="—"; $("#vBp").textContent="—";
+        $("#riskScore").textContent="18"; $("#riskBar").style.width="18%";
+        $("#prioTxt").textContent="LOW"; $("#riskTxt").textContent="LOW";
+        $("#decisionTxt").textContent="—"; $("#followTxt").textContent="—"; $("#notifyTxt").textContent="—";
+        renderAlerts();
+        newCase();
+        openView("triage");
+      });
+
+      $("#btnFinalize")?.addEventListener("click", ()=>{
+        pullCase();
+        buildReport();
+        try{ window.SCAUDIT?.audit?.("REPORT_FINALIZED", { id:caseObj.id, priority:caseObj.priority, decision:caseObj.decision }); }catch(_){}
+        alert("تم اعتماد التقرير (Demo) ✅");
+      });
+
+      // Init
+      newCase();
+      renderAlerts();
+      buildReport();
+
+      // Safety: stop media on leaving
+      window.addEventListener("beforeunload", ()=>{ try{ stopMedia(); }catch(_){ }});
+    })();
+  </script>
+
+</body>
+</html>
