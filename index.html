@@ -2,65 +2,88 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>منصة العيادة الذكية المتكاملة | Multi-Portal System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منظومة العيادة المدرسية الذكية | Smart Clinic OS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-[#020617] text-slate-200 min-h-screen">
+<body class="bg-[#020617] text-slate-200 overflow-x-hidden">
 
-    <div id="login-screen" class="fixed inset-0 z-[100] bg-slate-950 flex flex-col items-center justify-center p-6">
-        <h1 class="text-4xl font-black text-white mb-2 italic">المنظومة الرقمية للصحة المدرسية</h1>
-        <p class="text-blue-500 font-mono mb-12 uppercase tracking-widest">اختر بوابة الدخول للنظام</p>
+    <div class="video-background">
+        <div class="overlay"></div>
+        <video autoplay muted loop playsinline id="bg-video">
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-blue-atoms-9110-large.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <div id="noti-center" class="fixed top-6 left-10 z-[60] hidden">
+        <div class="relative cursor-pointer" onclick="toggleNotifications()">
+            <div class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border-2 border-[#020617]">
+                <span class="text-[8px] font-bold text-white" id="noti-count">2</span>
+            </div>
+            <div class="glass p-3 rounded-xl border border-white/10 hover:border-blue-500/50 transition">
+                <i class="fas fa-bell text-blue-400"></i>
+            </div>
+            <div id="noti-dropdown" class="hidden absolute top-14 left-0 w-80 glass border border-white/10 rounded-2xl p-4 shadow-2xl animate-in">
+                <h4 class="text-xs font-bold text-slate-400 mb-4 uppercase tracking-widest">التنبيهات اللحظية</h4>
+                <div id="noti-list" class="space-y-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="login-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 bg-slate-950/40 backdrop-blur-md">
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-black text-white italic tracking-tighter">SMART CLINIC OS</h1>
+            <p class="text-blue-400 font-mono tracking-[0.5em] mt-2 text-xs">VIRTUAL HEALTH GATEWAY</p>
+        </div>
         
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 w-full max-w-6xl">
             <div onclick="openPortal('school')" class="portal-card">
                 <i class="fas fa-school-flag text-4xl mb-4 text-blue-500"></i>
                 <h3>إدارة المدرسة</h3>
-                <p>متابعة الأثر والغياب الصحي</p>
+                <p>متابعة الأثر والغياب</p>
             </div>
             <div onclick="openPortal('doctor')" class="portal-card">
                 <i class="fas fa-user-md text-4xl mb-4 text-emerald-500"></i>
-                <h3>الطبيب / الممرض</h3>
-                <p>الرصد اللحظي والفرز الذكي</p>
+                <h3>الطبيب</h3>
+                <p>الرصد والفرز الذكي</p>
             </div>
             <div onclick="openPortal('student')" class="portal-card">
                 <i class="fas fa-user-graduate text-4xl mb-4 text-purple-500"></i>
                 <h3>الطالب</h3>
-                <p>الملف الصحي والواقع المعزز</p>
+                <p>الملف الصحي و AR</p>
             </div>
             <div onclick="openPortal('parent')" class="portal-card">
                 <i class="fas fa-family text-4xl mb-4 text-orange-500"></i>
                 <h3>ولي الأمر</h3>
-                <p>متابعة الحالة والتقارير الفورية</p>
+                <p>المتابعة اللحظية</p>
             </div>
         </div>
     </div>
 
     <div id="main-interface" class="hidden">
-        <aside class="fixed right-0 top-0 h-full w-72 glass border-l border-white/5 p-6">
+        <aside class="fixed right-0 top-0 h-full w-72 glass border-l border-white/5 p-6 z-50">
             <div class="mb-10 text-center">
-                <div id="user-avatar" class="w-20 h-20 rounded-full mx-auto mb-4 border-2 border-blue-500 p-1"></div>
+                <div id="user-avatar" class="w-20 h-20 rounded-full mx-auto mb-4 border-2 flex items-center justify-center bg-slate-900/50"></div>
                 <h2 id="portal-title" class="font-black text-white italic">اسم البوابة</h2>
-                <button onclick="location.reload()" class="text-[10px] text-red-500 mt-2 uppercase">تسجيل الخروج</button>
+                <button onclick="location.reload()" class="text-[10px] text-red-500 mt-2 uppercase font-bold">تسجيل الخروج</button>
             </div>
-            
-            <nav id="sidebar-nav" class="space-y-2">
-                </nav>
+            <nav id="sidebar-nav" class="space-y-2"></nav>
         </aside>
 
-        <main class="mr-72 p-10">
+        <main class="mr-72 p-10 min-h-screen relative">
             <header class="flex justify-between items-center mb-10">
-                <div id="page-header">
+                <div>
                     <h2 class="text-3xl font-black text-white italic" id="view-title">الرئيسية</h2>
-                    <p class="text-slate-500 text-xs" id="view-desc">وصف الصفحة المختارة</p>
+                    <p class="text-slate-500 text-xs font-bold uppercase tracking-widest" id="view-desc">Smart Health Monitoring</p>
                 </div>
-                <div class="blockchain-badge">
-                    <i class="fas fa-link text-emerald-500"></i> Secured by Blockchain
+                <div class="blockchain-badge animate-pulse">
+                    <i class="fas fa-link text-emerald-500"></i> BLOCKCHAIN SECURED
                 </div>
             </header>
 
-            <div id="portal-content" class="animate-in">
+            <div id="portal-content" class="animate-in pb-20">
                 </div>
         </main>
     </div>
