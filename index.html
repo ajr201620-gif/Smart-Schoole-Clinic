@@ -2,123 +2,236 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>منظومة العيادة الذكية - الخدمات المتكاملة</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Clinic OS | المنظومة الوطنية للعيادة الذكية</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
-        body { font-family: 'Tajawal', sans-serif; background: #020617; color: #cbd5e1; }
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.05); }
-        .portal-card { cursor: pointer; transition: 0.3s; border-radius: 2rem; }
-        .portal-card:hover { transform: translateY(-5px); border-color: #3b82f6; }
-        .service-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 1.5rem; border-right: 4px solid #3b82f6; }
-        .nav-btn { width: 100%; padding: 0.8rem; border-radius: 1rem; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
-        .nav-btn.active { background: rgba(59, 130, 246, 0.2); color: white; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Tajawal:wght@400;700;900&display=swap');
+        
+        :root {
+            --primary-blue: #3b82f6;
+            --primary-emerald: #10b981;
+            --primary-purple: #a855f7;
+            --primary-orange: #f59e0b;
+        }
+
+        body { font-family: 'Tajawal', sans-serif; background: #020617; color: #f8fafc; overflow: hidden; }
+        .cyber-font { font-family: 'Orbitron', sans-serif; }
+
+        /* تأثيرات الفيديو والخلفية */
+        .video-background { position: fixed; inset: 0; z-index: -2; }
+        #bg-video { width: 100%; height: 100%; object-fit: cover; opacity: 0.3; }
+        .overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(2,6,23,0.4) 0%, #020617 100%); z-index: -1; }
+
+        /* بطاقات الهوية */
+        .portal-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+        .portal-card:hover { transform: translateY(-15px) scale(1.05); border-color: var(--primary-blue); box-shadow: 0 0 40px rgba(59, 130, 246, 0.2); }
+
+        /* الرسوم البيانية والمحاكاة */
+        .glass-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 2rem; }
+        .status-pulse { width: 10px; height: 10px; border-radius: 50%; background: #10b981; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+
+        /* خريطة المدرسة */
+        .school-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+        .room { padding: 1.5rem; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.05); text-align: center; position: relative; }
+        .room.active-alert { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); animation: shake 0.5s infinite; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
     </style>
 </head>
 <body>
 
-    <div id="login-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 bg-slate-950">
-        <h1 class="text-4xl font-black text-white mb-10 italic">اختيار بوابة الصلاحيات</h1>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 w-full max-w-6xl">
-            <div onclick="openPortal('school')" class="portal-card glass p-8 text-center border border-blue-500/20">
-                <i class="fas fa-school text-4xl mb-4 text-blue-500"></i>
-                <h3 class="font-bold">إدارة المدرسة</h3>
+    <div class="video-background">
+        <div class="overlay"></div>
+        <video autoplay muted loop playsinline id="bg-video">
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-blue-atoms-9110-large.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <div id="login-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 backdrop-blur-xl">
+        <div class="text-center mb-16 animate-bounce">
+            <h1 class="text-6xl font-black text-white italic tracking-tighter cyber-font">SMART CLINIC <span class="text-blue-500">2030</span></h1>
+            <p class="text-slate-400 mt-4 font-bold tracking-[0.5em] text-sm">المنظومة الوطنية الموحدة للصحة المدرسية</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 w-full max-w-7xl">
+            <div onclick="initPortal('school')" class="portal-card p-10 rounded-[3rem] text-center">
+                <div class="w-20 h-20 bg-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-school text-4xl text-blue-500"></i>
+                </div>
+                <h3 class="text-xl font-black">إدارة المدرسة</h3>
+                <p class="text-xs text-slate-500 mt-2 italic">صلاحيات: متابعة الأثر الرقمي</p>
             </div>
-            <div onclick="openPortal('doctor')" class="portal-card glass p-8 text-center border border-emerald-500/20">
-                <i class="fas fa-user-md text-4xl mb-4 text-emerald-500"></i>
-                <h3 class="font-bold">الطبيب</h3>
+            <div onclick="initPortal('doctor')" class="portal-card p-10 rounded-[3rem] text-center">
+                <div class="w-20 h-20 bg-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-user-md text-4xl text-emerald-500"></i>
+                </div>
+                <h3 class="text-xl font-black">الطبيب / الممرض</h3>
+                <p class="text-xs text-slate-500 mt-2 italic">صلاحيات: الفرز والتشخيص AI</p>
             </div>
-            <div onclick="openPortal('student')" class="portal-card glass p-8 text-center border border-purple-500/20">
-                <i class="fas fa-user-graduate text-4xl mb-4 text-purple-500"></i>
-                <h3 class="font-bold">الطالب</h3>
+            <div onclick="initPortal('student')" class="portal-card p-10 rounded-[3rem] text-center">
+                <div class="w-20 h-20 bg-purple-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-user-graduate text-4xl text-purple-500"></i>
+                </div>
+                <h3 class="text-xl font-black">بوابة الطالب</h3>
+                <p class="text-xs text-slate-500 mt-2 italic">صلاحيات: الملف الصحي و AR</p>
             </div>
-            <div onclick="openPortal('parent')" class="portal-card glass p-8 text-center border border-orange-500/20">
-                <i class="fas fa-family text-4xl mb-4 text-orange-500"></i>
-                <h3 class="font-bold">ولي الأمر</h3>
+            <div onclick="initPortal('parent')" class="portal-card p-10 rounded-[3rem] text-center">
+                <div class="w-20 h-20 bg-orange-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-family text-4xl text-orange-500"></i>
+                </div>
+                <h3 class="text-xl font-black">ولي الأمر</h3>
+                <p class="text-xs text-slate-500 mt-2 italic">صلاحيات: المراقبة اللحظية</p>
             </div>
         </div>
     </div>
 
     <div id="main-interface" class="hidden">
-        <aside class="fixed right-0 top-0 h-full w-72 glass p-6 border-l border-white/5">
-            <div id="user-info" class="text-center mb-10">
-                <div id="p-icon" class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl border-2"></div>
-                <h2 id="p-title" class="font-black text-white"></h2>
-                <button onclick="location.reload()" class="text-[10px] text-red-500 mt-2 font-bold uppercase">خروج</button>
+        <aside class="fixed right-0 top-0 h-full w-80 glass-panel m-4 rounded-[2.5rem] p-8 z-50">
+            <div class="text-center mb-10 pb-10 border-b border-white/5">
+                <div id="p-avatar" class="w-24 h-24 rounded-3xl mx-auto mb-4 flex items-center justify-center text-4xl border-2 shadow-2xl"></div>
+                <h2 id="p-title" class="text-2xl font-black text-white italic"></h2>
+                <div class="flex items-center justify-center gap-2 mt-4">
+                    <div class="status-pulse"></div>
+                    <span class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">متصل بالبنية التحتية</span>
+                </div>
             </div>
-            <nav id="sidebar-nav" class="space-y-2"></nav>
+            <nav id="nav-list" class="space-y-4"></nav>
+            <button onclick="location.reload()" class="absolute bottom-8 left-8 right-8 py-4 bg-red-500/10 text-red-500 rounded-2xl text-xs font-black hover:bg-red-500 hover:text-white transition uppercase">تسجيل الخروج الآمن</button>
         </aside>
 
-        <main class="mr-72 p-10">
-            <div id="portal-content" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                </div>
+        <main class="mr-[22rem] p-10 h-screen overflow-y-auto">
+            <div id="content-area" class="animate-in"></div>
         </main>
     </div>
 
     <script>
-        const services = {
+        const config = {
             school: {
-                title: "إدارة المدرسة", color: "#3b82f6", icon: "fa-school",
-                list: [
-                    { name: "تتبع الغياب الصحي", desc: "رصد أسباب الغياب الطبية لحظياً لتقليل الهدر التعليمي.", icon: "fa-user-clock" },
-                    { name: "مؤشرات الأثر (KPIs)", desc: "قياس نسبة الاكتشاف المبكر وسرعة استجابة العيادة.", icon: "fa-chart-line" },
-                    { name: "خريطة الفصول الحرارية", desc: "تحديد الفصول التي تتركز فيها أعراض صحية مشابهة.", icon: "fa-map-marked-alt" }
+                title: "لوحة التحكم الاستراتيجية", color: "#3b82f6", icon: "fa-school",
+                features: [
+                    { id: 'impact', name: "مؤشرات الأثر (KPIs)", icon: "fa-chart-pie", desc: "نسبة انخفاض الغياب الصحي: 18%" },
+                    { id: 'map', name: "الخريطة الحرارية للفصول", icon: "fa-map-marked-alt", desc: "تتبع انتشار العدوى في المبنى" }
                 ]
             },
             doctor: {
-                title: "بوابة الطبيب", color: "#10b981", icon: "fa-user-md",
-                list: [
-                    { name: "الفرز الذكي (AI Triage)", desc: "تحليل تلقائي للعلامات الحيوية وتقديم تشخيص أولي.", icon: "fa-robot" },
-                    { name: "سجلات Blockchain", desc: "الوصول المشفر لملفات الطلاب الصحية غير القابلة للتلاعب.", icon: "fa-link" },
-                    { name: "الطب الاتصالي", desc: "استشارة فورية مع أطباء متخصصين عند الحاجة.", icon: "fa-video" }
+                title: "مركز الفرز والتشخيص", color: "#10b981", icon: "fa-user-md",
+                features: [
+                    { id: 'ai-triage', name: "الفرز الذكي (AI Engine)", icon: "fa-robot", desc: "تحليل العلامات الحيوية عبر IoT" },
+                    { id: 'blockchain', name: "سجلات Blockchain", icon: "fa-shield-halved", desc: "بيانات صحية مشفرة ومؤمنة" }
                 ]
             },
             student: {
-                title: "بوابة الطالب", color: "#a855f7", icon: "fa-user-graduate",
-                list: [
-                    { name: "الهوية الصحية الرقمية", desc: "ملف QR يحتوي على معلومات الحساسية وفصيلة الدم.", icon: "fa-id-card" },
-                    { name: "التوعية بالواقع المعزز (AR)", desc: "دروس تفاعلية 3D حول النظافة والوقاية الصحية.", icon: "fa-vr-cardboard" },
-                    { name: "نقاط الالتزام", desc: "نظام تحفيزي لتعزيز السلوكيات الصحية داخل المدرسة.", icon: "fa-star" }
+                title: "الملف الصحي للطالب", color: "#a855f7", icon: "fa-user-graduate",
+                features: [
+                    { id: 'qr', name: "هوية QR الصحية", icon: "fa-qrcode", desc: "عرض معلومات الحساسية والطوارئ" },
+                    { id: 'ar-edu', name: "مختبر التوعية AR", icon: "fa-vr-cardboard", desc: "دروس تفاعلية ثلاثية الأبعاد" }
                 ]
             },
             parent: {
                 title: "بوابة ولي الأمر", color: "#f59e0b", icon: "fa-family",
-                list: [
-                    { name: "المتابعة اللحظية", desc: "إشعارات فورية عند دخول الطالب للعيادة أو فحصه.", icon: "fa-bell" },
-                    { name: "التقارير الصحية الدورية", desc: "ملخص شهري لنمو الطالب ومؤشراته الحيوية.", icon: "fa-file-medical" },
-                    { name: "التواصل المباشر", desc: "قناة آمنة للحديث مع طبيب المدرسة وطلب تقارير.", icon: "fa-comments" }
+                features: [
+                    { id: 'live', name: "تتبع الحالة اللحظي", icon: "fa-eye", desc: "إشعارات فورية عند دخول العيادة" },
+                    { id: 'reports', name: "التقارير الطبية", icon: "fa-file-pdf", desc: "تحميل ملخص الحالة الشهري" }
                 ]
             }
         };
 
-        function openPortal(type) {
+        function initPortal(type) {
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-interface').classList.remove('hidden');
             
-            const p = services[type];
+            const p = config[type];
             document.getElementById('p-title').innerText = p.title;
-            const iconDiv = document.getElementById('p-icon');
-            iconDiv.innerHTML = `<i class="fas ${p.icon}"></i>`;
-            iconDiv.style.borderColor = p.color;
-            iconDiv.style.color = p.color;
+            const avatar = document.getElementById('p-avatar');
+            avatar.innerHTML = `<i class="fas ${p.icon}"></i>`;
+            avatar.style.borderColor = p.color;
+            avatar.style.color = p.color;
+            avatar.style.background = `${p.color}10`;
 
-            // بناء القائمة الجانبية
-            const nav = document.getElementById('sidebar-nav');
-            nav.innerHTML = p.list.map(s => `
-                <button class="nav-btn text-xs"><i class="fas ${s.icon}"></i> ${s.name}</button>
-            `).join('');
-
-            // بناء الخدمات في المحتوى الرئيسي
-            const content = document.getElementById('portal-content');
-            content.innerHTML = p.list.map(s => `
-                <div class="service-card glass border-l-4" style="border-right-color: ${p.color}">
-                    <i class="fas ${s.icon} text-2xl mb-4" style="color: ${p.color}"></i>
-                    <h4 class="font-bold text-white mb-2">${s.name}</h4>
-                    <p class="text-xs text-slate-400 leading-relaxed">${s.desc}</p>
-                    <button class="mt-4 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-white transition">دخول الخدمة →</button>
+            const nav = document.getElementById('nav-list');
+            nav.innerHTML = p.features.map(f => `
+                <div onclick="renderFeature('${type}', '${f.id}')" class="p-4 glass-panel cursor-pointer hover:bg-white/5 transition border-r-4" style="border-right-color:${p.color}">
+                    <h4 class="text-xs font-black text-white"><i class="fas ${f.icon} ml-2"></i> ${f.name}</h4>
+                    <p class="text-[9px] text-slate-500 mt-1">${f.desc}</p>
                 </div>
             `).join('');
+
+            renderFeature(type, p.features[0].id);
+        }
+
+        function renderFeature(portal, id) {
+            const area = document.getElementById('content-area');
+            if(id === 'ai-triage') {
+                area.innerHTML = `
+                    <div class="max-w-4xl mx-auto glass-panel p-12 text-center border-t-8 border-emerald-500">
+                        <div class="cyber-font text-emerald-500 mb-8 text-xl animate-pulse">VITAL SIGNS ANALYSIS IN PROGRESS...</div>
+                        <div class="flex justify-center gap-10 mb-10">
+                            <div class="text-center"><p class="text-xs text-slate-500">TEMP</p><h2 class="text-4xl font-black">38.4°</h2></div>
+                            <div class="text-center"><p class="text-xs text-slate-500">BPM</p><h2 class="text-4xl font-black">102</h2></div>
+                            <div class="text-center"><p class="text-xs text-slate-500">SPO2</p><h2 class="text-4xl font-black">96%</h2></div>
+                        </div>
+                        <div class="bg-red-500/10 p-6 rounded-3xl border border-red-500/20 mb-8">
+                            <h4 class="text-red-500 font-black mb-2"><i class="fas fa-exclamation-triangle"></i> قرار الذكاء الاصطناعي (AI Decision)</h4>
+                            <p class="text-sm">اشتباه في حالة إنفلونزا موسمية - يوصى بالعزل الفوري وإشعار ولي الأمر.</p>
+                        </div>
+                        <button onclick="alert('تم توثيق الحالة في البلوك تشين وإرسال إشعار لولي الأمر')" class="bg-emerald-600 px-12 py-4 rounded-2xl font-black shadow-lg shadow-emerald-500/20">اعتماد القرار وتشفير البيانات</button>
+                    </div>
+                `;
+            } else if(id === 'map') {
+                area.innerHTML = `
+                    <h2 class="text-3xl font-black mb-10 italic">تتبع الانتشار اللحظي (Infection Map)</h2>
+                    <div class="school-grid">
+                        <div class="room bg-emerald-500/5">فصل 1-أ <br> <span class="text-[10px] text-emerald-500">طبيعي</span></div>
+                        <div class="room active-alert">فصل 1-ب <br> <span class="text-[10px] text-red-500">تنبيه: 3 حالات حرارة</span></div>
+                        <div class="room bg-emerald-500/5">فصل 2-أ <br> <span class="text-[10px] text-emerald-500">طبيعي</span></div>
+                        <div class="room bg-emerald-500/5">فصل 2-ب <br> <span class="text-[10px] text-emerald-500">طبيعي</span></div>
+                    </div>
+                    <div class="mt-10 glass-panel p-8 h-64">
+                        <canvas id="myChart"></canvas>
+                    </div>
+                `;
+                initChart();
+            } else {
+                area.innerHTML = `<div class="p-20 text-center glass-panel rounded-[3rem] border-dashed border-white/10">
+                    <i class="fas fa-microchip text-6xl text-slate-800 mb-6"></i>
+                    <h2 class="text-xl font-black text-slate-500 tracking-widest">ENCRYPTED SERVICE</h2>
+                    <p class="text-xs text-slate-600 mt-2">يرجى الاتصال بالخادم المركزي لتفعيل هذه الميزة</p>
+                </div>`;
+            }
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('myChart');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'],
+                    datasets: [{
+                        label: 'معدل الحالات المكتشفة',
+                        data: [12, 19, 3, 5, 2],
+                        borderColor: '#3b82f6',
+                        tension: 0.4,
+                        fill: true,
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { display: false }, x: { grid: { display: false } } }
+                }
+            });
         }
     </script>
 </body>
