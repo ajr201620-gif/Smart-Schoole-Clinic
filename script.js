@@ -1,84 +1,125 @@
-/* Smart Clinic Core Logic - v5.0
-   System: جمع -> تحليل -> قرار -> استجابة -> متابعة
-*/
-
-// بيانات الطلاب الافتراضية المحمية (Blockchain Simulation)
-const studentDB = {
-    "12345": { name: "أحمد محمد", history: "حساسية موسمية", blood: "O+", parentID: "96650XXXXXXX" }
+// بيانات النظام والخدمات
+const portals = {
+    school: {
+        title: "إدارة المدرسة", color: "#3b82f6", icon: 'fa-school',
+        menu: [
+            { id: 'map', name: 'خريطة الرصد اللحظي', icon: 'fa-map-marked-alt' },
+            { id: 'impact', name: 'مؤشرات الأثر الدراسي', icon: 'fa-chart-line' }
+        ]
+    },
+    doctor: {
+        title: "بوابة الطبيب", color: "#10b981", icon: 'fa-user-md',
+        menu: [
+            { id: 'triage', name: 'الفرز الذكي (AI)', icon: 'fa-stethoscope' },
+            { id: 'patients', name: 'سجلات Blockchain', icon: 'fa-link' }
+        ]
+    },
+    student: {
+        title: "بوابة الطالب", color: "#a855f7", icon: 'fa-user-graduate',
+        menu: [
+            { id: 'health-id', name: 'هويتي الصحية الرقمية', icon: 'fa-id-card' },
+            { id: 'ar-edu', name: 'الواقع المعزز AR', icon: 'fa-vr-cardboard' }
+        ]
+    },
+    parent: {
+        title: "بوابة ولي الأمر", color: "#f59e0b", icon: 'fa-family',
+        menu: [
+            { id: 'live-track', name: 'متابعة الحالة الآن', icon: 'fa-heartbeat' },
+            { id: 'history', name: 'التقارير الطبية', icon: 'fa-file-alt' }
+        ]
+    }
 };
 
-// وظيفة بدء المنظومة
-function initSystem() {
-    console.log("System Initialized: Smart Clinic AI is Online.");
-    playAmbientSound(); // محاكاة صوت تقني
-}
+let notifications = [
+    { id: 1, type: 'warning', title: 'تنبيه AI', msg: 'ارتفاع حرارة فصل 1-B', time: 'منذ دقيقة' }
+];
 
-// 1. تسجيل الدخول والتعرف على الطالب
-function loginStudent() {
-    updateWorkflowUI(1);
-    const mainDisplay = document.getElementById('main-content');
-    mainDisplay.innerHTML = `<div class="loader"></div> <p class="tech-text">جاري استدعاء الملف من البلوك تشين...</p>`;
+// فتح بوابة محددة
+function openPortal(type) {
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('main-interface').classList.remove('hidden');
+    document.getElementById('noti-center').classList.remove('hidden');
     
-    setTimeout(() => {
-        showVitalsScanner();
-    }, 2000);
+    const portal = portals[type];
+    document.getElementById('portal-title').innerText = portal.title;
+    document.getElementById('user-avatar').innerHTML = `<i class="fas ${portal.icon} text-3xl" style="color:${portal.color}"></i>`;
+    document.getElementById('user-avatar').style.borderColor = portal.color;
+
+    renderSidebar(type);
+    loadPage(type, portal.menu[0].id);
+    renderNotifications();
 }
 
-// 2. قياس العلامات الحيوية (IoT Simulation)
-function showVitalsScanner() {
-    updateWorkflowUI(2);
-    const mainDisplay = document.getElementById('main-content');
-    mainDisplay.innerHTML = `
-        <div class="radar-section animate-in">
-            <div class="radar-scan">
-                <i class="fas fa-user-shield text-4xl text-cyan-400 animate-pulse"></i>
-            </div>
-            <h2 class="mt-8 text-2xl font-black italic">رصد المؤشرات الحيوية (IoT)</h2>
-            <div class="grid grid-cols-2 gap-4 mt-6">
-                <div class="vital-mini">Temp: <span id="t-live">--</span></div>
-                <div class="vital-mini">Pulse: <span id="p-live">--</span></div>
-            </div>
-        </div>
-    `;
-
-    // محاكاة تدفق بيانات IoT اللحظي
-    let t = 36.0;
-    let p = 70;
-    const interval = setInterval(() => {
-        t += (Math.random() * 0.2);
-        p += Math.floor(Math.random() * 5);
-        document.getElementById('t-live').innerText = t.toFixed(1) + "°";
-        document.getElementById('p-live').innerText = p + " bpm";
-        if(t >= 37.5) {
-            clearInterval(interval);
-            triggerAIAnalysis(t, p);
-        }
-    }, 100);
+function renderSidebar(type) {
+    const nav = document.getElementById('sidebar-nav');
+    nav.innerHTML = portals[type].menu.map(item => `
+        <button onclick="loadPage('${type}', '${item.id}')" class="nav-btn" id="btn-${item.id}">
+            <i class="fas ${item.icon}"></i> <span>${item.name}</span>
+        </button>
+    `).join('');
 }
 
-// 4. الفرز الطبي الذكي (AI Analysis)
-function triggerAIAnalysis(temp, pulse) {
-    updateWorkflowUI(4);
-    const mainDisplay = document.getElementById('main-content');
+function loadPage(type, pageId) {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('btn-' + pageId)?.classList.add('active');
     
-    mainDisplay.innerHTML = `
-        <div class="ai-box p-8 glass-panel border-cyan-500/50">
-            <h3 class="text-xl font-bold text-cyan-400 mb-4 italic">
-                <i class="fas fa-brain"></i> نتائج الفرز الذكي (AI Triage)
-            </h3>
-            <div class="space-y-4">
-                <p class="text-white">تحليل النمط: <span class="text-orange-400">ارتفاع طفيف في درجة الحرارة</span></p>
-                <p class="text-white italic text-sm">التنبؤ بالمخاطر: احتمال بداية أعراض زكام (Risk: 15%)</p>
-                <div class="p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                    <p class="text-xs text-emerald-400">القرار الوقائي: إرسال تنبيه فوري للمنصة الموحدة ولولي الأمر.</p>
-                </div>
-            </div>
-            <button onclick="document.location.reload()" class="btn-main mt-6 w-full">6. توثيق السجل الصحي (Blockchain)</button>
+    const view = document.getElementById('portal-content');
+    const title = document.getElementById('view-title');
+    title.innerText = portals[type].menu.find(m => m.id === pageId).name;
+
+    // عرض المحتوى بناء على الصفحة
+    if (pageId === 'map') renderMap(view);
+    else if (pageId === 'triage') renderTriage(view);
+    else if (pageId === 'ar-edu') renderAR(view);
+    else if (pageId === 'live-track') renderParentTrack(view);
+    else view.innerHTML = `<div class="p-20 text-center glass rounded-3xl">جاري تحميل البيانات الرقمية...</div>`;
+}
+
+// محاكاة الخريطة
+function renderMap(container) {
+    container.innerHTML = `
+        <div class="school-map">
+            <div class="classroom safe"><span>فصل 1-A</span><p class="text-[10px] mt-2 text-emerald-500">مستقر</p></div>
+            <div class="classroom warning"><span>فصل 1-B</span><p class="text-[10px] mt-2 text-orange-500">تنبيه حرارة</p></div>
+            <div class="classroom safe"><span>فصل 2-A</span><p class="text-[10px] mt-2 text-emerald-500">مستقر</p></div>
+            <div class="classroom safe"><span>فصل 2-B</span><p class="text-[10px] mt-2 text-emerald-500">مستقر</p></div>
         </div>
     `;
 }
 
-function updateWorkflowUI(step) {
-    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-    document.getElementById('step-' + step).classList.add('active');
+// محاكاة الفرز الذكي
+function renderTriage(container) {
+    container.innerHTML = `
+        <div class="max-w-xl mx-auto glass-main p-10 rounded-[3rem] text-center">
+            <div class="w-24 h-24 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+            <h3 class="text-xl font-bold mb-4">في انتظار مسح الطالب (IoT)</h3>
+            <button onclick="simulateAI()" class="bg-blue-600 px-10 py-4 rounded-2xl font-black shadow-lg">محاكاة فحص AI</button>
+        </div>
+    `;
+}
+
+function simulateAI() {
+    sendNewNotification('اكتشاف حالة', 'تم رصد ارتفاع حرارة طالب (38.8) - نظام الفرز أصدر قرار العزل', 'warning');
+    alert("AI Result: Fever Detected. Parent notified. Data stored in Blockchain.");
+}
+
+// إدارة التنبيهات
+function toggleNotifications() {
+    document.getElementById('noti-dropdown').classList.toggle('hidden');
+}
+
+function renderNotifications() {
+    const list = document.getElementById('noti-list');
+    list.innerHTML = notifications.map(n => `
+        <div class="noti-item ${n.type}">
+            <p class="text-[10px] font-bold uppercase">${n.title}</p>
+            <p class="text-xs text-slate-400">${n.msg}</p>
+        </div>
+    `).join('');
+    document.getElementById('noti-count').innerText = notifications.length;
+}
+
+function sendNewNotification(title, msg, type) {
+    notifications.unshift({ id: Date.now(), type, title, msg, time: 'الآن' });
+    renderNotifications();
 }
