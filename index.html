@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Clinic OS — بوابة الدخول</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">SC</div>
+      <div>
+        <div class="brand-title">Smart Clinic OS</div>
+        <div class="brand-sub">Role Gateway — بوابة الأدوار</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button class="btn ghost" id="btnTheme" title="تبديل الوضع">🌓</button>
+      <button class="btn ghost" id="btnJudge">وضع التحكيم</button>
+      <button class="btn" id="btnContinue">دخول سريع</button>
+    </div>
+  </header>
+
+  <main class="main" style="max-width:1100px; margin:0 auto;">
+
+    <section class="hero" style="margin-top:22px;">
+      <div class="hero-left">
+        <div class="kicker">🧠 + 🏫 + 🩺</div>
+        <h1>العيادة المدرسية الذكية</h1>
+        <p class="hero-desc">
+          نظام متعدد الأدوار: إدارة المدرسة، العيادة (طبيب/تمريض)، الطالب، ولي الأمر — مع صلاحيات (RBAC) وسجل تدقيق (Audit) (Demo).
+        </p>
+
+        <div class="hero-badges">
+          <span class="badge">GitHub Pages Ready</span>
+          <span class="badge ghost">Static Demo</span>
+          <span class="badge">Multi-Role</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="form" style="max-width:520px;">
+          <label>اختر الدور</label>
+          <div class="row" style="grid-template-columns:1fr 1fr;">
+            <button class="btn ghost roleBtn" data-role="school" data-go="admin.html">🏫 إدارة المدرسة</button>
+            <button class="btn ghost roleBtn" data-role="staff" data-go="doctor.html">👨‍⚕️ الطبيب/التمريض</button>
+            <button class="btn ghost roleBtn" data-role="student" data-go="student.html">🎓 الطالب</button>
+            <button class="btn ghost roleBtn" data-role="parent" data-go="parent.html">👨‍👩‍👧 ولي الأمر</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="row" style="grid-template-columns:1fr 1fr;">
+            <div>
+              <label>آخر دور</label>
+              <input id="lastRole" readonly placeholder="—" />
+            </div>
+            <div>
+              <label>PIN (اختياري Demo)</label>
+              <input id="pin" placeholder="1234" inputmode="numeric" />
+            </div>
+          </div>
+
+          <div class="card-actions" style="padding:0;">
+            <button class="btn" id="btnEnter">دخول</button>
+            <button class="btn ghost" id="btnReset">إعادة ضبط (Demo)</button>
+          </div>
+
+          <div class="muted small" style="margin-top:10px; line-height:1.8;">
+            * PIN اختياري للعرض:  
+            <b>إدارة:</b> 1111 — <b>طبيب:</b> 2222 — <b>طالب:</b> 3333 — <b>ولي أمر:</b> 4444
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="scorecard">
+          <div class="scorecard-head">
+            <div>
+              <div class="score-title">جاهزية العرض</div>
+              <div class="score-sub">أدوار + صفحات + تدفق</div>
+            </div>
+            <div class="ring">
+              <div class="ring-inner">
+                <div class="ring-num">100</div>
+                <div class="ring-lbl">%</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="scorecard-grid">
+            <div class="mini">
+              <div class="mini-k">Admin</div>
+              <div class="mini-v">✔</div>
+            </div>
+            <div class="mini">
+              <div class="mini-k">Doctor</div>
+              <div class="mini-v">✔</div>
+            </div>
+            <div class="mini">
+              <div class="mini-k">Student</div>
+              <div class="mini-v">✔</div>
+            </div>
+            <div class="mini">
+              <div class="mini-k">Parent</div>
+              <div class="mini-v">✔</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="muted small" style="line-height:1.9;">
+            نصيحة عرض للحكّام: افتح “وضع التحكيم” وشغّل الأدوار واحد واحد.
+          </div>
+        </div>
+
+        <div class="card" id="judgePanel" style="display:none; margin-top:14px;">
+          <div class="card-head">
+            <h3>وضع التحكيم</h3>
+            <div class="muted small">روابط مباشرة</div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <a class="btn ghost" href="admin.html">🏫 Admin</a>
+            <a class="btn ghost" href="doctor.html">👨‍⚕️ Doctor</a>
+            <a class="btn ghost" href="student.html">🎓 Student</a>
+            <a class="btn ghost" href="parent.html">👨‍👩‍👧 Parent</a>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="muted small">
+            إذا احتجت “Reset” امسح LocalStorage من زر إعادة الضبط.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="views" style="margin-top:18px;">
+      <section class="view show">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head">
+              <h3>كيف يشتغل (باختصار)</h3>
+              <div class="muted small">Flow</div>
+            </div>
+            <ul class="bullets">
+              <li>تختار الدور → ينقلك للواجهة المناسبة.</li>
+              <li>يحفظ آخر دور لاستخدام “دخول سريع”.</li>
+              <li>PIN اختياري للتجربة فقط.</li>
+              <li>كل صفحة تسجل أحداثها في Audit (إذا ملفاتك مفعلة).</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>تشغيل على GitHub Pages</h3>
+              <div class="muted small">No server</div>
+            </div>
+            <ul class="bullets">
+              <li>ارفع الملفات في Repo</li>
+              <li>فعّل Pages → Branch: main / root</li>
+              <li>افتح الرابط، وابدأ من index.html</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </section>
+
+  </main>
+
+  <script>
+    (function(){
+      const ROLE_KEY = "sc_role";
+      const LAST_KEY = "sc_last_role";
+      const LAST_GO = "sc_last_go";
+
+      const $ = (s,r=document)=>r.querySelector(s);
+      const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
+
+      const PINS = {
+        school: "1111",
+        staff: "2222",
+        student: "3333",
+        parent: "4444"
+      };
+
+      function setLast(){
+        const r = localStorage.getItem(LAST_KEY) || "—";
+        $("#lastRole").value = r;
+      }
+      setLast();
+
+      // Theme
+      $("#btnTheme")?.addEventListener("click", ()=>{
+        const html = document.documentElement;
+        html.dataset.theme = html.dataset.theme === "light" ? "dark" : "light";
+      });
+
+      // Judge
+      $("#btnJudge")?.addEventListener("click", ()=>{
+        const p = $("#judgePanel");
+        p.style.display = (p.style.display === "none") ? "" : "none";
+      });
+
+      // remember selection
+      let selected = null;
+
+      $$(".roleBtn").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          $$(".roleBtn").forEach(b=>b.classList.remove("active"));
+          btn.classList.add("active");
+          selected = { role: btn.dataset.role, go: btn.dataset.go };
+          localStorage.setItem(LAST_KEY, selected.role);
+          localStorage.setItem(LAST_GO, selected.go);
+          $("#lastRole").value = selected.role;
+        });
+      });
+
+      // Continue
+      $("#btnContinue")?.addEventListener("click", ()=>{
+        const go = localStorage.getItem(LAST_GO);
+        const role = localStorage.getItem(LAST_KEY);
+        if(!go || !role){
+          alert("اختر دور أولاً 😄");
+          return;
+        }
+        localStorage.setItem(ROLE_KEY, role);
+        location.href = go;
+      });
+
+      function enter(){
+        if(!selected){
+          // fallback last
+          const go = localStorage.getItem(LAST_GO);
+          const role = localStorage.getItem(LAST_KEY);
+          if(go && role){
+            selected = { role, go };
+          } else {
+            alert("اختر الدور أولاً 😄");
+            return;
+          }
+        }
+
+        const pin = ($("#pin").value || "").trim();
+        // PIN optional; if provided must match
+        if(pin && pin !== (PINS[selected.role] || "")){
+          alert("PIN غير صحيح (Demo) ❌");
+          return;
+        }
+
+        localStorage.setItem(ROLE_KEY, selected.role);
+        localStorage.setItem(LAST_KEY, selected.role);
+        localStorage.setItem(LAST_GO, selected.go);
+        location.href = selected.go;
+      }
+
+      $("#btnEnter")?.addEventListener("click", enter);
+
+      $("#pin")?.addEventListener("keydown", (e)=>{
+        if(e.key === "Enter") enter();
+      });
+
+      $("#btnReset")?.addEventListener("click", ()=>{
+        if(!confirm("إعادة ضبط بيانات الديمو (LocalStorage)؟")) return;
+        localStorage.clear();
+        $("#pin").value = "";
+        $("#lastRole").value = "—";
+        selected = null;
+        alert("تم ✅");
+      });
+    })();
+  </script>
+</body>
+</html>
