@@ -2,65 +2,170 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Smart Clinic OS | المنظومة السيادية</title>
+    <title>SMART CLINIC OS | NEURAL CORE 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Tajawal:wght@300;700;900&display=swap');
+        
+        :root { --neon-blue: #00f3ff; --neon-red: #ff003c; --bg-dark: #050a10; }
+        body { background: var(--bg-dark); color: white; font-family: 'Tajawal', sans-serif; overflow: hidden; height: 100vh; }
+        .cyber-font { font-family: 'Orbitron', sans-serif; }
+        
+        /* تأثيرات الإضاءة والزجاج */
+        .glass-panel { background: rgba(10, 20, 30, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(0, 243, 255, 0.1); border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .neon-border { border: 1px solid var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue); }
+        .neon-text { text-shadow: 0 0 10px var(--neon-blue); }
+
+        /* الأنيميشن */
+        .scan-line { width: 100%; height: 2px; background: var(--neon-blue); position: absolute; top: 0; left: 0; animation: scanning 3s linear infinite; box-shadow: 0 0 15px var(--neon-blue); z-index: 10; opacity: 0.5; }
+        @keyframes scanning { 100% { top: 100%; } }
+        
+        .grid-bg { background-image: linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px); background-size: 30px 30px; }
+    </style>
 </head>
-<body>
-    <div class="dashboard-wrapper">
-        <aside class="side-panel glass">
-            <div class="brand mb-10 text-center">
-                <div class="logo-shield mx-auto mb-4">SC</div>
-                <h1 class="cyber-font text-blue-500 font-black">SMART CLINIC <span class="text-white text-[10px] block opacity-50">V2.0 2026</span></h1>
-            </div>
-            <nav class="space-y-4">
-                <div class="nav-item active" onclick="switchTab('triage')"><i class="fas fa-microchip"></i> وحدة الفرز الذكي</div>
-                <div class="nav-item" onclick="switchTab('map')"><i class="fas fa-map-marked-alt"></i> رصد المبنى</div>
-                <div class="nav-item" onclick="switchTab('ledger')"><i class="fas fa-link"></i> سجل البلوك تشين</div>
-            </nav>
-        </aside>
+<body class="grid-bg flex p-4 gap-4">
 
-        <main class="content-view p-8">
-            <header class="flex justify-between items-center mb-10">
+    <aside class="w-1/4 flex flex-col gap-4">
+        <div class="glass-panel p-6 flex-1 relative overflow-hidden">
+            <div class="scan-line"></div>
+            <h2 class="cyber-font text-sm neon-text mb-4 uppercase">System Ledger (Blockchain)</h2>
+            <div id="blockchain-live" class="space-y-3 text-[10px] font-mono opacity-70">
+                </div>
+        </div>
+        <div class="glass-panel p-6 h-48 flex flex-col items-center justify-center">
+            <div id="qrcode" class="p-2 bg-white rounded-lg"></div>
+            <span class="text-[9px] mt-2 cyber-font opacity-50">SECURE ID: ALPHA-2026</span>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col gap-4">
+        <div class="glass-panel flex-[2] p-8 relative">
+            <div class="flex justify-between items-center mb-6">
                 <div>
-                    <h2 id="view-title" class="text-4xl font-black italic cyber-font">DASHBOARD</h2>
-                    <p class="text-xs text-slate-500 tracking-[0.3em]">AUTONOMOUS HEALTH GRID</p>
+                    <h1 class="text-4xl font-black italic tracking-tighter">SMART CLINIC <span class="text-cyan-400">OS</span></h1>
+                    <p class="text-[10px] cyber-font opacity-40 uppercase">National Health Security Infrastructure</p>
                 </div>
-                <div class="glass px-6 py-2 rounded-full border-emerald-500/30 text-emerald-500 text-[10px] font-bold animate-pulse">● SYSTEM ONLINE</div>
-            </header>
-
-            <div id="triage-section" class="tab-content grid grid-cols-12 gap-6">
-                <div class="col-span-8 glass p-6 h-[400px]"><canvas id="pulseChart"></canvas></div>
-                <div class="col-span-4 glass p-6 flex flex-col items-center justify-center">
-                    <div id="qrcode" class="bg-white p-4 rounded-2xl mb-4 shadow-2xl"></div>
-                    <p class="text-[10px] opacity-50 uppercase cyber-font">Student Health ID</p>
-                </div>
-                <div class="col-span-12 flex gap-4 mt-6">
-                    <button onclick="startBioScan()" class="scan-btn flex-1">بدء الفحص الحي (IoT)</button>
+                <div class="text-right">
+                    <div class="text-xs font-bold text-cyan-400 cyber-font animate-pulse">● LIVE TELEMETRY</div>
+                    <div class="text-[9px] opacity-40">ENCRYPTION: AES-256-GCM</div>
                 </div>
             </div>
 
-            <div id="map-section" class="tab-content hidden h-[500px] glass p-8">
-                <div class="building-grid" id="school-map"></div>
+            <div class="grid grid-cols-3 gap-6 mb-8">
+                <div class="glass-panel p-4 border-l-4 border-cyan-500">
+                    <span class="text-[10px] block opacity-50">TEMPERATURE</span>
+                    <h3 id="v-temp" class="text-3xl font-black cyber-font">--.-°C</h3>
+                </div>
+                <div class="glass-panel p-4 border-l-4 border-red-500">
+                    <span class="text-[10px] block opacity-50">HEART RATE</span>
+                    <h3 id="v-bpm" class="text-3xl font-black cyber-font text-red-500">-- BPM</h3>
+                </div>
+                <div class="glass-panel p-4 border-l-4 border-emerald-500">
+                    <span class="text-[10px] block opacity-50">OXYGEN (SPO2)</span>
+                    <h3 id="v-oxy" class="text-3xl font-black cyber-font text-emerald-500">--%</h3>
+                </div>
             </div>
 
-            <div id="ledger-section" class="tab-content hidden glass p-8">
-                <div id="ledger-display" class="space-y-4 max-h-[450px] overflow-y-auto p-4"></div>
+            <div class="h-48 relative glass-panel bg-black/20 p-4">
+                <canvas id="livePulseChart"></canvas>
             </div>
-        </main>
+
+            <button onclick="masterScan()" class="w-full mt-6 py-5 neon-border bg-cyan-500/10 hover:bg-cyan-500/20 transition-all font-black text-lg tracking-[0.5em] uppercase cyber-font">Initialize Quantum Scan</button>
+        </div>
+
+        <div class="glass-panel flex-1 p-6 grid grid-cols-4 gap-4" id="map-grid">
+            </div>
+    </main>
+
+    <div id="doctor-portal" class="fixed inset-0 bg-black/95 hidden z-50 p-12">
+        <div class="h-full w-full flex gap-8">
+            <div class="flex-1 glass-panel p-2 relative overflow-hidden">
+                <img src="https://img.freepik.com/free-photo/doctor-with-stethoscope-hands-hospital-background_1150-12940.jpg" class="w-full h-full object-cover opacity-60">
+                <div class="absolute bottom-8 left-8 p-6 glass-panel border-cyan-500">
+                    <h2 class="text-2xl font-black mb-2">د. خالد العتيبي</h2>
+                    <p class="text-sm opacity-70 italic">استشاري الطب الاتصالي - مركز القيادة</p>
+                </div>
+            </div>
+            <div class="w-1/3 flex flex-col gap-6">
+                <div class="glass-panel p-6 flex-1">
+                    <h3 class="cyber-font text-cyan-400 mb-4">Diagnosis Engine</h3>
+                    <div id="ai-analysis" class="text-sm leading-relaxed opacity-80">جاري انتظار البيانات...</div>
+                </div>
+                <button onclick="closePortal()" class="py-6 bg-red-600 font-black uppercase cyber-font">Terminate Session</button>
+            </div>
+        </div>
     </div>
 
-    <script src="voice-ai.js"></script>
-    <script src="medical-bot.js"></script>
-    <script src="blockchain-ledger.js"></script>
-    <script src="mobile-app.js"></script>
-    <script src="reports.js"></script>
-    <script src="pharmacy-hub.js"></script>
-    <script src="tele-medicine.js"></script>
-    <script src="engine.js"></script>
+    <script>
+        // محرك البيانات والرسومات
+        let chart;
+        let pData = Array(40).fill(70);
+        
+        function initChart() {
+            const ctx = document.getElementById('livePulseChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: pData.map((_, i) => i),
+                    datasets: [{
+                        data: pData,
+                        borderColor: '#00f3ff',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: true,
+                        backgroundColor: 'rgba(0, 243, 255, 0.05)',
+                        tension: 0.4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: {display: false}, y: {display: false} }, plugins: {legend: {display: false}} }
+            });
+        }
+
+        function masterScan() {
+            let i = 0;
+            const timer = setInterval(() => {
+                const bpm = Math.floor(70 + Math.random() * 60);
+                pData.push(bpm); pData.shift(); chart.update('none');
+                
+                document.getElementById('v-bpm').innerText = bpm;
+                document.getElementById('v-temp').innerText = (36.5 + Math.random() * 3).toFixed(1) + "°C";
+                document.getElementById('v-oxy').innerText = Math.floor(95 + Math.random() * 5) + "%";
+                
+                if(i++ > 50) {
+                    clearInterval(timer);
+                    addBlock("HEALTH_SCAN_ID_" + Math.random().toString(36).substr(2,9).toUpperCase());
+                    if(bpm > 100) openPortal();
+                }
+            }, 100);
+        }
+
+        function addBlock(hash) {
+            const ledger = document.getElementById('blockchain-live');
+            const entry = document.createElement('div');
+            entry.className = "p-2 border-r-2 border-cyan-500 bg-white/5 animate-pulse";
+            entry.innerHTML = `BLOCK: ${hash}<br>TIMESTAMP: ${new Date().toLocaleTimeString()}`;
+            ledger.prepend(entry);
+        }
+
+        function openPortal() { 
+            document.getElementById('doctor-portal').style.display = 'flex'; 
+            document.getElementById('ai-analysis').innerHTML = "تحذير: نبضات قلب الطالب غير منتظمة (Tachycardia). تم رصد ارتفاع ملحوظ في الحرارة. يوصى بالعزل الفوري وصرف وصفة خافض حرارة.";
+        }
+        function closePortal() { document.getElementById('doctor-portal').style.display = 'none'; }
+
+        // إنشاء خريطة المدرسة
+        const grid = document.getElementById('map-grid');
+        for(let i=1; i<=12; i++) {
+            const r = document.createElement('div');
+            r.className = `glass-panel flex items-center justify-center text-[10px] font-bold ${i===3?'border-red-500 text-red-500 bg-red-500/10':''}`;
+            r.innerText = `UNIT ${i}-A`;
+            grid.appendChild(r);
+        }
+
+        initChart();
+        new QRCode(document.getElementById("qrcode"), { text: "ALPHA-SECURE-ID-2026", width: 120, height: 120, colorDark: "#050a10" });
+    </script>
 </body>
 </html>
