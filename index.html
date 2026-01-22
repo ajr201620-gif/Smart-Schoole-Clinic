@@ -1,37 +1,1009 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>العيادة المدرسية الذكية</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="engine.js"></script>
-  <script src="blockchain-ledger.js"></script>
-  <script src="medical-bot.js"></script>
-  <script src="pharmacy-hub.js"></script>
-  <script src="tele-medicine.js"></script>
-  <script src="voice-ai.js"></script>
-  <script src="reports.js"></script>
-  <script src="mobile-app.js"></script>
-  <script src="script.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SMART CLINIC OS v2026 — العيادة المدرسية الذكية</title>
+  <meta name="description" content="منصة العيادة المدرسية الذكية — لوحة تنفيذية، تنبيهات، تقارير، ومحاكاة تدفق عمل العيادة." />
+  <meta name="theme-color" content="#0b1220" />
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-  <header>
-    <h1>العيادة المدرسية الذكية</h1>
-    <nav>
-      <a href="ar-vision.html">الرؤية</a>
-      <a href="#">لوحة التحكم</a>
-      <a href="#">التقارير</a>
-    </nav>
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">SC</div>
+      <div class="brand-text">
+        <div class="brand-title">SMART CLINIC OS</div>
+        <div class="brand-sub">العيادة المدرسية الذكية — لوحة تنفيذية وتحكيمية</div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button class="btn ghost" id="btnTheme" title="الوضع الليلي/النهاري">🌗</button>
+      <button class="btn ghost" id="btnFull" title="ملء الشاشة">⛶</button>
+      <button class="btn" id="btnQuickDemo" title="تشغيل ديمو سريع">تشغيل الديمو</button>
+    </div>
   </header>
-  <main>
-    <section>
-      <h2>مرحباً بك في العيادة المدرسية الذكية</h2>
-      <p>نظام متكامل لرعاية الطلاب صحياً باستخدام أحدث التقنيات.</p>
-    </section>
-  </main>
-  <footer>
-    <p>جميع الحقوق محفوظة &copy; 2026</p>
-  </footer>
+
+  <!-- Layout -->
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="nav-title">القائمة</div>
+      <nav class="nav">
+        <button class="nav-item active" data-view="dashboard">
+          <span class="ico">📊</span>
+          <span>Executive Dashboard</span>
+        </button>
+        <button class="nav-item" data-view="triage">
+          <span class="ico">🩺</span>
+          <span>Triage — فحص سريع</span>
+        </button>
+        <button class="nav-item" data-view="alerts">
+          <span class="ico">🚨</span>
+          <span>Alerts — التنبيهات</span>
+        </button>
+        <button class="nav-item" data-view="reports">
+          <span class="ico">🧾</span>
+          <span>Reports — التقارير</span>
+        </button>
+        <button class="nav-item" data-view="iot">
+          <span class="ico">📡</span>
+          <span>IoT Hub</span>
+        </button>
+        <button class="nav-item" data-view="about">
+          <span class="ico">🏛️</span>
+          <span>عن المشروع</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="pill">
+          <span class="dot" id="sysDot"></span>
+          <span id="sysStatus">System: Ready</span>
+        </div>
+        <div class="small muted">نسخة عرض (Static) — تعمل عبر GitHub Pages</div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-left">
+          <div class="kicker">نموذج وطني قابل للتوسع</div>
+          <h1>العيادة المدرسية الذكية</h1>
+          <p class="hero-desc">
+            لوحة تنفيذية “تحكيمية” توضح الأثر، تدفق العمل، والتنبيهات — لتقديم مشروع قوي للجهات الرسمية.
+          </p>
+          <div class="hero-cta">
+            <button class="btn" id="btnNewCase">إنشاء حالة فحص</button>
+            <button class="btn ghost" id="btnExport">تصدير ملخص (TXT)</button>
+          </div>
+          <div class="hero-badges">
+            <span class="badge">Early Detection</span>
+            <span class="badge">خفض الغياب</span>
+            <span class="badge">تقارير لحظية</span>
+            <span class="badge">قابل للتكامل</span>
+          </div>
+        </div>
+
+        <div class="hero-right">
+          <div class="scorecard">
+            <div class="scorecard-head">
+              <div>
+                <div class="score-title">مؤشر الجاهزية</div>
+                <div class="score-sub">قراءة لحظية للعرض</div>
+              </div>
+              <div class="ring" aria-label="Readiness score">
+                <div class="ring-inner">
+                  <div class="ring-num" id="readinessScore">86</div>
+                  <div class="ring-lbl">/100</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="scorecard-grid">
+              <div class="mini">
+                <div class="mini-k">حالات اليوم</div>
+                <div class="mini-v" id="kpiTodayCases">12</div>
+              </div>
+              <div class="mini">
+                <div class="mini-k">تنبيهات حرجة</div>
+                <div class="mini-v danger" id="kpiCritical">2</div>
+              </div>
+              <div class="mini">
+                <div class="mini-k">متابعة مطلوبة</div>
+                <div class="mini-v warn" id="kpiFollow">5</div>
+              </div>
+              <div class="mini">
+                <div class="mini-k">زمن الاستجابة</div>
+                <div class="mini-v" id="kpiResponse">7m</div>
+              </div>
+            </div>
+
+            <div class="scorecard-foot">
+              <div class="small muted">* أرقام تجريبية للعرض (Demo). يمكن ربطها لاحقًا بقاعدة بيانات/واجهات.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Views -->
+      <section class="views">
+        <!-- DASHBOARD -->
+        <div class="view show" id="view-dashboard">
+          <div class="section-head">
+            <h2>Executive Dashboard</h2>
+            <div class="section-actions">
+              <button class="btn ghost" id="btnRefresh">تحديث</button>
+              <button class="btn ghost" id="btnSimAlert">محاكاة تنبيه</button>
+            </div>
+          </div>
+
+          <div class="grid-4">
+            <div class="card kpi">
+              <div class="kpi-top">
+                <div class="kpi-ico">👥</div>
+                <div class="kpi-meta">
+                  <div class="kpi-label">عدد الطلاب (المدرسة)</div>
+                  <div class="kpi-value" id="kpiStudents">680</div>
+                </div>
+              </div>
+              <div class="kpi-bar"><span style="width:72%"></span></div>
+              <div class="kpi-note">قابل للتكامل مع أنظمة التعليم لاحقًا</div>
+            </div>
+
+            <div class="card kpi">
+              <div class="kpi-top">
+                <div class="kpi-ico">🩺</div>
+                <div class="kpi-meta">
+                  <div class="kpi-label">فحوصات هذا الأسبوع</div>
+                  <div class="kpi-value" id="kpiWeekChecks">94</div>
+                </div>
+              </div>
+              <div class="kpi-bar"><span style="width:58%"></span></div>
+              <div class="kpi-note">استهداف الفحص الدوري + الشكاوى</div>
+            </div>
+
+            <div class="card kpi">
+              <div class="kpi-top">
+                <div class="kpi-ico">🧠</div>
+                <div class="kpi-meta">
+                  <div class="kpi-label">مخاطر مكتشفة مبكرًا</div>
+                  <div class="kpi-value" id="kpiEarly">17</div>
+                </div>
+              </div>
+              <div class="kpi-bar"><span style="width:44%"></span></div>
+              <div class="kpi-note">تقليل مضاعفات + تقليل الغياب</div>
+            </div>
+
+            <div class="card kpi">
+              <div class="kpi-top">
+                <div class="kpi-ico">🧾</div>
+                <div class="kpi-meta">
+                  <div class="kpi-label">تقارير جاهزة</div>
+                  <div class="kpi-value" id="kpiReports">36</div>
+                </div>
+              </div>
+              <div class="kpi-bar"><span style="width:66%"></span></div>
+              <div class="kpi-note">جاهزة للطباعة/التصدير</div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <h3>Case Log — سجل الحالات</h3>
+                <div class="muted small">آخر 6 حالات</div>
+              </div>
+              <div class="table">
+                <div class="trow thead">
+                  <div>الوقت</div><div>الطالب</div><div>السبب</div><div>الأولوية</div><div>الحالة</div>
+                </div>
+                <div id="caseRows"></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <h3>Impact — الأثر</h3>
+                <div class="muted small">محاكاة أثر/قيمة للمُحكّم</div>
+              </div>
+
+              <div class="impact">
+                <div class="impact-item">
+                  <div class="impact-k">خفض الغياب المتوقع</div>
+                  <div class="impact-v" id="impactAbsence">-12%</div>
+                </div>
+                <div class="impact-item">
+                  <div class="impact-k">تقليل الإحالات المتأخرة</div>
+                  <div class="impact-v" id="impactReferrals">-18%</div>
+                </div>
+                <div class="impact-item">
+                  <div class="impact-k">رفع جاهزية التقارير</div>
+                  <div class="impact-v" id="impactReports">+40%</div>
+                </div>
+                <div class="impact-item">
+                  <div class="impact-k">رضا أولياء الأمور</div>
+                  <div class="impact-v" id="impactParents">+22%</div>
+                </div>
+              </div>
+
+              <div class="divider"></div>
+              <div class="small muted">
+                هذه المؤشرات تُعرض كقيمة مشروع (Value Proposition) ويمكن استبدالها لاحقًا ببيانات حقيقية.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRIAGE -->
+        <div class="view" id="view-triage">
+          <div class="section-head">
+            <h2>Triage — فحص سريع</h2>
+            <div class="section-actions">
+              <button class="btn ghost" id="btnRandomStudent">طالب عشوائي</button>
+              <button class="btn" id="btnSaveCase">حفظ الحالة</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <h3>بيانات الطالب</h3>
+                <div class="muted small">Demo — بدون بيانات حساسة</div>
+              </div>
+
+              <div class="form">
+                <label>اسم الطالب</label>
+                <input id="fName" placeholder="مثال: طالب / طالبة" />
+
+                <div class="row">
+                  <div>
+                    <label>العمر</label>
+                    <input id="fAge" type="number" min="5" max="19" placeholder="12" />
+                  </div>
+                  <div>
+                    <label>الصف</label>
+                    <input id="fGrade" placeholder="سادس" />
+                  </div>
+                </div>
+
+                <label>سبب الزيارة</label>
+                <select id="fReason">
+                  <option>حمّى / حرارة</option>
+                  <option>صداع</option>
+                  <option>ألم بطن</option>
+                  <option>ضيق تنفس / ربو</option>
+                  <option>إجهاد / دوخة</option>
+                  <option>جرح بسيط</option>
+                  <option>أخرى</option>
+                </select>
+
+                <label>ملاحظات</label>
+                <textarea id="fNotes" rows="4" placeholder="أدخل ملاحظة مختصرة..."></textarea>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <h3>قراءات سريعة (Demo)</h3>
+                <div class="muted small">يمكن ربطها لاحقًا بأجهزة IoT</div>
+              </div>
+
+              <div class="vitals">
+                <div class="vital">
+                  <div class="v-k">Temperature</div>
+                  <div class="v-v"><span id="vTemp">37.2</span>°C</div>
+                </div>
+                <div class="vital">
+                  <div class="v-k">Heart Rate</div>
+                  <div class="v-v"><span id="vHr">88</span>bpm</div>
+                </div>
+                <div class="vital">
+                  <div class="v-k">SpO₂</div>
+                  <div class="v-v"><span id="vSpo2">98</span>%</div>
+                </div>
+                <div class="vital">
+                  <div class="v-k">BP</div>
+                  <div class="v-v"><span id="vBp">110/70</span></div>
+                </div>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="risk">
+                <div class="risk-left">
+                  <div class="risk-k">Risk Level</div>
+                  <div class="risk-v" id="riskLevel">LOW</div>
+                </div>
+                <div class="risk-right">
+                  <div class="riskbar"><span id="riskBar" style="width:18%"></span></div>
+                  <div class="muted small" id="riskHint">لا توجد مؤشرات حرجة.</div>
+                </div>
+              </div>
+
+              <div class="card-actions">
+                <button class="btn ghost" id="btnRecalc">إعادة حساب المخاطر</button>
+                <button class="btn" id="btnTriggerCritical">محاكاة حالة حرجة</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ALERTS -->
+        <div class="view" id="view-alerts">
+          <div class="section-head">
+            <h2>Alerts — التنبيهات</h2>
+            <div class="section-actions">
+              <button class="btn ghost" id="btnClearAlerts">مسح التنبيهات</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <h3>قائمة التنبيهات</h3>
+                <div class="muted small">تظهر هنا الحالات ذات الأولوية</div>
+              </div>
+
+              <div class="alerts" id="alertsList"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <h3>بروتوكول الاستجابة</h3>
+                <div class="muted small">نموذج إجرائي قابل للتخصيص</div>
+              </div>
+
+              <ol class="protocol">
+                <li>تقييم سريع (Airway/Breathing/Circulation) حسب الحالة.</li>
+                <li>قياس العلامات الحيوية وتوثيقها.</li>
+                <li>تصنيف الأولوية (Low/Medium/High/Critical).</li>
+                <li>إجراء التدخل الأولي داخل المدرسة.</li>
+                <li>إبلاغ ولي الأمر عند الحاجة.</li>
+                <li>إحالة للجهة الصحية عند الضرورة + تقرير مختصر.</li>
+              </ol>
+
+              <div class="divider"></div>
+              <div class="small muted">
+                (عرض تحكيمي) — يتم تخصيص البروتوكول حسب السياسة الصحية المعتمدة.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- REPORTS -->
+        <div class="view" id="view-reports">
+          <div class="section-head">
+            <h2>Reports — التقارير</h2>
+            <div class="section-actions">
+              <button class="btn" id="btnMakeReport">إنشاء تقرير</button>
+              <button class="btn ghost" id="btnDownloadReport">تحميل TXT</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <h3>نموذج تقرير (PDF-look)</h3>
+                <div class="muted small">عرض شكلي للتقرير</div>
+              </div>
+
+              <div class="report" id="reportBox">
+                <div class="report-title">تقرير زيارة — العيادة المدرسية الذكية</div>
+                <div class="report-meta" id="reportMeta">—</div>
+                <div class="divider"></div>
+                <div class="report-body" id="reportBody">
+                  <div class="muted">اضغط "إنشاء تقرير" لتوليد تقرير بناءً على آخر حالة.</div>
+                </div>
+                <div class="divider"></div>
+                <div class="report-foot muted small">
+                  هذا تقرير تجريبي للعرض. (يمكن تطويره إلى PDF فعلي لاحقًا)
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <h3>ملخص تنفيذي</h3>
+                <div class="muted small">Key Points للمحكّمين</div>
+              </div>
+
+              <ul class="bullets">
+                <li><b>قيمة مباشرة:</b> اكتشاف مبكر + خفض الغياب + تقارير لحظية.</li>
+                <li><b>قابلية توسع:</b> من مدرسة واحدة إلى آلاف المدارس.</li>
+                <li><b>حوكمة البيانات:</b> تصميم يراعي الخصوصية (تجميعي/أدوار/موافقات).</li>
+                <li><b>تكاملات مستقبلية:</b> هوية رقمية/أنظمة تعليم/منصات صحية.</li>
+              </ul>
+
+              <div class="divider"></div>
+              <div class="small muted">
+                إذا تبغى، أكتب لك “Policy & Privacy” صفحة كاملة داخل المشروع.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- IOT -->
+        <div class="view" id="view-iot">
+          <div class="section-head">
+            <h2>IoT Hub</h2>
+            <div class="section-actions">
+              <button class="btn" id="btnSyncSensors">مزامنة حساسات</button>
+              <button class="btn ghost" id="btnResetSensors">إعادة ضبط</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <h3>حالة الأجهزة</h3>
+                <div class="muted small">Demo — محاكاة اتصال</div>
+              </div>
+
+              <div class="iot" id="iotStatus">
+                <div class="iot-item"><span class="tag">Thermometer</span><span class="ok">Ready</span></div>
+                <div class="iot-item"><span class="tag">SpO₂</span><span class="ok">Ready</span></div>
+                <div class="iot-item"><span class="tag">BP Cuff</span><span class="ok">Ready</span></div>
+                <div class="iot-item"><span class="tag">Weighing</span><span class="muted">Optional</span></div>
+              </div>
+
+              <div class="divider"></div>
+              <div class="small muted">
+                لاحقًا: ربط فعلي عبر Bluetooth/WiFi أو API Gateway.
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <h3>Log</h3>
+                <div class="muted small">سجل عمليات المنصة</div>
+              </div>
+
+              <div class="log" id="sysLog"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABOUT -->
+        <div class="view" id="view-about">
+          <div class="section-head">
+            <h2>عن المشروع</h2>
+            <div class="section-actions">
+              <button class="btn ghost" id="btnOpenReadme">فتح README</button>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <h3>لماذا هذا المشروع قوي؟</h3>
+                <div class="muted small">رسالة تحكيمية</div>
+              </div>
+
+              <div class="copy">
+                <p>
+                  العيادة المدرسية الذكية ليست “موقعًا” فقط؛ بل نموذج تشغيل (Operating Model) للصحة المدرسية:
+                  قياس → توثيق → تصنيف → تدخل → تقرير → متابعة — بشكل موحد وقابل للتوسع.
+                </p>
+                <p>
+                  النسخة الحالية Static لأغراض العرض بسرعة وبدون تكلفة، ومع ذلك فهي مصممة لتُطوّر لاحقًا إلى
+                  طبقات تكامل وواجهات خدمات وفق السياسات المعتمدة.
+                </p>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <h3>ملخص الخصوصية (عرض)</h3>
+                <div class="muted small">بدون تخزين بيانات حساسة في النسخة التجريبية</div>
+              </div>
+
+              <ul class="bullets">
+                <li>النسخة التجريبية لا تتطلب هوية حقيقية ولا تحفظ بيانات حساسة.</li>
+                <li>تطبيق الأدوار: (ممرض/مدير/ولي أمر) عند التطوير الفعلي.</li>
+                <li>إمكانية فصل بيانات المدرسة عن الجهات الأخرى.</li>
+                <li>قابلية إضافة موافقات أولياء الأمور والتشفير وسياسات الوصول.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- JS: uses existing engine.js if present, then our inline controller -->
+  <script src="engine.js"></script>
+  <script>
+    (function(){
+      "use strict";
+
+      const $ = (s, r=document) => r.querySelector(s);
+      const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+
+      // ---------- tiny state ----------
+      const state = {
+        theme: localStorage.getItem("sc_theme") || "dark",
+        lastCase: null,
+        cases: [],
+        alerts: [],
+        log: []
+      };
+
+      // ---------- helpers ----------
+      const now = () => new Date();
+      const pad2 = n => String(n).padStart(2,"0");
+      const timeStr = d => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+      const rand = (a,b)=> Math.floor(Math.random()*(b-a+1))+a;
+      const clamp = (n,a,b)=> Math.max(a, Math.min(b,n));
+      const uid = () => Math.random().toString(16).slice(2,8).toUpperCase();
+      const save = () => localStorage.setItem("sc_state", JSON.stringify(state));
+      const load = () => {
+        try{
+          const s = localStorage.getItem("sc_state");
+          if(!s) return;
+          const obj = JSON.parse(s);
+          Object.assign(state, obj || {});
+        }catch(_){}
+      };
+      const log = (msg, kind="info") => {
+        const item = { t: timeStr(now()), msg, kind };
+        state.log.unshift(item);
+        state.log = state.log.slice(0, 40);
+        renderLog();
+        save();
+      };
+
+      // ---------- theme ----------
+      function applyTheme(){
+        document.documentElement.dataset.theme = state.theme;
+      }
+
+      // ---------- nav ----------
+      function showView(name){
+        $$(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.view===name));
+        $$(".view").forEach(v => v.classList.remove("show"));
+        const el = $("#view-"+name);
+        if(el) el.classList.add("show");
+      }
+
+      // ---------- data seed ----------
+      function seed(){
+        if(state.cases && state.cases.length) return;
+
+        const sample = [
+          { student:"طالب", reason:"حمّى / حرارة", pr:"MED", status:"متابعة" },
+          { student:"طالبة", reason:"صداع", pr:"LOW", status:"تم" },
+          { student:"طالب", reason:"ضيق تنفس / ربو", pr:"HIGH", status:"تنبيه" },
+          { student:"طالبة", reason:"ألم بطن", pr:"MED", status:"متابعة" },
+          { student:"طالب", reason:"إجهاد / دوخة", pr:"LOW", status:"تم" },
+          { student:"طالبة", reason:"جرح بسيط", pr:"LOW", status:"تم" }
+        ];
+
+        state.cases = sample.map((x,i)=>({
+          id: uid(),
+          time: timeStr(new Date(Date.now() - (i*12+4)*60000)),
+          student: x.student + " #" + rand(12,99),
+          reason: x.reason,
+          priority: x.pr,
+          status: x.status
+        }));
+        state.lastCase = state.cases[0];
+        save();
+      }
+
+      // ---------- renderers ----------
+      function prBadge(pr){
+        const cls = pr==="CRIT" ? "pr crit" : pr==="HIGH" ? "pr high" : pr==="MED" ? "pr med" : "pr low";
+        const txt = pr==="CRIT" ? "حرج" : pr==="HIGH" ? "عالي" : pr==="MED" ? "متوسط" : "منخفض";
+        return `<span class="${cls}">${txt}</span>`;
+      }
+      function stBadge(st){
+        const cls = st==="تنبيه" ? "st alert" : st==="متابعة" ? "st follow" : "st done";
+        return `<span class="${cls}">${st}</span>`;
+      }
+
+      function renderCases(){
+        const box = $("#caseRows");
+        if(!box) return;
+        box.innerHTML = state.cases.slice(0,6).map(c=>`
+          <div class="trow">
+            <div class="muted">${c.time}</div>
+            <div><b>${c.student}</b></div>
+            <div>${c.reason}</div>
+            <div>${prBadge(c.priority)}</div>
+            <div>${stBadge(c.status)}</div>
+          </div>
+        `).join("");
+      }
+
+      function renderAlerts(){
+        const el = $("#alertsList");
+        if(!el) return;
+
+        if(!state.alerts.length){
+          el.innerHTML = `<div class="empty">لا توجد تنبيهات حاليًا.</div>`;
+          return;
+        }
+
+        el.innerHTML = state.alerts.map(a=>`
+          <div class="alert ${a.level}">
+            <div class="a-top">
+              <div class="a-title">${a.title}</div>
+              <div class="a-time muted">${a.time}</div>
+            </div>
+            <div class="a-body muted">${a.body}</div>
+            <div class="a-foot">
+              <span class="badge">${a.tag}</span>
+              <span class="badge ghost">Case: ${a.caseId}</span>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      function renderLog(){
+        const el = $("#sysLog");
+        if(!el) return;
+        if(!state.log.length){
+          el.innerHTML = `<div class="muted small">لا يوجد سجل بعد.</div>`;
+          return;
+        }
+        el.innerHTML = state.log.map(x=>`
+          <div class="logline ${x.kind}">
+            <span class="muted">${x.t}</span>
+            <span>${x.msg}</span>
+          </div>
+        `).join("");
+      }
+
+      function updateKPIs(){
+        // (Demo numbers) — simple derived values
+        const today = clamp(rand(9,14), 6, 20);
+        const critical = state.alerts.filter(a=>a.level==="crit").length || rand(0,2);
+        const follow = state.cases.filter(c=>c.status==="متابعة").length;
+        $("#kpiTodayCases").textContent = today;
+        $("#kpiCritical").textContent = critical;
+        $("#kpiFollow").textContent = follow;
+        $("#kpiResponse").textContent = rand(5,9) + "m";
+
+        $("#readinessScore").textContent = clamp(90 - (critical*8) - (follow*2) + rand(-2,2), 62, 96);
+
+        $("#kpiStudents").textContent = 680;
+        $("#kpiWeekChecks").textContent = 94 + rand(-6,10);
+        $("#kpiEarly").textContent = 17 + rand(-3,6);
+        $("#kpiReports").textContent = 36 + rand(-4,8);
+
+        // impact
+        $("#impactAbsence").textContent = "-" + rand(9,14) + "%";
+        $("#impactReferrals").textContent = "-" + rand(14,22) + "%";
+        $("#impactReports").textContent = "+" + rand(32,48) + "%";
+        $("#impactParents").textContent = "+" + rand(16,28) + "%";
+      }
+
+      // ---------- triage vitals + risk ----------
+      function genVitals(critical=false){
+        const t = critical ? (38.8 + Math.random()*0.7) : (36.6 + Math.random()*1.2);
+        const hr = critical ? rand(118,142) : rand(72,102);
+        const spo2 = critical ? rand(88,93) : rand(96,99);
+        const sbp = critical ? rand(90,102) : rand(105,125);
+        const dbp = critical ? rand(55,65) : rand(65,80);
+        $("#vTemp").textContent = t.toFixed(1);
+        $("#vHr").textContent = hr;
+        $("#vSpo2").textContent = spo2;
+        $("#vBp").textContent = `${sbp}/${dbp}`;
+        return { t, hr, spo2, sbp, dbp };
+      }
+
+      function calcRisk(v){
+        let score = 0;
+        if(v.t >= 38.0) score += 30;
+        if(v.hr >= 120) score += 25;
+        if(v.spo2 <= 93) score += 35;
+        if(v.sbp <= 95) score += 15;
+        score = clamp(score, 0, 100);
+
+        const bar = $("#riskBar");
+        const lvl = $("#riskLevel");
+        const hint = $("#riskHint");
+
+        bar.style.width = score + "%";
+
+        let level = "LOW", cls="low", msg="لا توجد مؤشرات حرجة.";
+        if(score >= 75){ level="CRITICAL"; cls="crit"; msg="مؤشرات حرجة — يلزم تدخل/إحالة حسب البروتوكول."; }
+        else if(score >= 50){ level="HIGH"; cls="high"; msg="مؤشرات عالية — مراقبة لصيقة وإجراءات أولية."; }
+        else if(score >= 25){ level="MEDIUM"; cls="med"; msg="مؤشرات متوسطة — متابعة وتوثيق وإرشادات."; }
+
+        lvl.textContent = level;
+        lvl.className = "risk-v " + cls;
+        hint.textContent = msg;
+
+        return { score, level };
+      }
+
+      function makeCaseFromForm(v, risk){
+        const name = ($("#fName").value || "طالب/طالبة") + " #" + rand(10,99);
+        const reason = $("#fReason").value || "أخرى";
+        const pr = risk.level==="CRITICAL" ? "CRIT" : risk.level==="HIGH" ? "HIGH" : risk.level==="MEDIUM" ? "MED" : "LOW";
+        const st = pr==="CRIT" || pr==="HIGH" ? "تنبيه" : pr==="MED" ? "متابعة" : "تم";
+
+        return {
+          id: uid(),
+          time: timeStr(now()),
+          student: name,
+          reason,
+          priority: pr,
+          status: st,
+          vitals: v,
+          notes: $("#fNotes").value || ""
+        };
+      }
+
+      // ---------- report ----------
+      function buildReport(c){
+        if(!c) return null;
+        const lines = [
+          "تقرير زيارة — العيادة المدرسية الذكية",
+          "-----------------------------------",
+          `الوقت: ${c.time}`,
+          `الطالب: ${c.student}`,
+          `السبب: ${c.reason}`,
+          `الأولوية: ${c.priority}`,
+          `الحالة: ${c.status}`,
+          "",
+          "العلامات الحيوية:",
+          `- الحرارة: ${c.vitals?.t?.toFixed?.(1) ?? c.vitals?.t} °C`,
+          `- نبض: ${c.vitals?.hr} bpm`,
+          `- SpO₂: ${c.vitals?.spo2}%`,
+          `- ضغط: ${c.vitals?.sbp}/${c.vitals?.dbp}`,
+          "",
+          "ملاحظات:",
+          (c.notes || "—"),
+          "",
+          "ملاحظة: هذا تقرير تجريبي للعرض."
+        ];
+        return lines.join("\n");
+      }
+
+      function renderReport(c){
+        const meta = $("#reportMeta");
+        const body = $("#reportBody");
+        if(!meta || !body) return;
+
+        if(!c){
+          meta.textContent = "—";
+          body.innerHTML = `<div class="muted">لا توجد حالة بعد.</div>`;
+          return;
+        }
+
+        meta.textContent = `الوقت: ${c.time} — الطالب: ${c.student} — الأولوية: ${c.priority}`;
+        body.innerHTML = `
+          <div class="rb">
+            <div><b>سبب الزيارة:</b> ${c.reason}</div>
+            <div><b>الحالة:</b> ${c.status}</div>
+          </div>
+          <div class="divider"></div>
+          <div class="rb">
+            <div><b>Temperature:</b> ${c.vitals.t.toFixed(1)}°C</div>
+            <div><b>HR:</b> ${c.vitals.hr} bpm</div>
+            <div><b>SpO₂:</b> ${c.vitals.spo2}%</div>
+            <div><b>BP:</b> ${c.vitals.sbp}/${c.vitals.dbp}</div>
+          </div>
+          <div class="divider"></div>
+          <div><b>ملاحظات:</b> ${c.notes ? escapeHtml(c.notes) : "—"}</div>
+        `;
+      }
+
+      function escapeHtml(s){
+        return String(s).replace(/[&<>"']/g, m => ({
+          "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+        }[m]));
+      }
+
+      // ---------- actions ----------
+      function simulateAlert(level="high"){
+        const c = state.lastCase || state.cases[0];
+        const a = {
+          time: timeStr(now()),
+          level: level,
+          caseId: c?.id || uid(),
+          title: level==="crit" ? "تنبيه حرج" : "تنبيه عالي",
+          body: level==="crit"
+            ? "مؤشرات حرجة تتطلب استجابة فورية حسب البروتوكول."
+            : "مؤشرات عالية تتطلب متابعة لصيقة وتوثيق.",
+          tag: level==="crit" ? "CRITICAL" : "HIGH"
+        };
+        state.alerts.unshift(a);
+        state.alerts = state.alerts.slice(0, 12);
+        renderAlerts();
+        updateKPIs();
+        pulseStatus(level==="crit" ? "Critical alert raised" : "High alert raised");
+        log(a.title + " — " + a.tag, level==="crit" ? "warn" : "info");
+        save();
+      }
+
+      function pulseStatus(text){
+        const dot = $("#sysDot");
+        const st = $("#sysStatus");
+        if(st) st.textContent = "System: " + text;
+        if(dot){
+          dot.classList.add("pulse");
+          setTimeout(()=>dot.classList.remove("pulse"), 800);
+        }
+      }
+
+      function downloadText(filename, text){
+        const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url), 800);
+      }
+
+      // ---------- wire up ----------
+      function bind(){
+        // nav
+        $$(".nav-item").forEach(btn=>{
+          btn.addEventListener("click", ()=>{
+            showView(btn.dataset.view);
+            log("Open view: " + btn.dataset.view);
+          });
+        });
+
+        $("#btnTheme").addEventListener("click", ()=>{
+          state.theme = state.theme==="dark" ? "light" : "dark";
+          localStorage.setItem("sc_theme", state.theme);
+          applyTheme();
+          log("Theme: " + state.theme);
+        });
+
+        $("#btnFull").addEventListener("click", ()=>{
+          if(!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+          else document.exitFullscreen?.();
+        });
+
+        $("#btnRefresh").addEventListener("click", ()=>{
+          updateKPIs();
+          renderCases();
+          renderAlerts();
+          pulseStatus("Refreshed");
+          log("Dashboard refreshed");
+        });
+
+        $("#btnSimAlert").addEventListener("click", ()=> simulateAlert("high"));
+
+        $("#btnClearAlerts").addEventListener("click", ()=>{
+          state.alerts = [];
+          renderAlerts();
+          updateKPIs();
+          pulseStatus("Alerts cleared");
+          log("Alerts cleared");
+          save();
+        });
+
+        $("#btnQuickDemo").addEventListener("click", ()=>{
+          showView("triage");
+          const v = genVitals(false);
+          const r = calcRisk(v);
+          $("#fName").value = "طالب";
+          $("#fAge").value = rand(9,15);
+          $("#fGrade").value = ["رابع","خامس","سادس","أول متوسط"][rand(0,3)];
+          $("#fNotes").value = "حالة تجريبية للعرض (Demo).";
+          pulseStatus("Demo started");
+          log("Quick demo started");
+          save();
+        });
+
+        $("#btnNewCase").addEventListener("click", ()=>{
+          showView("triage");
+          $("#fName").focus();
+          log("New case (form) opened");
+        });
+
+        $("#btnRandomStudent").addEventListener("click", ()=>{
+          $("#fName").value = Math.random() > 0.5 ? "طالب" : "طالبة";
+          $("#fAge").value = rand(8,16);
+          $("#fGrade").value = ["ثالث","رابع","خامس","سادس","أول متوسط","ثاني متوسط"][rand(0,5)];
+          log("Random student generated");
+        });
+
+        let lastVitals = genVitals(false);
+        calcRisk(lastVitals);
+
+        $("#btnRecalc").addEventListener("click", ()=>{
+          lastVitals = genVitals(false);
+          calcRisk(lastVitals);
+          log("Risk recalculated");
+        });
+
+        $("#btnTriggerCritical").addEventListener("click", ()=>{
+          lastVitals = genVitals(true);
+          const r = calcRisk(lastVitals);
+          simulateAlert("crit");
+          log("Critical scenario simulated", "warn");
+        });
+
+        $("#btnSaveCase").addEventListener("click", ()=>{
+          const risk = calcRisk(lastVitals);
+          const c = makeCaseFromForm(lastVitals, risk);
+          state.lastCase = c;
+          state.cases.unshift(c);
+          state.cases = state.cases.slice(0, 30);
+          renderCases();
+          updateKPIs();
+          if(c.status==="تنبيه") simulateAlert(c.priority==="CRIT" ? "crit" : "high");
+          pulseStatus("Case saved");
+          log("Case saved: " + c.id);
+          save();
+        });
+
+        $("#btnMakeReport").addEventListener("click", ()=>{
+          renderReport(state.lastCase);
+          pulseStatus("Report generated");
+          log("Report generated");
+        });
+
+        $("#btnDownloadReport").addEventListener("click", ()=>{
+          const txt = buildReport(state.lastCase) || "لا توجد حالة بعد.";
+          downloadText("smart-clinic-report.txt", txt);
+          log("Report downloaded");
+        });
+
+        $("#btnExport").addEventListener("click", ()=>{
+          const txt = [
+            "SMART CLINIC OS — Executive Summary",
+            "-----------------------------------",
+            "KPIs (Demo):",
+            `- Cases today: ${$("#kpiTodayCases").textContent}`,
+            `- Critical alerts: ${$("#kpiCritical").textContent}`,
+            `- Follow-up: ${$("#kpiFollow").textContent}`,
+            `- Response time: ${$("#kpiResponse").textContent}`,
+            "",
+            "Note: Demo build for GitHub Pages."
+          ].join("\n");
+          downloadText("smart-clinic-summary.txt", txt);
+          log("Summary exported");
+        });
+
+        $("#btnSyncSensors").addEventListener("click", ()=>{
+          pulseStatus("Sensors synced (demo)");
+          log("IoT sensors synced (demo)");
+          // if engine exists, call it (doesn't break if not)
+          try{ window.ClinicEngine?.syncSensors?.(); }catch(_){}
+        });
+
+        $("#btnResetSensors").addEventListener("click", ()=>{
+          pulseStatus("Sensors reset (demo)");
+          log("IoT sensors reset (demo)");
+          save();
+        });
+
+        $("#btnOpenReadme").addEventListener("click", ()=>{
+          // opens README in new tab if exists in repo pages path
+          window.open("./README.md", "_blank");
+        });
+      }
+
+      // ---------- init ----------
+      load();
+      seed();
+      applyTheme();
+      bind();
+      renderCases();
+      renderAlerts();
+      renderLog();
+      updateKPIs();
+      renderReport(state.lastCase);
+      pulseStatus("Ready");
+      log("System ready");
+    })();
+  </script>
 </body>
 </html>
