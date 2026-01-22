@@ -457,9 +457,16 @@
         openView("dashboard");
         const el = $("#sysLog");
         el?.scrollIntoView({behavior:"smooth", block:"center"});
+    
       });
 
     })();
   </script>
 </body>
 </html>
+window.addEventListener("sc:bus:update", ()=>{
+  // هنا تنادي دوال التحديث عندك
+  // مثال:
+  // renderAlertsFromBus();
+  // renderCasesFromBus();
+});
