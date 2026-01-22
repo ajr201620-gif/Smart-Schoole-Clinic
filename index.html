@@ -3,12 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منظومة العيادة المدرسية الذكية | Smart Clinic OS</title>
+    <title>المنظومة الرقمية للعيادة الذكية | Smart Clinic OS</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
+        body { font-family: 'Tajawal', sans-serif; background: #020617; color: #cbd5e1; overflow-x: hidden; }
+        
+        /* فيديو الخلفية */
+        .video-background { position: fixed; inset: 0; z-index: -2; overflow: hidden; }
+        #bg-video { width: 100%; height: 100%; object-fit: cover; opacity: 0.4; }
+        .overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(2,6,23,0.5) 0%, rgba(2,6,23,1) 100%); z-index: -1; }
+
+        /* الزجاجيات */
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .portal-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 2.5rem 1.5rem; border-radius: 2rem; text-align: center;
+            cursor: pointer; transition: 0.4s;
+        }
+        .portal-card:hover { transform: translateY(-10px); border-color: #3b82f6; box-shadow: 0 0 30px rgba(59, 130, 246, 0.3); }
+
+        .nav-btn {
+            width: 100%; padding: 1rem; border-radius: 1.2rem;
+            display: flex; align-items: center; gap: 15px;
+            color: #94a3b8; font-weight: 700; transition: 0.3s;
+        }
+        .nav-btn.active { background: rgba(59, 130, 246, 0.1); color: #fff; border-right: 4px solid #3b82f6; }
+
+        .school-map { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .classroom { padding: 20px; border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        .safe { border-right: 4px solid #10b981; background: rgba(16, 185, 129, 0.05); }
+        
+        .animate-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
-<body class="bg-[#020617] text-slate-200 overflow-x-hidden">
+<body>
 
     <div class="video-background">
         <div class="overlay"></div>
@@ -17,47 +50,26 @@
         </video>
     </div>
 
-    <div id="noti-center" class="fixed top-6 left-10 z-[60] hidden">
-        <div class="relative cursor-pointer" onclick="toggleNotifications()">
-            <div class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border-2 border-[#020617]">
-                <span class="text-[8px] font-bold text-white" id="noti-count">2</span>
-            </div>
-            <div class="glass p-3 rounded-xl border border-white/10 hover:border-blue-500/50 transition">
-                <i class="fas fa-bell text-blue-400"></i>
-            </div>
-            <div id="noti-dropdown" class="hidden absolute top-14 left-0 w-80 glass border border-white/10 rounded-2xl p-4 shadow-2xl animate-in">
-                <h4 class="text-xs font-bold text-slate-400 mb-4 uppercase tracking-widest">التنبيهات اللحظية</h4>
-                <div id="noti-list" class="space-y-3"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="login-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 bg-slate-950/40 backdrop-blur-md">
-        <div class="text-center mb-12">
-            <h1 class="text-5xl font-black text-white italic tracking-tighter">SMART CLINIC OS</h1>
-            <p class="text-blue-400 font-mono tracking-[0.5em] mt-2 text-xs">VIRTUAL HEALTH GATEWAY</p>
-        </div>
+    <div id="login-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 backdrop-blur-md">
+        <h1 class="text-5xl font-black text-white italic mb-2">SMART CLINIC OS</h1>
+        <p class="text-blue-400 font-mono tracking-widest mb-12 uppercase text-xs">نظام إدارة الصحة المدرسية المتكامل</p>
         
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 w-full max-w-6xl">
             <div onclick="openPortal('school')" class="portal-card">
-                <i class="fas fa-school-flag text-4xl mb-4 text-blue-500"></i>
-                <h3>إدارة المدرسة</h3>
-                <p>متابعة الأثر والغياب</p>
+                <i class="fas fa-school text-4xl mb-4 text-blue-500"></i>
+                <h3 class="font-bold">إدارة المدرسة</h3>
             </div>
             <div onclick="openPortal('doctor')" class="portal-card">
                 <i class="fas fa-user-md text-4xl mb-4 text-emerald-500"></i>
-                <h3>الطبيب</h3>
-                <p>الرصد والفرز الذكي</p>
+                <h3 class="font-bold">الطبيب</h3>
             </div>
             <div onclick="openPortal('student')" class="portal-card">
                 <i class="fas fa-user-graduate text-4xl mb-4 text-purple-500"></i>
-                <h3>الطالب</h3>
-                <p>الملف الصحي و AR</p>
+                <h3 class="font-bold">الطالب</h3>
             </div>
             <div onclick="openPortal('parent')" class="portal-card">
                 <i class="fas fa-family text-4xl mb-4 text-orange-500"></i>
-                <h3>ولي الأمر</h3>
-                <p>المتابعة اللحظية</p>
+                <h3 class="font-bold">ولي الأمر</h3>
             </div>
         </div>
     </div>
@@ -65,29 +77,68 @@
     <div id="main-interface" class="hidden">
         <aside class="fixed right-0 top-0 h-full w-72 glass border-l border-white/5 p-6 z-50">
             <div class="mb-10 text-center">
-                <div id="user-avatar" class="w-20 h-20 rounded-full mx-auto mb-4 border-2 flex items-center justify-center bg-slate-900/50"></div>
-                <h2 id="portal-title" class="font-black text-white italic">اسم البوابة</h2>
-                <button onclick="location.reload()" class="text-[10px] text-red-500 mt-2 uppercase font-bold">تسجيل الخروج</button>
+                <div id="user-avatar" class="w-20 h-20 rounded-full mx-auto mb-4 border-2 flex items-center justify-center bg-slate-900"></div>
+                <h2 id="portal-title" class="font-black text-white italic">البوابة</h2>
+                <button onclick="location.reload()" class="text-[10px] text-red-500 mt-2 font-bold">تسجيل الخروج</button>
             </div>
             <nav id="sidebar-nav" class="space-y-2"></nav>
         </aside>
 
-        <main class="mr-72 p-10 min-h-screen relative">
-            <header class="flex justify-between items-center mb-10">
-                <div>
-                    <h2 class="text-3xl font-black text-white italic" id="view-title">الرئيسية</h2>
-                    <p class="text-slate-500 text-xs font-bold uppercase tracking-widest" id="view-desc">Smart Health Monitoring</p>
-                </div>
-                <div class="blockchain-badge animate-pulse">
-                    <i class="fas fa-link text-emerald-500"></i> BLOCKCHAIN SECURED
-                </div>
-            </header>
-
-            <div id="portal-content" class="animate-in pb-20">
+        <main class="mr-72 p-10">
+            <div id="portal-content" class="animate-in">
                 </div>
         </main>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        const portals = {
+            school: { title: "إدارة المدرسة", color: "#3b82f6", icon: "fa-school", menu: [{id:'map', name:'خريطة الفصول', icon:'fa-map'}] },
+            doctor: { title: "بوابة الطبيب", color: "#10b981", icon: "fa-user-md", menu: [{id:'triage', name:'الفرز الذكي', icon:'fa-robot'}] },
+            student: { title: "بوابة الطالب", color: "#a855f7", icon: "fa-user-graduate", menu: [{id:'id', name:'الملف الصحي', icon:'fa-id-card'}] },
+            parent: { title: "بوابة ولي الأمر", color: "#f59e0b", icon: "fa-family", menu: [{id:'track', name:'تتبع الحالة', icon:'fa-heartbeat'}] }
+        };
+
+        function openPortal(type) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-interface').classList.remove('hidden');
+            
+            const p = portals[type];
+            document.getElementById('portal-title').innerText = p.title;
+            document.getElementById('user-avatar').innerHTML = `<i class="fas ${p.icon} text-3xl" style="color:${p.color}"></i>`;
+            document.getElementById('user-avatar').style.borderColor = p.color;
+
+            const nav = document.getElementById('sidebar-nav');
+            nav.innerHTML = p.menu.map(m => `
+                <button class="nav-btn active">
+                    <i class="fas ${m.icon}"></i> ${m.name}
+                </button>
+            `).join('');
+
+            showContent(type);
+        }
+
+        function showContent(type) {
+            const content = document.getElementById('portal-content');
+            if(type === 'school') {
+                content.innerHTML = `
+                    <h2 class="text-3xl font-black mb-8 italic">خريطة الفصول اللحظية (IoT)</h2>
+                    <div class="school-map">
+                        <div class="classroom safe">فصل 1-أ <br> <span class="text-[10px] text-emerald-500">الحالة: مستقرة</span></div>
+                        <div class="classroom safe">فصل 1-ب <br> <span class="text-[10px] text-emerald-500">الحالة: مستقرة</span></div>
+                    </div>
+                `;
+            } else if(type === 'doctor') {
+                content.innerHTML = `
+                    <div class="max-w-xl mx-auto glass p-10 rounded-[3rem] text-center border border-emerald-500/20">
+                        <i class="fas fa-microchip text-5xl text-emerald-500 mb-6 animate-pulse"></i>
+                        <h3 class="text-xl font-bold mb-6 text-white">بدء الفرز الذكي للطالب</h3>
+                        <button onclick="alert('جاري سحب البيانات من الحساسات...')" class="bg-emerald-600 px-10 py-4 rounded-2xl font-black">تشغيل AI</button>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = `<div class="p-20 text-center glass rounded-3xl">جاري تحميل البيانات الرقمية المحمية...</div>`;
+            }
+        }
+    </script>
 </body>
 </html>
