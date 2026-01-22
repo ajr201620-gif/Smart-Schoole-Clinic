@@ -528,3 +528,14 @@
 
 </body>
 </html>
+document.getElementById("btnStep")?.addEventListener("click", ()=>{
+  const r = window.SCBUS.runStoryStep();
+  alert("Step: " + r.step + " ✅");
+});
+
+document.getElementById("btnRunFull")?.addEventListener("click", ()=>{
+  window.SCBUS.runStoryStep();
+  window.SCBUS.runStoryStep();
+  window.SCBUS.runStoryStep();
+  alert("تم تشغيل السيناريو كامل ✅");
+});
