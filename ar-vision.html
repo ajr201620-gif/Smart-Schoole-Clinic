@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>AR VISION | الرؤية المعززة 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap');
+        
+        body, html {
+            margin: 0; padding: 0; overflow: hidden;
+            background: #000; font-family: 'Orbitron', sans-serif;
+            perspective: 1000px;
+        }
+
+        /* خلفية الكاميرا المحاكية */
+        .ar-background {
+            position: fixed; inset: 0;
+            background: url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover; background-position: center;
+            filter: brightness(0.4) contrast(1.2) saturate(0.5);
+            z-index: -1;
+        }
+
+        /* شبكة الرؤية المعززة */
+        .ar-grid {
+            position: absolute; inset: 0;
+            background-image: radial-gradient(circle, #00f3ff 1px, transparent 1px);
+            background-size: 50px 50px; opacity: 0.1;
+            transform: rotateX(60deg);
+        }
+
+        /* جسم الطالب الافتراضي (Hologram) */
+        .hologram-container {
+            position: absolute; left: 50%; top: 55%;
+            transform: translate(-50%, -50%);
+            width: 400px; height: 600px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .human-silhouette {
+            width: 100%; height: 100%;
+            background: url('https://cdn.pixabay.com/photo/2013/07/13/12/17/human-159570_1280.png');
+            background-size: contain; background-repeat: no-repeat; background-position: center;
+            filter: drop-shadow(0 0 15px #00f3ff) invert(1);
+            opacity: 0.6; animation: hover 4s ease-in-out infinite;
+        }
+
+        /* أيقونات البيانات الطائرة */
+        .data-float {
+            position: absolute;
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid #00f3ff;
+            padding: 15px; border-radius: 10px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+            animation: float 5s ease-in-out infinite;
+        }
+
+        @keyframes hover { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(10px, -15px); } }
+
+        /* تأثير المسح الضوئي */
+        .scan-bar {
+            position: absolute; width: 100%; height: 50px;
+            background: linear-gradient(transparent, #00f3ff, transparent);
+            opacity: 0.3; top: -50px;
+            animation: scanning 4s linear infinite;
+        }
+        @keyframes scanning { 100% { top: 100%; } }
+
+        .tag { color: #00f3ff; font-size: 10px; font-weight: 900; letter-spacing: 2px; }
+        .val { color: white; font-size: 24px; font-weight: 900; }
+    </style>
+</head>
+<body>
+
+    <div class="ar-background"></div>
+    <div class="ar-grid"></div>
+    <div class="scan-bar"></div>
+
+    <div class="fixed top-10 left-10 text-cyan-400 z-50">
+        <div class="text-[10px] mb-1">AR NEURAL LINK: ACTIVE</div>
+        <div class="text-2xl font-black">SUBJECT #8841-B</div>
+        <div class="w-48 h-1 bg-cyan-900 mt-2"><div class="h-full bg-cyan-400 w-3/4 animate-pulse"></div></div>
+    </div>
+
+    <div class="hologram-container">
+        <div class="human-silhouette"></div>
+
+        <div class="data-float" style="top: 10%; right: -50px;">
+            <div class="tag">BRAIN ACTIVITY</div>
+            <div class="val">BETA WAVE</div>
+            <div class="w-24 h-8 bg-cyan-400/20 mt-2 flex items-end gap-1 px-1">
+                <div class="w-1 bg-cyan-400 h-2 animate-bounce"></div>
+                <div class="w-1 bg-cyan-400 h-5 animate-bounce" style="animation-delay: 0.2s"></div>
+                <div class="w-1 bg-cyan-400 h-3 animate-bounce" style="animation-delay: 0.4s"></div>
+            </div>
+        </div>
+
+        <div class="data-float" style="top: 40%; left: -80px; border-color: #ff003c;">
+            <div class="tag" style="color: #ff003c;">CARDIAC CORE</div>
+            <div class="val text-red-500">112 BPM</div>
+            <div class="text-[8px] text-white opacity-50 mt-1">STATUS: TACHYCARDIA</div>
+        </div>
+
+        <div class="data-float" style="bottom: 15%; right: -30px;">
+            <div class="tag">THERMAL CORE</div>
+            <div class="val text-orange-400">39.1°C</div>
+            <div class="text-[8px] text-white opacity-50 mt-1">FEVER DETECTED</div>
+        </div>
+    </div>
+
+    <div class="fixed bottom-10 left-1/2 -translate-x-1/2 flex gap-6">
+        <button onclick="window.close()" class="px-8 py-3 border border-cyan-400 text-cyan-400 text-xs font-black hover:bg-cyan-400 hover:text-black transition uppercase">إغلاق العدسة</button>
+        <button onclick="location.reload()" class="px-8 py-3 bg-cyan-400 text-black text-xs font-black hover:bg-white transition uppercase">إعادة المعايرة</button>
+    </div>
+
+    <div class="fixed bottom-10 right-10 w-32 h-32 border border-cyan-400/30 rounded-full flex items-center justify-center">
+        <div class="w-full h-[1px] bg-cyan-400/50 absolute rotate-45"></div>
+        <div class="w-full h-[1px] bg-cyan-400/50 absolute -rotate-45"></div>
+        <div class="w-2 h-2 bg-red-500 rounded-full absolute top-1/4 right-1/4 animate-ping"></div>
+        <div class="text-[8px] absolute bottom-2 text-cyan-400">RADAR ACTIVE</div>
+    </div>
+
+</body>
+</html>
