@@ -1,62 +1,35 @@
-/**
- * SMART CLINIC OS v2026 - CENTRAL INTELLIGENCE ENGINE
- * نظام الإدارة المركزية والربط الرباعي
+/** * SMART CLINIC ENGINE v2026 
+ * المحرك المركزي للربط بين الحساسات والذكاء الاصطناعي
  */
+const ClinicEngine = {
+    currentData: {},
 
-const SmartClinicEngine = {
-    // 1. الربط مع الحساسات (IoT Sensors)
-    async captureVitals() {
-        console.log("إشارة: جاري سحب البيانات من الحساسات الذكية...");
-        // محاكاة سحب البيانات من النبض والحرارة والأكسجين
-        const data = {
-            bpm: Math.floor(72 + Math.random() * 20),
-            temp: (36.6 + Math.random() * 1.5).toFixed(1),
-            oxygen: Math.floor(95 + Math.random() * 5),
-            timestamp: new Date().toISOString()
+    // استقبال البيانات من الحساسات الذكية (IoT) [cite: 2026-01-22]
+    async syncSensors() {
+        console.log("📡 جاري المزامنة مع الحساسات...");
+        this.currentData = {
+            temp: (36.5 + Math.random() * 2.5).toFixed(1),
+            bpm: Math.floor(70 + Math.random() * 50),
+            oxy: Math.floor(94 + Math.random() * 6),
+            bp: "120/80"
         };
-        this.processAI(data);
+        this.runAIAnalysis();
     },
 
-    // 2. معالجة الذكاء الاصطناعي (AI Decision Support)
-    processAI(vitals) {
-        console.log("تحليل: محرك الذكاء الاصطناعي يبحث عن أنماط الخطر...");
-        let diagnosis = "مستقرة";
-        let priority = "Low";
+    // تحليل الذكاء الاصطناعي لدعم القرار الطبي [cite: 2026-01-22]
+    runAIAnalysis() {
+        let status = "NORMAL";
+        let recommendation = "الحالة مستقرة، لا تستدعي القلق.";
 
-        if (vitals.temp > 38.2 || vitals.bpm > 110) {
-            diagnosis = "اشتباه في عدوى نشطة - تفعيل بروتوكول العزل";
-            priority = "Critical";
-            this.triggerEmergency(vitals);
+        if (this.currentData.temp > 38) {
+            status = "CRITICAL";
+            recommendation = "ارتفاع في الحرارة، يوصى بالاستشارة عن بُعد فوراً.";
+            TeleMedicine.initCall(); // تفعيل الاتصال بولي الأمر [cite: 2026-01-22]
         }
 
-        // توثيق العملية في البلوك تشين فوراً
-        this.sealInBlockchain(vitals, diagnosis);
-    },
-
-    // 3. التوثيق في البلوك تشين (Blockchain Ledger)
-    sealInBlockchain(data, result) {
-        const block = {
-            id: btoa(Math.random()).substring(0, 12),
-            data: data,
-            diagnosis: result,
-            hash: "SHA256-" + Math.random().toString(16).slice(2)
-        };
-        // إرسال الإشارة لملف blockchain-ledger.js
-        console.log(`✅ تم ختم السجل الطبي في البلوك تشين: ${block.id}`);
-        this.notifyParent(result);
-    },
-
-    // 4. نظام إشعارات أولياء الأمور الذكي
-    notifyParent(message) {
-        // الربط مع ملف mobile-app.js لإرسال الإشعار
-        console.log(`📱 تم إرسال إشعار فوري لولي الأمر: ${message}`);
-    },
-
-    triggerEmergency(data) {
-        // تفعيل وحدة التخاطب المرئي (tele-medicine.js)
-        console.log("🚨 تنبيه: فتح قناة اتصال مباشرة مع الطبيب المناوب.");
+        // توثيق في البلوك تشين وإرسال التقارير
+        BlockchainLedger.record(this.currentData, status);
+        ReportsManager.generate(this.currentData, recommendation);
+        PharmacyHub.checkInventory(status);
     }
 };
-
-// تشغيل المحرك عند بدء الفحص
-// SmartClinicEngine.captureVitals();
