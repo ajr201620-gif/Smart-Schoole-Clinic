@@ -1,132 +1,197 @@
-/* =========================================================
-   RBAC Demo — Smart Clinic OS
-   Roles: staff, school, student, parent
-   GitHub Pages friendly (localStorage)
-   ========================================================= */
+/* ===========================================================
+   Smart Clinic OS — RBAC UI Shell
+   - Role-based nav + actions
+   - Clean topbar (1 primary action + status)
+   - Auto-hide elements with [data-roles]
+   =========================================================== */
 
-(() => {
-  "use strict";
+(function () {
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
-  const ROLE_KEY = "sc_role";
-  const $ = (s, r=document) => r.querySelector(s);
-  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const ROLES = {
+    student: {
+      label: "بوابة الطالب",
+      badge: "Student",
+      home: "student.html",
+      primary: { text: "🎥 زيارة افتراضية", href: "visit.html?role=student", id: "actVisit" },
+      nav: [
+        { text: "🏠 الرئيسية", href: "student.html" },
+        { text: "🩺 طلب زيارة", href: "student.html#request", key: "R" },
+        { text: "📚 إرشاد صحي", href: "student.html#coach", key: "C" },
+        { text: "🧾 تقريري", href: "report.html#me", key: "P" }
+      ],
+      quick: [
+        { text: "🩺 طلب زيارة", id: "qRequest", kind: "action" },
+        { text: "🎥 دخول الزيارة", href: "visit.html?role=student", kind: "link" },
+        { text: "📣 بلاغ بسيط", id: "qReport", kind: "action" }
+      ]
+    },
 
-  // صلاحيات حسب الدور (مبسطة)
-  const PERMS = {
-    staff:   { dashboard:1, triage:1, alerts:1, reports:1, iot:1, about:1, manageUsers:0, viewSensitive:1 },
-    school:  { dashboard:1, triage:0, alerts:1, reports:1, iot:0, about:1, manageUsers:1, viewSensitive:0 },
-    student: { dashboard:0, triage:1, alerts:0, reports:0, iot:0, about:1, manageUsers:0, viewSensitive:0 },
-    parent:  { dashboard:0, triage:0, alerts:1, reports:1, iot:0, about:1, manageUsers:0, viewSensitive:1 }
+    doctor: {
+      label: "بوابة الطبيب",
+      badge: "Doctor",
+      home: "doctor.html",
+      primary: { text: "🎥 زيارة افتراضية", href: "visit.html?role=doctor", id: "actVisit" },
+      nav: [
+        { text: "🏠 الرئيسية", href: "doctor.html" },
+        { text: "📥 الطلبات", href: "doctor.html#inbox", key: "I" },
+        { text: "🧠 التشخيص", href: "doctor.html#dx", key: "D" },
+        { text: "🧾 التقارير", href: "report.html", key: "P" }
+      ],
+      quick: [
+        { text: "📥 فتح آخر طلب", id: "qOpenLatest", kind: "action" },
+        { text: "🧠 إنشاء تشخيص", id: "qNewDx", kind: "action" },
+        { text: "🎥 دخول الزيارة", href: "visit.html?role=doctor", kind: "link" }
+      ]
+    },
+
+    admin: {
+      label: "إدارة المدرسة",
+      badge: "Admin",
+      home: "admin.html",
+      primary: { text: "📊 لوحة المدرسة", href: "admin.html#dash", id: "actDash" },
+      nav: [
+        { text: "🏠 الرئيسية", href: "admin.html" },
+        { text: "📊 لوحة المؤشرات", href: "admin.html#dash", key: "K" },
+        { text: "🧯 البلاغات", href: "admin.html#alerts", key: "A" },
+        { text: "🧾 تقارير عامة", href: "report.html#school", key: "P" }
+      ],
+      quick: [
+        { text: "📊 مؤشرات اليوم", id: "qKPIs", kind: "action" },
+        { text: "🧯 أحدث تنبيه", id: "qLatestAlert", kind: "action" },
+        { text: "🧾 تقرير أسبوعي", href: "report.html#school", kind: "link" }
+      ]
+    },
+
+    parent: {
+      label: "بوابة ولي الأمر",
+      badge: "Parent",
+      home: "parent.html",
+      primary: { text: "📨 تواصل/زيارة", href: "visit.html?role=student", id: "actVisitParent" },
+      nav: [
+        { text: "🏠 الرئيسية", href: "parent.html" },
+        { text: "👦 ملف الابن", href: "parent.html#child", key: "F" },
+        { text: "✅ موافقات", href: "parent.html#consent", key: "C" },
+        { text: "🧾 التقارير", href: "report.html#parent", key: "P" }
+      ],
+      quick: [
+        { text: "✅ موافقة/رفض", id: "qConsent", kind: "action" },
+        { text: "🧾 آخر تقرير", href: "report.html#parent", kind: "link" },
+        { text: "📞 طلب تواصل", id: "qCall", kind: "action" }
+      ]
+    }
   };
 
-  function getRole(){
-    return localStorage.getItem(ROLE_KEY) || "school"; // افتراضي: إدارة
+  function getRole() {
+    const urlRole = new URLSearchParams(location.search).get("role");
+    const stored = localStorage.getItem("SC_ROLE");
+    const role = (urlRole || stored || document.documentElement.getAttribute("data-role") || "student").toLowerCase();
+    return ROLES[role] ? role : "student";
   }
 
-  function setRole(role){
-    localStorage.setItem(ROLE_KEY, role);
-    applyRBAC();
+  function setRole(role) {
+    localStorage.setItem("SC_ROLE", role);
   }
 
-  function roleLabel(role){
-    return role === "staff" ? "العيادة (طبيب/تمريض)"
-      : role === "school" ? "إدارة المدرسة"
-      : role === "student" ? "طالب"
-      : role === "parent" ? "ولي أمر"
-      : role;
+  function applyRoleVisibility(role) {
+    // Any element with data-roles="doctor,admin" etc.
+    $$("[data-roles]").forEach(el => {
+      const allowed = (el.getAttribute("data-roles") || "")
+        .split(",").map(x => x.trim().toLowerCase()).filter(Boolean);
+      el.style.display = allowed.includes(role) ? "" : "none";
+    });
   }
 
-  function ensureRoleSwitchUI(){
-    // زر صغير أعلى اليمين للتبديل (Demo)
-    const top = document.querySelector(".topbar .top-actions");
-    if(!top) return;
+  function mountShell(role) {
+    const cfg = ROLES[role];
 
-    if($("#roleSwitch")) return;
+    // role chip
+    const chip = $("#scRoleChip");
+    if (chip) chip.textContent = cfg.badge;
 
-    const wrap = document.createElement("div");
-    wrap.id = "roleSwitch";
-    wrap.style.display = "flex";
-    wrap.style.gap = "8px";
-    wrap.style.alignItems = "center";
+    // title
+    const ttl = $("#scRoleTitle");
+    if (ttl) ttl.textContent = cfg.label;
 
-    const pill = document.createElement("div");
-    pill.className = "badge";
-    pill.id = "rolePill";
-    pill.textContent = "Role: —";
+    // primary action
+    const pa = $("#scPrimaryAction");
+    if (pa) {
+      pa.textContent = cfg.primary.text;
+      pa.setAttribute("href", cfg.primary.href);
+      pa.setAttribute("data-role", role);
+    }
 
-    const sel = document.createElement("select");
-    sel.id = "roleSelect";
-    sel.style.padding = "10px 12px";
-    sel.style.borderRadius = "14px";
-    sel.style.border = "1px solid var(--stroke)";
-    sel.style.background = "var(--panel)";
-    sel.style.color = "var(--text)";
-    sel.innerHTML = `
-      <option value="staff">العيادة (طبيب/تمريض)</option>
-      <option value="school">إدارة المدرسة</option>
-      <option value="student">طالب</option>
-      <option value="parent">ولي أمر</option>
-    `;
+    // nav
+    const nav = $("#scNav");
+    if (nav) {
+      nav.innerHTML = cfg.nav.map(item => `
+        <a class="sc-nav-item" href="${item.href}">
+          <span class="sc-nav-ico">•</span>
+          <span>${item.text}</span>
+        </a>
+      `).join("");
+    }
 
-    sel.value = getRole();
-    sel.addEventListener("change", () => setRole(sel.value));
+    // quick actions
+    const qa = $("#scQuick");
+    if (qa) {
+      qa.innerHTML = cfg.quick.map(q => {
+        if (q.kind === "link") {
+          return `<a class="sc-qa" href="${q.href}">${q.text}</a>`;
+        }
+        return `<button class="sc-qa" data-action="${q.id}">${q.text}</button>`;
+      }).join("");
+    }
 
-    wrap.appendChild(pill);
-    wrap.appendChild(sel);
+    // status
+    const st = $("#scStatus");
+    if (st) st.textContent = "🟢 Ready";
 
-    // دخّله قبل زر الديمو
-    const demoBtn = $("#btnQuickDemo");
-    if(demoBtn) top.insertBefore(wrap, demoBtn);
-    else top.appendChild(wrap);
+    applyRoleVisibility(role);
   }
 
-  function allow(view){
-    const role = getRole();
-    const p = PERMS[role] || PERMS.school;
-    return !!p[view];
-  }
+  function bindGlobalActions(role) {
+    const cfg = ROLES[role];
 
-  function applyRBAC(){
-    ensureRoleSwitchUI();
+    // Quick action buttons
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+      const id = btn.getAttribute("data-action");
 
-    const role = getRole();
-    const pill = $("#rolePill");
-    if(pill) pill.textContent = "الدور: " + roleLabel(role);
-
-    // اخفاء/اظهار أزرار القائمة حسب الدور
-    $$(".nav-item").forEach(btn => {
-      const v = btn.dataset.view; // dashboard/triage/alerts/reports/iot/about
-      btn.style.display = allow(v) ? "" : "none";
+      // Minimal demo actions (you can wire BUS here)
+      if (id === "qRequest") return alert("تم فتح نموذج طلب زيارة (اربطه بإنشاء Request عبر BUS)");
+      if (id === "qReport") return alert("فتح نموذج بلاغ بسيط (Student)");
+      if (id === "qOpenLatest") return alert("فتح آخر طلب (Doctor) — اربطه بـ SCBUS.load().requests[0]");
+      if (id === "qNewDx") return alert("إنشاء تشخيص جديد (Doctor)");
+      if (id === "qKPIs") return alert("مؤشرات اليوم (Admin)");
+      if (id === "qLatestAlert") return alert("أحدث تنبيه (Admin)");
+      if (id === "qConsent") return alert("موافقة/رفض (Parent)");
+      if (id === "qCall") return alert("طلب تواصل (Parent)");
     });
 
-    // إذا المستخدم واقف على صفحة ممنوعة، نحوله لأول صفحة مسموحة
-    const active = $(".nav-item.active")?.dataset.view || "dashboard";
-    if(!allow(active)){
-      const first = $$(".nav-item").find(b => b.style.display !== "none");
-      first?.click();
+    // Role switcher (for demo only)
+    const sw = $("#scRoleSwitch");
+    if (sw) {
+      sw.addEventListener("change", () => {
+        const r = sw.value;
+        setRole(r);
+        location.href = ROLES[r].home;
+      });
     }
-
-    // إخفاء عناصر حساسة (أمثلة)
-    // - بروتوكول/ملاحظات سريرية: للعيادة وولي الأمر فقط
-    const canSensitive = (PERMS[role] || PERMS.school).viewSensitive;
-
-    // في صفحة التقارير: اخفِ فقرة "ملاحظات" للمدرسة/الطالب
-    const reportBox = $("#reportBox");
-    if(reportBox){
-      reportBox.style.filter = canSensitive ? "none" : "blur(3px)";
-      reportBox.title = canSensitive ? "" : "محتوى حساس — مخفي حسب الصلاحيات (Demo)";
-    }
-
-    // في triage: المدرسة/ولي الأمر ما يشوفونها أساسًا
-    // في alerts: الطالب ما يشوفها
-
-    // تحديث شارة النظام
-    const st = $("#sysStatus");
-    if(st) st.textContent = "System: Role applied (" + roleLabel(role) + ")";
-    try{ window.ClinicEngine?.log?.("RBAC applied: " + role, "info"); }catch(_){}
   }
 
-  // init
-  window.SCRBAC = { getRole, setRole, applyRBAC };
-  document.addEventListener("DOMContentLoaded", applyRBAC);
+  // Public mount
+  window.SCRBAC = {
+    mount() {
+      const role = getRole();
+      mountShell(role);
+      bindGlobalActions(role);
+
+      // keep role switch value
+      const sw = $("#scRoleSwitch");
+      if (sw) sw.value = role;
+    }
+  };
 })();
