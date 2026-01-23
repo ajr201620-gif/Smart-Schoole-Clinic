@@ -1,118 +1,204 @@
 <!doctype html>
-<html lang="ar" dir="rtl" data-theme="dark">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Smart Clinic OS — Virtual Visit</title>
-  <link rel="stylesheet" href="ar.css" />
-</head>
-<body>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>الزيارة الافتراضية — Smart School Clinic OS</title>
 
+  <link rel="stylesheet" href="assets/css/app.css"/>
+
+  <script src="js/bus.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/visit-session.js"></script>
+
+  <style>
+    .vidGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    video{width:100%;border-radius:16px;border:1px solid rgba(255,255,255,.12);background:#000}
+    .bar{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+  </style>
+</head>
+
+<body>
 <header class="topbar">
   <div class="brand">
-    <div class="logo">VV</div>
-    <div>
-      <b id="title">زيارة افتراضية</b>
-      <small id="sub">WebRTC (Local Signaling)</small>
+    <div class="logo">🎥</div>
+    <div class="brandText">
+      <div class="name">الزيارة الافتراضية</div>
+      <div class="tagline">Room • Doctor/Student/Parent Guest</div>
     </div>
   </div>
-  <div class="actions">
-    <a class="btn ghost" id="backLink" href="index.html">🏠 رجوع</a>
-    <button class="btn ghost" id="btnClear">🧹 تصفير الغرفة</button>
-    <button class="btn" id="btnJoin">🔴 دخول الزيارة</button>
+  <div class="topActions">
+    <span class="pill" id="roleBadge">—</span>
+    <button class="btn ghost" id="btnBack">⬅️ رجوع</button>
   </div>
 </header>
 
-<div class="wrap">
-  <div class="panel">
+<main class="container">
+
+  <section class="panel">
+    <div class="bar">
+      <div>
+        <b>Room:</b> <span id="roomTxt">—</span>
+        <div class="muted small" id="hint">—</div>
+      </div>
+
+      <div class="row">
+        <button class="btn ghost" id="btnInviteParent">👨‍👩‍👧 دعوة ولي الأمر</button>
+        <button class="btn ghost" id="btnToggleCam">📷 كاميرا</button>
+        <button class="btn ghost" id="btnToggleMic">🎙️ مايك</button>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="vidGrid">
+      <div>
+        <div class="muted small">📹 أنت</div>
+        <video id="localVid" autoplay playsinline muted></video>
+      </div>
+      <div>
+        <div class="muted small">🧑‍⚕️ الطرف الآخر (Demo)</div>
+        <video id="remoteVid" autoplay playsinline></video>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="muted small">
+      هذه نسخة Demo بدون سيرفر WebRTC كامل (لا يوجد اتصال حقيقي بين جهازين).
+      الهدف: عرض تجربة الزيارة وتوثيقها داخل النظام.
+    </div>
+  </section>
+
+  <div class="sep"></div>
+
+  <!-- Session Panel injected by visit-session.js -->
+  <section class="panel">
     <div class="h">
-      <h2>الغرفة</h2>
-      <div class="muted" id="st">Idle</div>
+      <h2>جلسة الزيارة</h2>
+      <div class="muted" id="vsStatus">—</div>
     </div>
 
     <div class="row">
-      <span class="badge">Role: <b id="roleTxt">—</b></span>
-      <span class="badge">Room ID: <b id="roomTxt">—</b></span>
-      <a class="btn ghost" id="openOther" href="#" target="_blank">فتح الطرف الآخر (تبويب)</a>
+      <span class="badge">⏱️ Timer: <b id="vsTimer">00:00</b></span>
+      <button class="btn ghost" id="btnExportJSON">💾 تصدير JSON</button>
+      <button class="btn ghost" id="btnSaveNotes">💾 حفظ الملاحظات</button>
+      <button class="btn" id="btnEndVisit">✅ إنهاء الزيارة + تقرير</button>
     </div>
 
     <div class="sep"></div>
 
-    <div class="grid" style="grid-template-columns:1fr 1fr;">
-      <div class="panel">
-        <div class="h"><h2>أنت</h2><div class="muted">Local</div></div>
-        <video id="vLocal" autoplay playsinline muted style="width:100%; border-radius:18px; border:1px solid var(--stroke);"></video>
-      </div>
-      <div class="panel">
-        <div class="h"><h2>الطرف الآخر</h2><div class="muted">Remote</div></div>
-        <video id="vRemote" autoplay playsinline style="width:100%; border-radius:18px; border:1px solid var(--stroke);"></video>
-      </div>
+    <div class="h">
+      <h2>ملاحظات الطبيب</h2>
+      <div class="muted">تُحفظ داخل الحالة</div>
     </div>
 
-    <div class="sep"></div>
-    <div class="small">
-      ✅ هذا الاتصال يعمل مجانًا بدون سيرفر بشرط: نفس الجهاز/المتصفح (تبويبين).<br>
-      إذا تبغاه بين جهازين (طالب بجوال + طبيب بجهاز آخر) أعطيك Signaling مجاني بسيط.
-    </div>
-  </div>
-</div>
+    <textarea id="vsNotes" rows="5" class="input"
+      style="width:100%; border-radius:14px; padding:12px"
+      placeholder="اكتب ملاحظاتك..."></textarea>
+  </section>
 
-<script src="webrtc-local.js"></script>
+</main>
+
 <script>
 (function(){
   const $ = (s)=>document.querySelector(s);
   const qs = new URLSearchParams(location.search);
+  const room = qs.get("room") || "ROOM-DEMO";
+  const role = (qs.get("role") || localStorage.getItem("SC_ROLE") || "student").toLowerCase();
+  const isGuest = role === "parent";
+  const isDoctor = role === "doctor";
 
-  const role = (qs.get("role") || "student").toLowerCase(); // student | doctor
-  const room = qs.get("room") || ("R" + Math.random().toString(36).slice(2,8).toUpperCase());
-
-  $("#roleTxt").textContent = role;
   $("#roomTxt").textContent = room;
+  $("#roleBadge").textContent =
+    role==="doctor" ? "👨‍⚕️ Doctor" :
+    role==="parent" ? "👨‍👩‍👧 Parent (Guest)" :
+    "🎓 Student";
 
-  // titles + back links
-  if(role === "doctor"){
-    $("#title").textContent = "زيارة افتراضية — الطبيب";
-    $("#backLink").href = "doctor.html";
-  } else {
-    $("#title").textContent = "زيارة افتراضية — الطالب";
-    $("#backLink").href = "student.html";
+  $("#hint").textContent = isGuest
+    ? "Guest Mode: عرض فقط (بدون كاميرا/مايك افتراضيًا)"
+    : "يمكن تشغيل الكاميرا والمايك للعرض";
+
+  $("#btnBack").addEventListener("click", ()=>{
+    location.href = role==="doctor" ? "doctor.html" : role==="parent" ? "parent.html" : "student.html";
+  });
+
+  // Invite parent (open same room)
+  $("#btnInviteParent").addEventListener("click", ()=>{
+    const url = `visit.html?role=parent&room=${encodeURIComponent(room)}&autojoin=1`;
+    window.open(url, "_blank");
+  });
+  if(!isDoctor) $("#btnInviteParent").style.display = "none";
+
+  // Media
+  const localVid = $("#localVid");
+  const remoteVid = $("#remoteVid");
+  let stream = null;
+  let camOn = false;
+  let micOn = false;
+
+  async function startMedia(){
+    try{
+      const mediaOpts = isGuest ? { video:false, audio:false } : { video:true, audio:true };
+      stream = await navigator.mediaDevices.getUserMedia(mediaOpts);
+      localVid.srcObject = stream;
+
+      camOn = !!mediaOpts.video;
+      micOn = !!mediaOpts.audio;
+
+      // Demo: remote shows same stream if exists
+      remoteVid.srcObject = stream;
+
+      updateBtns();
+    }catch(e){
+      $("#hint").textContent = "لم يتم منح صلاحيات كاميرا/مايك (أو الجهاز لا يدعم).";
+      updateBtns();
+    }
   }
 
-  // Open other side (for local demo)
-  const otherRole = role === "doctor" ? "student" : "doctor";
-  $("#openOther").href = `visit.html?role=${encodeURIComponent(otherRole)}&room=${encodeURIComponent(room)}`;
-  $("#openOther").textContent = `فتح ${otherRole === "doctor" ? "الطبيب" : "الطالب"} (تبويب)`;
-
-  $("#btnClear").addEventListener("click", ()=>{
-    window.SCWEBRTC.clearRoom(room);
-    $("#st").textContent = "Room cleared";
-  });
-
-  $("#btnJoin").addEventListener("click", async ()=>{
-    $("#st").textContent = "Starting…";
-    try{
-      if(role === "doctor"){
-        await window.SCWEBRTC.initDoctor(room, {
-          localVideo: $("#vLocal"),
-          remoteVideo: $("#vRemote"),
-          status: $("#st")
-        });
-      } else {
-        await window.SCWEBRTC.initKiosk(room, { // kiosk side == caller side
-          localVideo: $("#vLocal"),
-          remoteVideo: $("#vRemote"),
-          status: $("#st")
-        });
-      }
-    }catch(e){
-      console.error(e);
-      alert("فشل تشغيل الزيارة. تأكد من السماح بالكاميرا/المايك.");
+  function updateBtns(){
+    $("#btnToggleCam").textContent = camOn ? "📷 إيقاف الكاميرا" : "📷 تشغيل الكاميرا";
+    $("#btnToggleMic").textContent = micOn ? "🎙️ كتم المايك" : "🎙️ تشغيل المايك";
+    if(isGuest){
+      $("#btnToggleCam").style.display = "none";
+      $("#btnToggleMic").style.display = "none";
     }
+  }
+
+  function toggleTrack(kind, on){
+    if(!stream) return;
+    const tracks = kind==="video" ? stream.getVideoTracks() : stream.getAudioTracks();
+    tracks.forEach(t=>t.enabled = on);
+  }
+
+  $("#btnToggleCam").addEventListener("click", ()=>{
+    camOn = !camOn;
+    toggleTrack("video", camOn);
+    updateBtns();
   });
-  // Auto-join if requested
-if(qs.get("autojoin") === "1"){
-  setTimeout(()=> $("#btnJoin").click(), 450);
-}
+
+  $("#btnToggleMic").addEventListener("click", ()=>{
+    micOn = !micOn;
+    toggleTrack("audio", micOn);
+    updateBtns();
+  });
+
+  // Notes editing only doctor
+  setTimeout(()=>{
+    const notes = $("#vsNotes");
+    if(notes && !isDoctor){
+      notes.setAttribute("readonly","readonly");
+      notes.style.opacity = "0.9";
+    }
+    const saveBtn = $("#btnSaveNotes");
+    if(saveBtn && !isDoctor) saveBtn.style.display = "none";
+  }, 250);
+
+  // Start session (BUS integration)
+  window.SCVISIT && window.SCVISIT.mount();
+
+  // Auto media
+  startMedia();
 })();
 </script>
 </body>
