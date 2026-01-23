@@ -8,288 +8,335 @@
 </head>
 
 <body data-page="admin">
-
   <!-- Topbar -->
-  <header class="topbar">
-    <div class="inner">
-      <div class="topbar_left">
-        <a class="btn ghost" href="index.html">↩︎ الرئيسية</a>
-
-        <div class="brand">
-          <div class="brand__logo"></div>
-          <div class="brand__txt">
-            <div class="brand__name">العيادة المدرسية الذكية</div>
-            <div class="brand__sub">لوحة الإدارة • مؤشرات • إحالات • مراقبة</div>
-          </div>
-        </div>
-
-        <div class="pill">
-          <small>الدور</small>
-          <b data-user-role>admin</b>
+  <header class="topbar topbar--slim">
+    <div class="topbar__left">
+      <a class="btn ghost sm" href="index.html">↩︎ الرئيسية</a>
+      <div class="brand mini">
+        <div class="brand__logo">🏫</div>
+        <div class="brand__txt">
+          <div class="brand__name">العيادة المدرسية الذكية</div>
+          <div class="brand__sub">لوحة الإدارة • مؤشرات • متابعة</div>
         </div>
       </div>
+    </div>
 
-      <div class="topbar_right">
-        <div class="pill">
-          <small>مرحبًا</small>
-          <b data-user-name>إدارة المدرسة</b>
-        </div>
-
-        <input class="input" id="requestId" type="text" placeholder="Request ID (للموافقة/الرفض)">
-<input class="input" id="caseId" type="text" placeholder="Case ID (للإسناد)">
-
-<button class="btn" id="btnRequests" data-action="btnRequests">📥 الطلبات</button>
-<button class="btn primary" id="btnApprove" data-action="btnApprove">✅ موافقة</button>
-<button class="btn danger" id="btnReject" data-action="btnReject">❌ رفض</button>
-<button class="btn" id="btnAssign" data-action="btnAssign">🩺 إسناد لطبيب</button>
-<button class="btn" id="btnHeatmap" data-action="btnHeatmap">🗺️ Heatmap</button>
-<button class="btn ghost" id="btnHelp" data-action="btnHelp">🆘 مساعدة</button>
-<button class="btn danger" id="btnLogout" data-action="btnLogout">خروج</button>
+    <div class="topbar__right">
+      <div class="pill pill--soft">
+        <span class="dot ok"></span>
+        <span>مرحبًا، <b data-user-name>الإدارة</b></span>
+      </div>
+      <button class="btn ghost sm" id="btnTheme">🌓</button>
+      <button class="btn danger sm" id="btnLogoutTop" data-action="common:logout">خروج</button>
     </div>
   </header>
 
-  <main class="container">
-
+  <main class="shell shell--wide">
     <!-- Hero -->
-    <section class="panel hero">
-      <div class="heroRow">
-        <div>
-          <div class="heroTitle">🏫 لوحة الإدارة — تحكم كامل (بدون كرف يدوي)</div>
-          <div class="heroDesc">
-            هنا تشوف عدد الحالات، الحالات الحرجة، الموافقات، الزيارات، والمتابعة.
-            كل زر هنا شغال (تجريبي محليًا) وجاهز نربطه على Firestore بعد ما نثبت السيناريو.
-          </div>
+    <section class="hero hero--compact">
+      <div class="hero__left">
+        <h1 class="hero__title">مؤشرات المدرسة الصحية</h1>
+        <p class="hero__lead">نظرة شاملة على الحالات، الأولويات، والمتابعة—بشكل واضح وقابل للعرض.</p>
 
-          <div class="heroActions mt12">
-            <button class="btn" id="btnAdminRequests" data-action="admin:view-requests">📥 عرض الطلبات</button>
-            <button class="btn primary" id="btnAssignDoctor" data-action="admin:assign-doctor">🩺 إحالة لطبيب</button>
-            <button class="btn bad" id="btnMarkCritical" data-action="admin:mark-critical">🚨 تمييز كحالة حرجة</button>
-            <button class="btn ghost" id="btnExportAudit" data-action="admin:export-audit">⬇️ تصدير السجل</button>
-          </div>
-
-          <div class="flex mt12">
-            <a class="btn ghost" href="student.html">🎒 الطالب</a>
-            <a class="btn ghost" href="parent.html">👨‍👩‍👧‍👦 ولي الأمر</a>
-            <a class="btn ghost" href="doctor.html">🩺 الطبيب</a>
-            <a class="btn ghost" href="visit.html">🎥 الزيارة</a>
-          </div>
+        <div class="hero__cta">
+          <span class="chip"><span class="dot ok"></span> Firestore: <b id="fbState">—</b></span>
+          <span class="chip">الدور: <b data-user-role>admin</b></span>
+          <button class="btn ghost sm" id="btnRefresh">تحديث</button>
         </div>
+      </div>
 
-        <div class="kpiRow" style="min-width:320px;">
-          <div class="kpi">
-            <div class="kLabel">إجمالي الحالات</div>
-            <div class="kVal" id="k_cases">0</div>
-            <div class="kMeta">اليوم/آخر جلسة</div>
-          </div>
-          <div class="kpi warn">
-            <div class="kLabel">حالات تحتاج متابعة</div>
-            <div class="kVal" id="k_follow">0</div>
-            <div class="kMeta">Followup required</div>
-          </div>
-          <div class="kpi bad">
-            <div class="kLabel">حالات حرجة</div>
-            <div class="kVal" id="k_critical">0</div>
-            <div class="kMeta">Critical / High risk</div>
-          </div>
-          <div class="kpi ok">
-            <div class="kLabel">زيارات مجدولة</div>
-            <div class="kVal" id="k_visits">0</div>
-            <div class="kMeta">Scheduled / In progress</div>
+      <div class="hero__right">
+        <div class="glassCard glassCard--tight">
+          <div class="glassCard__title">ملخص سريع</div>
+          <div class="glassCard__body">
+            <div class="row"><span class="muted">طلاب فحصوا اليوم:</span> <b id="kChecked">—</b></div>
+            <div class="row"><span class="muted">يحتاج متابعة:</span> <b id="kFollow">—</b></div>
+            <div class="row"><span class="muted">إحالات:</span> <b id="kRefer">—</b></div>
           </div>
         </div>
       </div>
     </section>
 
-    <div class="grid mt16">
-
-      <!-- Cases List -->
-      <section class="panel card col-8">
-        <div class="cardHeader">
-          <div class="cardTitle"><span class="ico">📋</span> قائمة الحالات</div>
-          <span class="chip">Cases</span>
-        </div>
-
-        <div class="cardBody">
-          <div id="caseList">
-            <div class="subtle">لا توجد حالات بعد.</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Admin Insights -->
-      <section class="panel card col-4">
-        <div class="cardHeader">
-          <div class="cardTitle"><span class="ico">📈</span> مؤشرات سريعة</div>
-          <span class="chip warn">Monitor</span>
-        </div>
-
-        <div class="cardBody">
-          <div class="rowCard">
-            <div class="rowTitle">موافقات ولي الأمر</div>
-            <div class="rowMeta">
-              Approved: <b id="k_cons_appr">0</b> • Rejected: <b id="k_cons_rej">0</b> • Pending: <b id="k_cons_pen">0</b>
+    <!-- Layout -->
+    <section class="triLayout triLayout--admin">
+      <!-- Left: KPIs -->
+      <section class="card card--soft">
+        <header class="card__head">
+          <h2 class="card__title">📌 مؤشرات</h2>
+        </header>
+        <div class="card__body">
+          <div class="kpis kpis--admin">
+            <div class="kpiBox">
+              <div class="kpiBox__t">إجمالي الحالات</div>
+              <div class="kpiBox__v" id="kTotal">—</div>
+            </div>
+            <div class="kpiBox">
+              <div class="kpiBox__t">جديدة</div>
+              <div class="kpiBox__v" id="kNew">—</div>
+            </div>
+            <div class="kpiBox">
+              <div class="kpiBox__t">متوسطة</div>
+              <div class="kpiBox__v" id="kMed">—</div>
+            </div>
+            <div class="kpiBox">
+              <div class="kpiBox__t">عالية</div>
+              <div class="kpiBox__v" id="kHigh">—</div>
+            </div>
+            <div class="kpiBox">
+              <div class="kpiBox__t">مُعتمدة</div>
+              <div class="kpiBox__v" id="kApproved">—</div>
+            </div>
+            <div class="kpiBox">
+              <div class="kpiBox__t">متابعة</div>
+              <div class="kpiBox__v" id="kFollow2">—</div>
+            </div>
+            <div class="kpiBox">
+              <div class="kpiBox__t">إحالة</div>
+              <div class="kpiBox__v" id="kRefer2">—</div>
+            </div>
+            <div class="kpiBox">
+              <div class="kpiBox__t">إشعارات اليوم</div>
+              <div class="kpiBox__v" id="kNotif">—</div>
             </div>
           </div>
 
-          <div class="rowCard">
-            <div class="rowTitle">قرارات AI / الطبيب</div>
-            <div class="rowMeta" id="k_decisions">—</div>
-          </div>
+          <div class="divider"></div>
 
-          <div class="rowCard">
-            <div class="rowTitle">إجراءات سريعة</div>
-            <div class="rowMeta flex">
-              <button class="btn small" id="btnHeatmap" data-action="admin:open-heatmap">🗺️ Heatmap</button>
-              <button class="btn small" id="btnSlips" data-action="admin:open-slips">🧾 تصاريح</button>
-              <button class="btn small" data-action="common:download-report">⬇️ تقرير</button>
+          <div class="noticeBox">
+            <div class="noticeBox__title">🧭 قرار سريع</div>
+            <div class="muted">اختر حالة من الجدول، ثم أرسل إشعار أو غيّر حالتها.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Center: Table -->
+      <section class="card card--focus">
+        <header class="card__head">
+          <h2 class="card__title">🧾 جدول الحالات</h2>
+          <div class="card__tools">
+            <select id="filterStatus" class="input" style="max-width:180px">
+              <option value="all">كل الحالات</option>
+              <option value="new">جديدة</option>
+              <option value="approved">مُعتمدة</option>
+              <option value="follow">متابعة</option>
+              <option value="refer">إحالة</option>
+            </select>
+          </div>
+        </header>
+
+        <div class="card__body">
+          <div id="casesTable" class="tableWrap">
+            <div class="empty muted">جاري التحميل…</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Actions -->
+      <aside class="card card--soft">
+        <header class="card__head">
+          <h2 class="card__title">⚙️ إجراءات</h2>
+        </header>
+        <div class="card__body">
+          <div class="miniCards miniCards--2">
+            <div class="miniCard">
+              <div class="miniCard__label">Case ID</div>
+              <div class="miniCard__value" id="selId">—</div>
+            </div>
+            <div class="miniCard">
+              <div class="miniCard__label">Owner</div>
+              <div class="miniCard__value" id="selOwner">—</div>
+            </div>
+            <div class="miniCard">
+              <div class="miniCard__label">Status</div>
+              <div class="miniCard__value" id="selStatus">—</div>
+            </div>
+            <div class="miniCard">
+              <div class="miniCard__label">Priority</div>
+              <div class="miniCard__value" id="selPriority">—</div>
             </div>
           </div>
-        </div>
-      </section>
 
-      <!-- Notifications -->
-      <section class="panel card col-12">
-        <div class="cardHeader">
-          <div class="cardTitle"><span class="ico">🔔</span> تنبيهات الإدارة</div>
-          <span class="chip ok">Live</span>
-        </div>
+          <div class="divider"></div>
 
-        <div class="cardBody">
-          <div id="adminNotify">
-            <div class="subtle">لا يوجد تنبيهات حالياً.</div>
+          <label class="field">
+            <div class="field__label">رسالة إشعار</div>
+            <textarea id="notifMsg" class="input" rows="4" placeholder="مثال: تم اعتماد حالتك، راجع الطبيب غدًا…"></textarea>
+          </label>
+
+          <div class="rowActions rowActions--split">
+            <button class="btn primary" id="btnNotifyStudent">🔔 إشعار الطالب</button>
+            <button class="btn" id="btnNotifyParent">👨‍👩‍👧‍👦 إشعار ولي الأمر</button>
           </div>
-        </div>
-      </section>
 
-    </div>
+          <div class="divider"></div>
+
+          <div class="rowActions rowActions--split">
+            <button class="btn warn" id="btnSetFollow">🔁 متابعة</button>
+            <button class="btn" id="btnSetRefer">↪️ إحالة</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <button class="btn danger" id="btnLogoutBottom" data-action="common:logout">خروج</button>
+        </div>
+      </aside>
+    </section>
   </main>
 
   <!-- Scripts -->
   <script src="./bus.js"></script>
   <script src="./auth.js"></script>
-  <script src="./sensor-sim.js"></script>
 
-  <!-- Firebase init (module) -->
+  <!-- Firebase -->
   <script type="module" src="./firebase-init.js"></script>
 
-  <!-- Actions -->
+  <!-- Actions (logout/theme etc if you have) -->
   <script src="./actions.js"></script>
 
-  <!-- Admin binder -->
+  <!-- Page glue -->
   <script>
     (function(){
-      "use strict";
-      const $ = (s,r=document)=>r.querySelector(s);
-      const esc = (s)=>String(s??"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+      const $=(s,r=document)=>r.querySelector(s);
+      let casesCache=[];
+      let selected=null;
 
-      function badge(priority, risk){
-        const p = (priority||"").toLowerCase();
-        const r = (risk||"").toLowerCase();
-        if(p.includes("critical") || r.includes("high")) return `<span class="chip bad">Critical</span>`;
-        if(p.includes("high") || r.includes("med")) return `<span class="chip warn">Needs attention</span>`;
-        return `<span class="chip ok">Normal</span>`;
+      async function showFB(){
+        const el=$("#fbState");
+        let tries=0; while(!window.FB && tries++<40) await new Promise(r=>setTimeout(r,50));
+        el.textContent = window.FB ? "متصل" : "غير جاهز";
       }
 
-      function compute(){
-        const DB = window.SSC?.db;
-        if(!DB) return null;
+      function fmt(s){ return (s===undefined||s===null||s==="") ? "—" : String(s); }
 
-        const cases = DB.cases || [];
-        const visits = DB.visits || [];
+      function setSelected(c){
+        selected=c;
+        $("#selId").textContent = c? c.id : "—";
+        $("#selOwner").textContent = c? fmt(c.ownerId) : "—";
+        $("#selStatus").textContent = c? fmt(c.status) : "—";
+        $("#selPriority").textContent = c? fmt(c.priority) : "—";
+      }
 
-        const critical = cases.filter(c => (c.priority==="critical" || c.risk==="high" || c.status==="critical")).length;
-        const follow = cases.filter(c => (c.status==="followup_required")).length;
+      function computeKPIs(){
+        const total = casesCache.length;
+        const kNew = casesCache.filter(c=>c.status==="new").length;
+        const kApproved = casesCache.filter(c=>c.status==="approved").length;
+        const kFollow = casesCache.filter(c=>c.status==="follow").length;
+        const kRefer = casesCache.filter(c=>c.status==="refer").length;
+        const kHigh = casesCache.filter(c=>(c.priority||"").toLowerCase()==="high").length;
+        const kMed  = casesCache.filter(c=>(c.priority||"").toLowerCase()==="medium").length;
 
-        const vActive = visits.filter(v => ["scheduled","in_progress","checked_in"].includes(v.status)).length;
+        $("#kTotal").textContent = total;
+        $("#kNew").textContent = kNew;
+        $("#kApproved").textContent = kApproved;
+        $("#kFollow2").textContent = kFollow;
+        $("#kRefer2").textContent = kRefer;
+        $("#kHigh").textContent = kHigh;
+        $("#kMed").textContent = kMed;
 
-        const consAppr = cases.filter(c => c.consent==="approved").length;
-        const consRej  = cases.filter(c => c.consent==="rejected").length;
-        const consPen  = cases.length - consAppr - consRej;
+        $("#kChecked").textContent = total; // Demo: total
+        $("#kFollow").textContent = kFollow;
+        $("#kRefer").textContent = kRefer;
+      }
 
-        // top decisions quick summary
-        const top = {};
-        cases.forEach(c => {
-          const d = (c.decision || "—").slice(0,30);
-          top[d] = (top[d]||0)+1;
+      function renderTable(){
+        const wrap=$("#casesTable");
+        const f = $("#filterStatus").value;
+        const list = (f==="all") ? casesCache : casesCache.filter(c=>c.status===f);
+
+        if(!list.length){
+          wrap.innerHTML = `<div class="empty muted">لا توجد نتائج.</div>`;
+          return;
+        }
+
+        wrap.innerHTML = `
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Case</th>
+                <th>Owner</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Symptoms</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${list.map(c=>`
+                <tr class="trow ${selected?.id===c.id?'is-active':''}" data-id="${c.id}">
+                  <td>${c.id}</td>
+                  <td>${fmt(c.ownerId)}</td>
+                  <td>${fmt(c.status)}</td>
+                  <td>${fmt(c.priority)}</td>
+                  <td>${fmt(c.symptoms).slice(0,38)}${(fmt(c.symptoms).length>38)?'…':''}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        `;
+
+        wrap.querySelectorAll(".trow").forEach(tr=>{
+          tr.onclick=()=>{
+            const id = tr.dataset.id;
+            const c = casesCache.find(x=>x.id===id);
+            setSelected(c);
+            renderTable();
+          };
         });
-        const topStr = Object.entries(top)
-          .sort((a,b)=>b[1]-a[1])
-          .slice(0,4)
-          .map(([k,v])=> `${esc(k)}: <b>${v}</b>`)
-          .join(" • ") || "—";
-
-        return { cases, visits, critical, follow, vActive, consAppr, consRej, consPen, topStr };
       }
 
-      function render(){
-        const data = compute();
-        if(!data) return;
-
-        $("#k_cases").textContent = data.cases.length;
-        $("#k_critical").textContent = data.critical;
-        $("#k_follow").textContent = data.follow;
-        $("#k_visits").textContent = data.vActive;
-
-        $("#k_cons_appr").textContent = data.consAppr;
-        $("#k_cons_rej").textContent = data.consRej;
-        $("#k_cons_pen").textContent = data.consPen;
-
-        $("#k_decisions").innerHTML = data.topStr;
-
-        const list = $("#caseList");
-        if(list){
-          if(!data.cases.length){
-            list.innerHTML = `<div class="subtle">لا توجد حالات بعد.</div>`;
-          } else {
-            list.innerHTML = data.cases.slice(0,10).map(c => `
-              <div class="rowCard">
-                <div class="rowTitle">
-                  ${esc(c.owner?.name || "طالب")} • <span class="subtle">#${esc(c.id)}</span>
-                </div>
-                <div class="rowMeta">
-                  <span class="subtle">${esc(c.at || "")}</span>
-                  • الحالة: <b>${esc(c.status || "—")}</b>
-                  • ${badge(c.priority, c.risk)}
-                </div>
-                <div class="rowMeta">
-                  شكوى: ${esc((c.symptoms || "—").slice(0,80))}
-                </div>
-
-                <div class="flex mt12">
-                  <button class="btn small" data-action="admin:assign-doctor" data-case-id="${esc(c.id)}">🩺 إحالة لطبيب</button>
-                  <button class="btn small bad" data-action="admin:mark-critical" data-case-id="${esc(c.id)}">🚨 حرجة</button>
-                  <a class="btn small ghost" href="doctor.html">فتح عند الطبيب</a>
-                </div>
-              </div>
-            `).join("");
-          }
-        }
-
-        const box = $("#adminNotify");
-        if(box){
-          const DB = window.SSC?.db;
-          const items = (DB.notifications || []).filter(n => n.toRole === "admin").slice(0,8);
-          box.innerHTML = items.length
-            ? items.map(n => `
-              <div class="rowCard">
-                <div class="rowTitle">${esc(n.title)}</div>
-                <div class="rowMeta">${esc(n.message)} • <span class="subtle">${esc(n.at)}</span></div>
-              </div>
-            `).join("")
-            : `<div class="subtle">لا يوجد تنبيهات حالياً.</div>`;
-        }
+      async function loadCases(){
+        const { db, collection, getDocs } = window.FB;
+        const snap = await getDocs(collection(db,"cases"));
+        casesCache=[];
+        snap.forEach(d=>casesCache.push({ id:d.id, ...d.data() }));
+        computeKPIs();
+        if(!selected && casesCache[0]) setSelected(casesCache[0]);
+        renderTable();
       }
 
-      document.addEventListener("DOMContentLoaded", () => {
-        render();
-        window.bus?.on?.("case:update", render);
-        window.bus?.on?.("visit:update", render);
-        window.bus?.on?.("notify:update", render);
+      async function updateCaseStatus(status){
+        if(!selected) return alert("اختر حالة من الجدول أولاً");
+        const { db, doc, updateDoc, serverTimestamp } = window.FB;
+        await updateDoc(doc(db,"cases",selected.id), { status, updatedAt: serverTimestamp() });
+        await loadCases();
+        alert("تم ✅");
+      }
+
+      async function sendNotif(toRole){
+        if(!selected) return alert("اختر حالة أولاً");
+        const msg = ($("#notifMsg").value||"").trim();
+        if(!msg) return alert("اكتب رسالة الإشعار");
+
+        const { db, collection, addDoc, serverTimestamp } = window.FB;
+        await addDoc(collection(db,"notifications"), {
+          toRole,
+          title: "تنبيه من الإدارة",
+          message: msg,
+          caseId: selected.id,
+          ownerId: selected.ownerId || null,
+          at: new Date().toISOString(),
+          createdAt: serverTimestamp()
+        });
+        $("#notifMsg").value="";
+        alert("تم إرسال الإشعار ✅");
+      }
+
+      document.addEventListener("DOMContentLoaded", async()=>{
+        await showFB();
+        await loadCases();
+
+        $("#btnRefresh").onclick = loadCases;
+        $("#filterStatus").onchange = renderTable;
+
+        $("#btnSetFollow").onclick = ()=>updateCaseStatus("follow");
+        $("#btnSetRefer").onclick = ()=>updateCaseStatus("refer");
+
+        $("#btnNotifyStudent").onclick = ()=>sendNotif("student");
+        $("#btnNotifyParent").onclick = ()=>sendNotif("parent");
+
+        const name = localStorage.getItem("USER_NAME") || "الإدارة";
+        document.querySelectorAll("[data-user-name]").forEach(el=>el.textContent=name);
       });
     })();
   </script>
-<script type="module" src="./firebase-init.js"></script>
-<script src="./rbac.js"></script>
-<script src="./actions.js"></script>
 </body>
 </html>
