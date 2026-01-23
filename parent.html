@@ -8,180 +8,265 @@
 </head>
 
 <body data-page="parent">
+
+  <!-- Topbar (matches app.css) -->
   <header class="topbar">
-    <div class="topbar__left">
-      <a class="btn ghost" href="index.html">⟵ الرئيسية</a>
-      <div class="brand mini">
-        <div class="brand__logo">👨‍👩‍👧</div>
-        <div class="brand__txt">
-          <div class="brand__name">بوابة ولي الأمر</div>
-          <div class="brand__sub">متابعة • موافقات • انضمام للزيارة</div>
+    <div class="inner">
+      <div class="topbar_left">
+        <a class="btn ghost" href="index.html">↩︎ الرئيسية</a>
+
+        <div class="brand">
+          <div class="brand__logo"></div>
+          <div class="brand__txt">
+            <div class="brand__name">العيادة المدرسية الذكية</div>
+            <div class="brand__sub">بوابة ولي الأمر • موافقات • متابعة</div>
+          </div>
+        </div>
+
+        <div class="pill">
+          <small>الدور</small>
+          <b data-user-role>parent</b>
         </div>
       </div>
-    </div>
 
-    <div class="topbar__right">
-      <div class="pill">مرحبًا: <b data-user-name>ولي الأمر</b></div>
-      <button class="btn ghost" id="btnTheme">🌓</button>
+      <div class="topbar_right">
+        <div class="pill">
+          <small>مرحبًا</small>
+          <b data-user-name>ولي أمر</b>
+        </div>
+        <button class="btn ghost" id="btnTheme" data-action="common:theme-toggle">🌓</button>
+        <button class="btn bad" id="btnLogout" data-action="common:logout">خروج</button>
+      </div>
     </div>
   </header>
 
-  <main class="shell">
-    <section class="grid2">
-      <!-- Summary -->
-      <div class="card pad">
-        <div class="card__title">📌 ملخص الحالة</div>
-        <div class="muted">عرض الديمو: مربوط بآخر حالة تخص رقم الطالب المحفوظ.</div>
+  <main class="container">
 
-        <div class="block">
-          <div class="label">اسم الطالب</div>
-          <div class="box" id="parentChildName">—</div>
-        </div>
-
-        <div class="kpis">
-          <div class="kpi">
-            <div class="kpi__label">آخر حالة</div>
-            <div class="kpi__val" id="parentLastCase">—</div>
+    <!-- Hero -->
+    <section class="panel hero">
+      <div class="heroRow">
+        <div>
+          <div class="heroTitle">هنا تراقب… وتوافق… وتطمن ✅</div>
+          <div class="heroDesc">
+            هذه الصفحة تعرض آخر حالة مسجلة للطالب (تجريبي محليًا)، وتسمح لك بالموافقة على الزيارة أو طلب زيارة إضافية.
+            *لا تقلق: ما راح نخلي ولي الأمر “زر موافقة وبس” 😄*
           </div>
-          <div class="kpi">
-            <div class="kpi__label">الحالة</div>
-            <div class="kpi__val" id="parentStatus">—</div>
+
+          <div class="heroActions mt12">
+            <button class="btn primary" id="btnApproveConsent" data-action="parent:approve-consent">✅ موافقة ولي الأمر</button>
+            <button class="btn" id="btnRequestVisit" data-action="parent:request-visit">📅 طلب زيارة</button>
+            <button class="btn ghost" id="btnReport" data-action="common:download-report">⬇️ تنزيل تقرير</button>
           </div>
         </div>
 
-        <div class="block">
-          <div class="label">التالي</div>
-          <div class="box" id="parentActions">—</div>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="card__title">✅ الموافقات</div>
-        <div class="muted">إذا طلب الطبيب موافقة إجراء — رد هنا.</div>
-
-        <div class="row actions">
-          <button class="btn solid" id="btnConsentApprove" data-action="consent:approve">👍 موافقة</button>
-          <button class="btn ghost" id="btnConsentDecline" data-action="consent:decline">👎 رفض</button>
-        </div>
-
-        <div class="row actions">
-          <button class="btn ghost" data-action="doctor:makeDecision" data-decision="موافقة ولي الأمر مطلوبة (طلب من ولي الأمر)">📝 إرسال طلب/ملاحظة</button>
-          <a class="btn ghost" href="visit.html">🎥 غرفة الزيارة</a>
-        </div>
-      </div>
-
-      <!-- History -->
-      <div class="card pad">
-        <div class="card__title">🧾 سجل الحالات</div>
-        <div class="muted">آخر 6 حالات مرتبطة برقم الطالب.</div>
-
-        <div id="parentCasesList" class="list"></div>
-
-        <div class="hr"></div>
-
-        <div class="card__title">🔔 تنبيهات</div>
-        <div id="parentAlerts" class="list"></div>
-
-        <div class="row actions">
-          <a class="btn ghost" href="student.html">🎒 فتح الطالب</a>
-          <a class="btn ghost" href="doctor.html">🩺 فتح الطبيب</a>
-          <a class="btn ghost" href="admin.html">🏫 فتح الإدارة</a>
+        <div class="kpiRow" style="min-width:320px;">
+          <div class="kpi ok">
+            <div class="kLabel">الحالة</div>
+            <div class="kVal" id="p_status">—</div>
+            <div class="kMeta">آخر تحديث: <span id="p_updated">—</span></div>
+          </div>
+          <div class="kpi">
+            <div class="kLabel">الأولوية</div>
+            <div class="kVal" id="p_priority">—</div>
+            <div class="kMeta">مستوى المخاطر: <span id="p_risk">—</span></div>
+          </div>
         </div>
       </div>
     </section>
+
+    <div class="grid mt16">
+
+      <!-- Summary -->
+      <section class="panel card col-6">
+        <div class="cardHeader">
+          <div class="cardTitle"><span class="ico">🧾</span> ملخص الحالة</div>
+          <span class="chip" id="p_consentChip">Consent: —</span>
+        </div>
+
+        <div class="cardBody">
+          <div class="rowCard">
+            <div class="rowTitle">شكوى الطالب</div>
+            <div class="rowMeta" id="p_symptoms">—</div>
+          </div>
+
+          <div class="rowCard">
+            <div class="rowTitle">قرار الفرز / الطبيب</div>
+            <div class="rowMeta" id="p_decision">—</div>
+          </div>
+
+          <div class="flex mt12">
+            <a class="btn ghost" href="student.html">🎒 صفحة الطالب</a>
+            <a class="btn ghost" href="doctor.html">🩺 صفحة الطبيب</a>
+            <a class="btn ghost" href="admin.html">🏫 لوحة الإدارة</a>
+            <a class="btn ghost" href="visit.html">🎥 غرفة الزيارة</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vitals -->
+      <section class="panel card col-6">
+        <div class="cardHeader">
+          <div class="cardTitle"><span class="ico">📊</span> القياسات</div>
+          <span class="chip warn">Demo</span>
+        </div>
+
+        <div class="cardBody">
+          <div class="vitals">
+            <div class="vital">
+              <div class="vLabel">نبض القلب</div>
+              <div class="vVal" id="p_hr">—</div>
+            </div>
+            <div class="vital">
+              <div class="vLabel">الأكسجين</div>
+              <div class="vVal" id="p_spo2">—</div>
+            </div>
+            <div class="vital">
+              <div class="vLabel">الحرارة</div>
+              <div class="vVal" id="p_temp">—</div>
+            </div>
+            <div class="vital">
+              <div class="vLabel">الضغط</div>
+              <div class="vVal" id="p_bp">—</div>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="subtle">
+            إذا القياسات غير مريحة… اطلب زيارة أو تواصل مع المدرسة/العيادة فورًا.
+          </div>
+        </div>
+      </section>
+
+      <!-- Timeline -->
+      <section class="panel card col-8">
+        <div class="cardHeader">
+          <div class="cardTitle"><span class="ico">🧭</span> السجل الزمني</div>
+          <span class="chip">Timeline</span>
+        </div>
+
+        <div class="cardBody">
+          <div id="p_timeline">
+            <div class="subtle">لا يوجد سجل بعد.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Notifications -->
+      <section class="panel card col-4">
+        <div class="cardHeader">
+          <div class="cardTitle"><span class="ico">🔔</span> تنبيهات ولي الأمر</div>
+          <span class="chip ok">Live</span>
+        </div>
+
+        <div class="cardBody">
+          <div id="p_notify">
+            <div class="subtle">لا يوجد تنبيهات حالياً.</div>
+          </div>
+        </div>
+      </section>
+
+    </div>
   </main>
 
   <!-- Scripts -->
-  <script src="bus.js"></script>
-  <script src="auth.js"></script>
-  <script src="app-init.js"></script>
-  <script src="sensor-sim.js"></script>
-  <script src="triage-ai.js"></script>
-  <script src="doctor-copilot.js"></script>
-  <script src="visit-session.js"></script>
-  <script src="app.js"></script>
-  <script src="actions.js"></script>
+  <script src="./bus.js"></script>
+  <script src="./auth.js"></script>
+  <script src="./sensor-sim.js"></script>
 
+  <!-- Firebase init (module) -->
+  <script type="module" src="./firebase-init.js"></script>
+
+  <!-- Actions -->
+  <script src="./actions.js"></script>
+
+  <!-- Parent binder -->
   <script>
-    function escapeHtml(s){
-      return String(s ?? "")
-        .replaceAll("&","&amp;").replaceAll("<","&lt;")
-        .replaceAll(">","&gt;").replaceAll('"',"&quot;")
-        .replaceAll("'","&#39;");
-    }
+    (function(){
+      "use strict";
+      const $ = (s,r=document)=>r.querySelector(s);
+      const esc = (s)=>String(s??"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
 
-    function renderParent(){
-      const app = window.app;
-      if(!app) return;
-
-      const sum = app.getParentSummary?.();
-      if(!sum) return;
-
-      document.getElementById("parentChildName").textContent = sum.childName ?? "—";
-      document.getElementById("parentLastCase").textContent = sum.lastCaseTitle ?? "—";
-      document.getElementById("parentStatus").textContent = sum.status ?? "—";
-      document.getElementById("parentActions").textContent = sum.nextSteps ?? "—";
-
-      const list = document.getElementById("parentCasesList");
-      if(list){
-        if(!sum.cases?.length){
-          list.innerHTML = `<div class="muted">لا توجد حالات بعد.</div>`;
-        } else {
-          list.innerHTML = sum.cases.map(x => `
-            <div class="rowCard">
-              <div class="rowTitle">${escapeHtml(x.title || "حالة")}</div>
-              <div class="rowMeta">${escapeHtml(x.time || "")} • ${escapeHtml(x.status || "")}</div>
-            </div>
-          `).join("");
-        }
+      function chipForConsent(consent){
+        const el = $("#p_consentChip");
+        if(!el) return;
+        el.className = "chip";
+        if(consent === "approved"){ el.classList.add("ok"); el.textContent = "Consent: Approved"; return; }
+        if(consent === "rejected"){ el.classList.add("bad"); el.textContent = "Consent: Rejected"; return; }
+        el.classList.add("warn");
+        el.textContent = "Consent: Pending";
       }
 
-      const alerts = document.getElementById("parentAlerts");
-      if(alerts){
-        const cases = app.getCases?.() || [];
-        const childId = (window.Auth?.getUser?.()?.childSchoolId) || "S-1001";
-        const mine = cases.filter(c => c.patient?.schoolId === childId);
-        const last = mine.length ? mine[mine.length - 1] : null;
+      function getLatestCase(){
+        const DB = window.SSC?.db;
+        if(!DB) return null;
+        return DB.cases?.[0] || null;
+      }
 
-        if(!last){
-          alerts.innerHTML = `<div class="muted">لا توجد تنبيهات.</div>`;
+      function render(){
+        const DB = window.SSC?.db;
+        const c = getLatestCase();
+
+        if(!DB || !c){
+          $("#p_status").textContent = "لا توجد حالة";
+          $("#p_priority").textContent = "—";
+          $("#p_risk").textContent = "—";
+          $("#p_updated").textContent = "—";
+          $("#p_symptoms").textContent = "—";
+          $("#p_decision").textContent = "—";
+          chipForConsent(null);
           return;
         }
 
-        const blocks = [];
-        if (last.triage?.priority === "P1") blocks.push({ t:"🚨 تنبيه", m:"حالة حرجة — يفضل التواصل فورًا" });
-        if ((last.visit?.allowParent)) blocks.push({ t:"🎥 زيارة افتراضية", m:"الطبيب فعّل انضمام ولي الأمر للزيارة" });
-        if ((last.visit?.consent && last.visit?.consent !== "none")) blocks.push({ t:"📝 موافقة", m:`حالة الموافقة الحالية: ${last.visit.consent}` });
+        $("#p_status").textContent = c.status || "—";
+        $("#p_priority").textContent = c.priority || "—";
+        $("#p_risk").textContent = c.risk || "—";
+        $("#p_updated").textContent = (c.timeline && c.timeline[0] && c.timeline[0].at) ? c.timeline[0].at : c.at;
 
-        if(!blocks.length){
-          alerts.innerHTML = `<div class="muted">لا توجد تنبيهات حالياً.</div>`;
-        } else {
-          alerts.innerHTML = blocks.map(x => `
-            <div class="rowCard">
-              <div class="rowTitle">${escapeHtml(x.t)}</div>
-              <div class="rowMeta">${escapeHtml(x.m)}</div>
-            </div>
-          `).join("");
+        $("#p_symptoms").textContent = c.symptoms || "—";
+        $("#p_decision").textContent = c.decision || "—";
+
+        $("#p_hr").textContent = c.vitals?.hr ?? "—";
+        $("#p_spo2").textContent = c.vitals?.spo2 ?? "—";
+        $("#p_temp").textContent = c.vitals?.temp ?? "—";
+        $("#p_bp").textContent = c.vitals?.bp ?? "—";
+
+        chipForConsent(c.consent);
+
+        const tl = $("#p_timeline");
+        if(tl){
+          const items = (c.timeline || []).slice(0,8);
+          tl.innerHTML = items.length
+            ? items.map(x => `
+              <div class="rowCard">
+                <div class="rowTitle">${esc(x.msg || "تحديث")}</div>
+                <div class="rowMeta">${esc(x.at || "")}</div>
+              </div>
+            `).join("")
+            : `<div class="subtle">لا يوجد سجل بعد.</div>`;
+        }
+
+        const box = $("#p_notify");
+        if(box){
+          const items = (DB.notifications || []).filter(n => n.toRole === "parent").slice(0,8);
+          box.innerHTML = items.length
+            ? items.map(n => `
+              <div class="rowCard">
+                <div class="rowTitle">${esc(n.title)}</div>
+                <div class="rowMeta">${esc(n.message)} • <span class="subtle">${esc(n.at)}</span></div>
+              </div>
+            `).join("")
+            : `<div class="subtle">لا يوجد تنبيهات حالياً.</div>`;
         }
       }
-    }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("btnTheme")?.addEventListener("click", () => {
-        const html = document.documentElement;
-        const isDark = html.getAttribute("data-theme") !== "light";
-        html.setAttribute("data-theme", isDark ? "light" : "dark");
+      document.addEventListener("DOMContentLoaded", () => {
+        render();
+        window.bus?.on?.("case:update", render);
+        window.bus?.on?.("notify:update", render);
       });
-
-      renderParent();
-      window.bus?.on?.("case:update", renderParent);
-      window.bus?.on?.("visit:update", renderParent);
-    });
+    })();
   </script>
-    <!-- باقي سكربتاتك -->
-  <script src="./actions.js"></script>
 
-  <!-- Firebase (لازم آخر شيء وقبل </body>) -->
-  <script type="module" src="./firebase-init.js"></script>
 </body>
 </html>
