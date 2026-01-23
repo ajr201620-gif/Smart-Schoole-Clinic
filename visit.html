@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Clinic OS — Virtual Visit</title>
+  <link rel="stylesheet" href="ar.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">VV</div>
+    <div>
+      <b id="title">زيارة افتراضية</b>
+      <small id="sub">WebRTC (Local Signaling)</small>
+    </div>
+  </div>
+  <div class="actions">
+    <a class="btn ghost" id="backLink" href="index.html">🏠 رجوع</a>
+    <button class="btn ghost" id="btnClear">🧹 تصفير الغرفة</button>
+    <button class="btn" id="btnJoin">🔴 دخول الزيارة</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="panel">
+    <div class="h">
+      <h2>الغرفة</h2>
+      <div class="muted" id="st">Idle</div>
+    </div>
+
+    <div class="row">
+      <span class="badge">Role: <b id="roleTxt">—</b></span>
+      <span class="badge">Room ID: <b id="roomTxt">—</b></span>
+      <a class="btn ghost" id="openOther" href="#" target="_blank">فتح الطرف الآخر (تبويب)</a>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="grid" style="grid-template-columns:1fr 1fr;">
+      <div class="panel">
+        <div class="h"><h2>أنت</h2><div class="muted">Local</div></div>
+        <video id="vLocal" autoplay playsinline muted style="width:100%; border-radius:18px; border:1px solid var(--stroke);"></video>
+      </div>
+      <div class="panel">
+        <div class="h"><h2>الطرف الآخر</h2><div class="muted">Remote</div></div>
+        <video id="vRemote" autoplay playsinline style="width:100%; border-radius:18px; border:1px solid var(--stroke);"></video>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+    <div class="small">
+      ✅ هذا الاتصال يعمل مجانًا بدون سيرفر بشرط: نفس الجهاز/المتصفح (تبويبين).<br>
+      إذا تبغاه بين جهازين (طالب بجوال + طبيب بجهاز آخر) أعطيك Signaling مجاني بسيط.
+    </div>
+  </div>
+</div>
+
+<script src="webrtc-local.js"></script>
+<script>
+(function(){
+  const $ = (s)=>document.querySelector(s);
+  const qs = new URLSearchParams(location.search);
+
+  const role = (qs.get("role") || "student").toLowerCase(); // student | doctor
+  const room = qs.get("room") || ("R" + Math.random().toString(36).slice(2,8).toUpperCase());
+
+  $("#roleTxt").textContent = role;
+  $("#roomTxt").textContent = room;
+
+  // titles + back links
+  if(role === "doctor"){
+    $("#title").textContent = "زيارة افتراضية — الطبيب";
+    $("#backLink").href = "doctor.html";
+  } else {
+    $("#title").textContent = "زيارة افتراضية — الطالب";
+    $("#backLink").href = "student.html";
+  }
+
+  // Open other side (for local demo)
+  const otherRole = role === "doctor" ? "student" : "doctor";
+  $("#openOther").href = `visit.html?role=${encodeURIComponent(otherRole)}&room=${encodeURIComponent(room)}`;
+  $("#openOther").textContent = `فتح ${otherRole === "doctor" ? "الطبيب" : "الطالب"} (تبويب)`;
+
+  $("#btnClear").addEventListener("click", ()=>{
+    window.SCWEBRTC.clearRoom(room);
+    $("#st").textContent = "Room cleared";
+  });
+
+  $("#btnJoin").addEventListener("click", async ()=>{
+    $("#st").textContent = "Starting…";
+    try{
+      if(role === "doctor"){
+        await window.SCWEBRTC.initDoctor(room, {
+          localVideo: $("#vLocal"),
+          remoteVideo: $("#vRemote"),
+          status: $("#st")
+        });
+      } else {
+        await window.SCWEBRTC.initKiosk(room, { // kiosk side == caller side
+          localVideo: $("#vLocal"),
+          remoteVideo: $("#vRemote"),
+          status: $("#st")
+        });
+      }
+    }catch(e){
+      console.error(e);
+      alert("فشل تشغيل الزيارة. تأكد من السماح بالكاميرا/المايك.");
+    }
+  });
+})();
+</script>
+</body>
+</html>
