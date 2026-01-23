@@ -543,3 +543,38 @@
     audit("page.load", { role: role(), sid: sessionId() }).catch(() => {});
   });
 })();
+// ==============================
+// Student: View My Cases
+// ==============================
+document.addEventListener("click", async (e) => {
+  if (e.target?.dataset?.action !== "btnMyCases") return;
+
+  const { db, collection, getDocs, query, where } = window.FB;
+
+  const userId = "u_student_1"; // مؤقتًا
+  const q = query(
+    collection(db, "cases"),
+    where("ownerId", "==", userId)
+  );
+
+  const snap = await getDocs(q);
+
+  if (snap.empty) {
+    alert("لا توجد حالات مسجلة");
+    return;
+  }
+
+  let out = "";
+  snap.forEach(doc => {
+    const c = doc.data();
+    out += `
+      الحالة: ${doc.id}
+      الأعراض: ${c.symptoms}
+      الحالة: ${c.status}
+      القرار: ${c.decision}
+      ----------
+    `;
+  });
+
+  alert(out);
+});
