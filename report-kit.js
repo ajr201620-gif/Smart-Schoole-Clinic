@@ -455,6 +455,33 @@ const attHtml = atts.length
         .sc-rk-paper{ background:#fff !important; border:1px solid #ddd !important; }
         .sc-rk-card{ background:#fff !important; border:1px solid #ddd !important; }
       }
+      .attgrid{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:10px;
+}
+@media (max-width: 900px){
+  .attgrid{ grid-template-columns: repeat(2, 1fr); }
+}
+.att{
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  border-radius:14px;
+  padding:8px;
+  overflow:hidden;
+}
+[data-theme="light"] .att{
+  border:1px solid rgba(20,22,28,.12);
+  background: rgba(20,22,28,.03);
+}
+.att img{
+  width:100%;
+  height:140px;
+  object-fit:cover;
+  border-radius:12px;
+  display:block;
+  margin-bottom:8px;
+}
     `;
     document.head.appendChild(st);
   }
