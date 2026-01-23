@@ -197,6 +197,11 @@
       .join("");
 
     container.innerHTML = `
+    <div class="sc-rk-card sc-rk-wide">
+  <h3>المرفقات (Attachments)</h3>
+  ${attHtml}
+  <div class="muted small">* يعرض آخر 6 مرفقات (صور) فقط.</div>
+</div>
       <div class="sc-rk-wrap" id="scReportWrap">
         <div class="sc-rk-paper" id="scPaper">
           <div class="sc-rk-head">
