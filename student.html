@@ -21,7 +21,7 @@
 
     <div class="top-actions">
   <a class="btn ghost" href="index.html">🔁 تبديل الدور</a>
-  <a class="btn ghost" href="visit.html?role=student">🎥 زيارة افتراضية</a>
+  <button class="btn ghost" id="btnOneClickVisit">🎥 زيارة افتراضية (نقرة واحدة)</button>
    <a class="btn ghost" href="ar-student.html">📷 AR Coach</a>
   <button class="btn ghost" id="btnTheme">🌓</button>
 </div>
@@ -661,6 +661,24 @@
       renderReq();
     })();
   </script>
+<script>
+(function(){
+  const btn = document.getElementById("btnOneClickVisit");
+  if(!btn) return;
 
+  btn.addEventListener("click", ()=>{
+    // Room ثابت مرتبط بآخر Request إن وجد
+    const bus = window.SCBUS?.load?.();
+    const latestReq = bus?.requests?.[0];
+    const room = latestReq?.id ? ("ROOM-" + latestReq.id) : ("ROOM-" + Date.now());
+
+    // افتح تبويب الطبيب تلقائيًا (نفس الجهاز للـ demo)
+    window.open(`visit.html?role=doctor&room=${encodeURIComponent(room)}&autojoin=1`, "_blank");
+
+    // ادخل الطالب تلقائيًا
+    location.href = `visit.html?role=student&room=${encodeURIComponent(room)}&autojoin=1`;
+  });
+})();
+</script>
 </body>
 </html>
