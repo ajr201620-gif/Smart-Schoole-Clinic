@@ -160,3 +160,30 @@
   };
 
 })();
+SCBUS.seedDemo = function(){
+  const demo = {
+    role: "student",
+    requests: [{
+      id: "REQ-1",
+      studentName: "طالب تجريبي",
+      desc: "صداع + تعب عام"
+    }],
+    cases: [{
+      id: "CASE-1",
+      studentName: "طالب تجريبي",
+      priority: "HIGH",
+      status: "OPEN_VIRTUAL",
+      riskScore: 72,
+      vitals: { temp: 38.5, hr: 110, spo2: 95 },
+      ai: {
+        priority: "HIGH",
+        risk: 72,
+        recommendation: "زيارة افتراضية مع الطبيب"
+      }
+    }],
+    audit: []
+  };
+  localStorage.setItem("SC_BUS", JSON.stringify(demo));
+  alert("تم تحميل بيانات تجريبية ✅");
+  location.reload();
+};
