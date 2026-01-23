@@ -3,187 +3,74 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Smart Clinic OS — تقرير الحالة</title>
+  <title>التقارير — العيادة المدرسية الذكية</title>
   <link rel="stylesheet" href="app.css" />
-<link rel="stylesheet" href="ui.css" />
+  <link rel="stylesheet" href="ui.css" />
 </head>
 
-<body>
-
-  <!-- Topbar -->
+<body data-page="report">
   <header class="topbar">
-    <div class="brand">
-      <div class="logo">SC</div>
-      <div>
-        <div class="brand-title">Smart Clinic OS</div>
-        <div class="brand-sub">Case Report — تقرير الحالة</div>
+    <div class="topbar__left">
+      <a class="btn ghost" href="index.html">↩︎ الرئيسية</a>
+      <div class="brand mini">
+        <div class="brand__logo">📄</div>
+        <div class="brand__txt">
+          <div class="brand__name">التقارير</div>
+          <div class="brand__sub">عرض • تصدير • طباعة</div>
+        </div>
       </div>
     </div>
 
-    <div class="top-actions">
-      <a class="btn ghost" href="index.html">🏠 بوابة الأدوار</a>
-      <a class="btn ghost" href="demo-hub.html">🎬 Demo Hub</a>
-      <button class="btn ghost" id="btnTheme">🌓</button>
-      <button class="btn" id="btnRefresh">تحديث التقرير</button>
+    <div class="topbar__right">
+      <div class="pill"><span class="dot ok"></span><span>تقرير: <b>Live</b></span></div>
+      <button class="btn ghost" id="btnTheme" data-action="common:theme-toggle">🌓 المظهر</button>
+      <button class="btn danger" id="btnLogout" data-action="common:logout">خروج</button>
     </div>
   </header>
 
-  <div class="layout">
-
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="nav-title">التقرير</div>
-      <nav class="nav">
-        <button class="nav-item active" id="navMain">
-          <span class="ico">🧾</span><span>التقرير</span>
-        </button>
-      </nav>
-
-      <div class="sidebar-foot">
-        <div class="pill">
-          <span class="dot" id="dotLive"></span>
-          <div>
-            <div style="font-weight:1000;">Status</div>
-            <div class="muted small" id="sysStatus">Ready</div>
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="muted small" style="line-height:1.8;">
-          ✅ يعرض آخر Case من النظام (BUS).<br>
-          إذا ما فيه Case، يعرض Demo افتراضي.
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="muted small">
-          تلميح: شغّل السيناريو من <b>demo-hub.html</b> ثم ارجع هنا وشوف التقرير.
+  <main class="shell">
+    <section class="hero">
+      <div class="hero__left">
+        <h1 class="hero__title">تقرير الحالة — تصميم “عرض حكومي”</h1>
+        <p class="hero__lead">تجميع الشكوى + القياسات + قرار AI + قرار الطبيب + سجل الزيارة.</p>
+        <div class="hero__actions">
+          <button class="btn primary" data-action="report:build">🧠 توليد التقرير</button>
+          <button class="btn" data-action="report:download">⬇️ تنزيل</button>
+          <a class="btn ghost" href="report-view.html">👁️ عرض مخصص</a>
         </div>
       </div>
-    </aside>
 
-    <!-- Main -->
-    <main class="main">
-      <section class="views">
-        <section class="view show">
-          <div class="section-head">
-            <div>
-              <h2>تقرير الحالة</h2>
-              <div class="muted">PDF-look + QR + توقيع + Audit (Demo)</div>
-            </div>
-            <div class="section-actions">
-              <button class="btn ghost" id="btnOpenLatest">فتح آخر حالة</button>
-              <button class="btn ghost" id="btnOpenByHash">فتح حسب الرابط</button>
-            </div>
+      <div class="hero__right">
+        <div class="glassCard">
+          <div class="glassCard__title">مؤشرات</div>
+          <div class="glassCard__body">
+            <div class="row"><span class="muted">آخر تحديث:</span><span id="r_updated">—</span></div>
+            <div class="row"><span class="muted">عدد السجلات:</span><span id="r_rows">—</span></div>
+            <div class="row"><span class="muted">المصدر:</span><span>Local + Firestore</span></div>
           </div>
+        </div>
+      </div>
+    </section>
 
-          <div class="card" id="reportMount"></div>
-        </section>
-      </section>
-    </main>
+    <section class="card" style="margin-top:16px">
+      <header class="card__head">
+        <h2 class="card__title">📌 معاينة التقرير</h2>
+        <div class="card__tools">
+          <span class="pill"><span class="dot warn"></span> Demo</span>
+        </div>
+      </header>
+      <div class="card__body">
+        <div id="reportBox" class="list">
+          <div class="empty muted">اضغط “توليد التقرير” لعرض البيانات.</div>
+        </div>
+      </div>
+    </section>
+  </main>
 
-  </div>
-
-  <!-- Scripts -->
-  <script src="bus.js"></script>
-  <script src="report-kit.js"></script>
-  <script src="role-switcher.js"></script>
-
-  <script>
-    (function(){
-      const $ = (s,r=document)=>r.querySelector(s);
-
-      function pulse(){
-        $("#dotLive")?.classList.add("pulse");
-        setTimeout(()=>$("#dotLive")?.classList.remove("pulse"), 900);
-      }
-
-      function setStatus(txt){
-        const el = $("#sysStatus");
-        if(el) el.textContent = txt;
-      }
-
-      // Theme
-      $("#btnTheme")?.addEventListener("click", ()=>{
-        const html = document.documentElement;
-        html.dataset.theme = html.dataset.theme === "light" ? "dark" : "light";
-      });
-
-      // Build report using latest case
-      function renderLatest(){
-        pulse();
-        const mount = $("#reportMount");
-        if(!mount) return;
-
-        // pull latest case if exists (report-kit also falls back)
-        const bus = window.SCBUS?.load?.();
-        const latest = bus?.cases?.[0];
-
-        setStatus(latest ? ("Loaded: " + latest.id) : "No case found — using demo");
-
-        window.SCREPORT.renderInto(mount, {
-          school: "مدرسة A",
-          doctorName: "د. سراج (Demo)",
-          parentName: "ولي أمر الطالب (Demo)",
-          // override caseLink so QR opens this report page (clean for judges)
-          caseLink: location.origin + location.pathname.replace(/\/[^\/]*$/, "/report.html") + "#case=" + encodeURIComponent(latest?.id || "CASE-DEMO-01"),
-          title: "تقرير حالة — العيادة المدرسية الذكية"
-        });
-
-        try{ window.SCBUS?.audit?.("REPORT_PAGE_RENDER", { latest: latest?.id || null }); }catch(_){}
-      }
-
-      // Open case by URL hash: #case=CASE-XXXX
-      function renderFromHash(){
-        pulse();
-        const mount = $("#reportMount");
-        const bus = window.SCBUS?.load?.();
-        const id = new URLSearchParams(location.hash.replace(/^#/, "")).get("case");
-
-        if(!id){
-          alert("ما فيه case في الرابط. مثال:\nreport.html#case=CASE-XXXX");
-          return;
-        }
-
-        const found = (bus?.cases || []).find(c => c.id === id) || null;
-
-        setStatus(found ? ("Loaded: " + found.id) : ("Not found in bus: " + id + " — demo"));
-
-        // temporarily swap latest case by putting found at top if exists
-        if(found && bus){
-          bus.cases = [found].concat((bus.cases || []).filter(x=>x.id!==found.id));
-          localStorage.setItem(window.SCBUS.KEY, JSON.stringify(bus));
-          localStorage.setItem("sc_bus_ping", String(Date.now()));
-        }
-
-        renderLatest();
-      }
-
-      $("#btnRefresh")?.addEventListener("click", renderLatest);
-      $("#btnOpenLatest")?.addEventListener("click", renderLatest);
-      $("#btnOpenByHash")?.addEventListener("click", renderFromHash);
-
-      // auto-refresh when BUS updates (live)
-      window.addEventListener("sc:bus:update", ()=>{
-        // خفيف: لا نعيد رسم التقرير إذا المستخدم يطبع، بس هنا نخليه ينعكس فورًا
-        renderLatest();
-      });
-
-      // init
-      renderLatest();
-    })();
-  </script>
-  <!-- باقي سكربتاتك -->
   <script src="./bus.js"></script>
-<script src="./auth.js"></script>
-<script src="./triage-ai.js"></script>
-<script src="./sensor-sim.js"></script>
-<script src="./student-notify.js"></script>
-
-<script type="module" src="./firebase-init.js"></script>
-
-<script src="./rbac.js"></script>
-<script src="./actions.js"></script>
+  <script src="./auth.js"></script>
+  <script type="module" src="./firebase-init.js"></script>
+  <script src="./rbac.js"></script>
+  <script src="./actions.js"></script>
 </body>
 </html>
