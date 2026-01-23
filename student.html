@@ -1,15 +1,19 @@
 <!doctype html>
-<html lang="ar" dir="rtl" data-theme="dark">
+<html lang="ar" dir="rtl" data-theme="dark" data-ui="pro">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>بوابة الطالب — العيادة المدرسية الذكية</title>
+
+  <!-- existing -->
   <link rel="stylesheet" href="app.css" />
+  <!-- new design system -->
+  <link rel="stylesheet" href="ui.css" />
 </head>
 
 <body data-page="student">
-  <!-- Topbar (Slim) -->
-  <header class="topbar topbar--slim">
+  <!-- TOPBAR -->
+  <header class="topbar">
     <div class="topbar__left">
       <a class="btn ghost sm" href="index.html">↩︎ الرئيسية</a>
 
@@ -23,223 +27,191 @@
     </div>
 
     <div class="topbar__right">
-      <div class="pill pill--soft">
+      <span class="pill">
         <span class="dot ok"></span>
         <span>مرحبًا، <b data-user-name>طالب</b></span>
-      </div>
+      </span>
+
+      <!-- UI mode toggle (PRO/CLEAN/NEO) -->
+      <button class="btn ghost sm" data-ui-toggle>PRO</button>
 
       <button class="btn ghost sm" id="btnTheme" data-action="common:theme-toggle">🌓</button>
-      <button class="btn danger sm" id="btnLogoutTop" data-action="common:logout">خروج</button>
+      <button class="btn danger sm" id="btnLogout" data-action="common:logout">خروج</button>
     </div>
   </header>
 
   <main class="shell shell--wide">
-    <!-- Hero (Clean) -->
-    <section class="hero hero--compact">
+    <!-- HERO -->
+    <section class="hero">
       <div class="hero__left">
-        <h1 class="hero__title">جاهز نفحصك… بدون ما نخوفك 😄</h1>
+        <h1 class="hero__title">فحص ذكي سريع — بدون توتر</h1>
         <p class="hero__lead">
-          اكتب الشكوى ➜ شغّل القياسات ➜ شغّل الفرز الذكي ➜ ثم ابدأ زيارة.
+          اكتب الشكوى → شغّل القياسات → شغّل الفرز الذكي → إذا احتجت: زيارة افتراضية مع الطبيب.
         </p>
 
-        <div class="hero__cta">
-          <button class="btn primary lg" id="btnPrimaryFlow" data-action="student:primary-flow">
-            🧠 ابدأ الفحص الذكي
-          </button>
-
-          <div class="hero__mini">
-            <span class="chip" id="chipStatus"><span class="dot ok"></span> النظام جاهز</span>
-            <span class="chip"><span class="dot ok"></span> Firebase/Firestore: <b id="fbState">—</b></span>
-            <span class="chip">الدور: <b data-user-role>student</b></span>
-          </div>
+        <div class="hero__actions">
+          <span class="badge ok"><span class="dot ok"></span> النظام جاهز</span>
+          <span class="badge"><span class="dot ok"></span> Firestore: <b id="fbState">—</b></span>
+          <span class="badge">الدور: <b data-user-role>student</b></span>
         </div>
       </div>
 
       <div class="hero__right">
-        <div class="glassCard glassCard--tight">
-          <div class="glassCard__title">ملخص سريع</div>
-          <div class="glassCard__body">
+        <div class="card">
+          <div class="card__head">
+            <h2 class="card__title">الإجراء التالي</h2>
+          </div>
+          <div class="card__body">
             <div class="row">
-              <span class="muted">الخطوة التالية:</span>
-              <span id="nextStepTxt">ابدأ بكتابة الشكوى 👇</span>
+              <span class="muted">المطلوب الآن:</span>
+              <b id="nextStepTxt">اكتب الشكوى 👇</b>
             </div>
-            <div class="row">
+            <div class="row" style="margin-top:10px">
               <span class="muted">آخر تحديث:</span>
               <span id="lastUpdateTxt">—</span>
             </div>
           </div>
         </div>
+      </div>
+    </section>
 
-        <div class="quickBar">
-          <button class="qbtn" id="qbCreateCase" data-action="btnCreateCase">🧾 حالة</button>
-          <button class="qbtn" id="qbSensors" data-action="student:run-sensors">📟 قياسات</button>
-          <button class="qbtn qbtn--primary" id="qbAI" data-action="student:submit-ai">🤖 فرز</button>
-          <button class="qbtn" id="qbVisit" data-action="student:start-visit">🎥 زيارة</button>
-          <button class="qbtn" id="qbReport" data-action="btnMyReport">⬇️ تقرير</button>
+    <!-- MAIN WORKSPACE (ONE CARD ONLY) -->
+    <section class="card">
+      <div class="card__head">
+        <h2 class="card__title">لوحة الفحص</h2>
+
+        <!-- Quick actions (واضحة ومباشرة) -->
+        <div class="card__tools">
+          <button class="btn sm" data-action="btnCreateCase">🧾 إنشاء حالة</button>
+          <button class="btn sm" data-action="student:run-sensors">📟 قياسات</button>
+          <button class="btn primary sm" data-action="student:submit-ai">🤖 فرز</button>
+          <button class="btn sm" data-action="student:start-visit">🎥 زيارة</button>
+          <button class="btn ghost sm" data-action="btnMyReport">⬇️ تقرير</button>
+        </div>
+      </div>
+
+      <div class="card__body">
+        <div class="grid2">
+          <!-- LEFT: Symptoms -->
+          <section>
+            <div class="field__label">📝 الشكوى / الأعراض</div>
+            <textarea id="symptoms" class="input" rows="10"
+              placeholder="مثال: صداع + حرارة + سعال + ألم حلق…"></textarea>
+
+            <div style="margin-top:10px" class="row" >
+              <button class="btn ghost" data-action="student:save-symptoms">حفظ</button>
+              <span class="muted" style="font-size:13px">* اكتبها بوضوح عشان الفرز يكون أدق</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="stack">
+              <button class="btn" id="btnRunSensors" data-action="student:run-sensors">📟 تشغيل القياسات (محاكاة)</button>
+              <button class="btn primary" id="btnSubmitAI" data-action="student:submit-ai">🤖 تشغيل الفرز الذكي</button>
+              <button class="btn" id="btnStartVisit" data-action="student:start-visit">🎥 بدء زيارة افتراضية</button>
+            </div>
+          </section>
+
+          <!-- RIGHT: Results -->
+          <section>
+            <div class="field__label">📊 القياسات والنتيجة</div>
+
+            <div class="tableWrap" style="border-radius:14px">
+              <table class="table" style="min-width:auto">
+                <thead>
+                  <tr>
+                    <th>المؤشر</th>
+                    <th>القيمة</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>نبض القلب</td><td id="v_hr">—</td></tr>
+                  <tr><td>الأكسجين</td><td id="v_spo2">—</td></tr>
+                  <tr><td>الحرارة</td><td id="v_temp">—</td></tr>
+                  <tr><td>الضغط</td><td id="v_bp">—</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="grid2">
+              <div class="card" style="box-shadow:none">
+                <div class="card__head"><h3 class="card__title" style="font-size:14px">الحالة</h3></div>
+                <div class="card__body"><b id="v_status">—</b></div>
+              </div>
+              <div class="card" style="box-shadow:none">
+                <div class="card__head"><h3 class="card__title" style="font-size:14px">الأولوية</h3></div>
+                <div class="card__body"><b id="v_priority">—</b></div>
+              </div>
+              <div class="card" style="box-shadow:none">
+                <div class="card__head"><h3 class="card__title" style="font-size:14px">المخاطر</h3></div>
+                <div class="card__body"><b id="v_risk">—</b></div>
+              </div>
+              <div class="card" style="box-shadow:none">
+                <div class="card__head"><h3 class="card__title" style="font-size:14px">قرار AI</h3></div>
+                <div class="card__body"><b id="v_decision">—</b></div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="card" style="box-shadow:none">
+              <div class="card__head">
+                <h3 class="card__title" style="font-size:14px">🔔 التنبيهات</h3>
+              </div>
+              <div class="card__body">
+                <div id="notifyList" class="list">
+                  <div class="empty muted">لا يوجد تنبيهات حالياً.</div>
+                </div>
+              </div>
+            </div>
+
+          </section>
         </div>
       </div>
     </section>
 
-    <!-- Layout 3 Columns -->
-    <section class="triLayout">
-      <!-- Left: Steps -->
-      <aside class="card card--soft">
-        <header class="card__head">
-          <h2 class="card__title">🧭 خطواتك</h2>
-        </header>
-        <div class="card__body">
-          <ol class="steps">
-            <li class="step" id="st1"><span class="step__dot"></span><span>اكتب الشكوى</span></li>
-            <li class="step" id="st2"><span class="step__dot"></span><span>شغّل القياسات</span></li>
-            <li class="step" id="st3"><span class="step__dot"></span><span>شغّل الفرز الذكي</span></li>
-            <li class="step" id="st4"><span class="step__dot"></span><span>ابدأ زيارة</span></li>
-          </ol>
-
-          <div class="divider"></div>
-
-          <div class="stack">
-            <a class="btn ghost" href="visit.html">فتح صفحة الزيارة</a>
-            <a class="btn ghost" href="parent.html">بوابة ولي الأمر</a>
-          </div>
-        </div>
-      </aside>
-
-      <!-- Center: Complaint + Actions -->
-      <section class="card card--focus">
-        <header class="card__head">
-          <h2 class="card__title">📝 الشكوى / الأعراض</h2>
-          <div class="card__tools">
-            <button class="btn ghost sm" data-action="student:save-symptoms">حفظ</button>
-          </div>
-        </header>
-
-        <div class="card__body">
-          <label class="field">
-            <div class="field__label">وش تحس فيه؟ (اكتبها بوضوح)</div>
-            <textarea id="symptoms" class="input input--xl" rows="6"
-              placeholder="مثال: صداع + حرارة + سعال + ألم حلق…"></textarea>
-          </label>
-
-          <div class="rowActions rowActions--split">
-            <button class="btn" id="btnRunSensors" data-action="student:run-sensors">📟 تشغيل القياسات</button>
-            <button class="btn primary" id="btnSubmitAI" data-action="student:submit-ai">🤖 تشغيل الفرز الذكي</button>
-          </div>
-
-          <div class="hint">
-            ✅ القياسات هنا محاكاة (Demo). لاحقًا نربط IoT الحقيقي.
-          </div>
-        </div>
-      </section>
-
-      <!-- Right: Results -->
-      <aside class="card card--soft">
-        <header class="card__head">
-          <h2 class="card__title">📊 النتيجة والقياسات</h2>
-          <div class="card__tools">
-            <span class="pill"><span class="dot warn"></span> Demo</span>
-          </div>
-        </header>
-
-        <div class="card__body">
-          <div class="vitals vitals--mini">
-            <div class="vital">
-              <div class="vital__label">نبض</div>
-              <div class="vital__value" id="v_hr">—</div>
-              <div class="vital__unit">BPM</div>
-            </div>
-            <div class="vital">
-              <div class="vital__label">O₂</div>
-              <div class="vital__value" id="v_spo2">—</div>
-              <div class="vital__unit">%</div>
-            </div>
-            <div class="vital">
-              <div class="vital__label">حرارة</div>
-              <div class="vital__value" id="v_temp">—</div>
-              <div class="vital__unit">°C</div>
-            </div>
-            <div class="vital">
-              <div class="vital__label">ضغط</div>
-              <div class="vital__value" id="v_bp">—</div>
-              <div class="vital__unit">mmHg</div>
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="miniCards miniCards--2">
-            <div class="miniCard">
-              <div class="miniCard__label">الحالة</div>
-              <div class="miniCard__value" id="v_status">—</div>
-            </div>
-            <div class="miniCard">
-              <div class="miniCard__label">الأولوية</div>
-              <div class="miniCard__value" id="v_priority">—</div>
-            </div>
-            <div class="miniCard">
-              <div class="miniCard__label">المخاطر</div>
-              <div class="miniCard__value" id="v_risk">—</div>
-            </div>
-            <div class="miniCard">
-              <div class="miniCard__label">قرار AI</div>
-              <div class="miniCard__value" id="v_decision">—</div>
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <section class="noticeBox">
-            <div class="noticeBox__title">🔔 التنبيهات</div>
-            <div id="notifyList" class="list">
-              <div class="empty muted">لا يوجد تنبيهات حالياً.</div>
-            </div>
-          </section>
-
-          <div class="divider"></div>
-
-          <button class="btn danger" id="btnLogoutBottom" data-action="common:logout">خروج</button>
-        </div>
-      </aside>
-    </section>
   </main>
 
-  <!-- Scripts (order matters) -->
+  <!-- Core scripts -->
   <script src="./bus.js"></script>
   <script src="./auth.js"></script>
   <script src="./triage-ai.js"></script>
   <script src="./sensor-sim.js"></script>
   <script src="./student-notify.js"></script>
 
-  <!-- Firebase init (ONE TIME ONLY) -->
+  <!-- UI mode switcher -->
+  <script src="./ui.js"></script>
+
+  <!-- Firebase (ONE TIME) -->
   <script type="module" src="./firebase-init.js"></script>
 
-  <!-- Actions wiring (ONE TIME ONLY) -->
+  <!-- Actions (ONE TIME) -->
   <script src="./actions.js"></script>
 
-  <!-- Small UI binder -->
+  <!-- Binder: يعرض البيانات الموجودة عندك الآن من SSC.db (وإذا لاحقًا ربطتها من Firestore ما يتعارض) -->
   <script>
     (function(){
       "use strict";
-      function $(s,r=document){return r.querySelector(s);}
-      function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));}
+      const $=(s,r=document)=>r.querySelector(s);
+      const escapeHtml=(s)=>String(s??"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
 
-      function setStep(n){
-        ["st1","st2","st3","st4"].forEach((id,i)=>{
-          const el = $("#"+id);
-          if(!el) return;
-          el.classList.toggle("is-done", i < n-1);
-          el.classList.toggle("is-active", i === n-1);
-        });
+      async function showFB(){
+        const el=$("#fbState");
+        let tries=0;
+        while(!window.FB && tries++<40) await new Promise(r=>setTimeout(r,50));
+        el.textContent = window.FB ? "متصل" : "غير جاهز";
       }
 
-      function renderVitals() {
+      function renderVitals(){
         const db = window.SSC && window.SSC.db;
-        if (!db) return;
+        if(!db) return;
 
         const userId = db.session?.currentUserId;
-        const c = db.cases?.find(x => x.owner?.id === userId) || db.cases?.[0];
-        if (!c) {
-          setStep(1);
-          $("#nextStepTxt").textContent = "ابدأ بكتابة الشكوى 👇";
+        const c = db.cases?.find(x=>x.owner?.id===userId) || db.cases?.[0];
+        if(!c){
+          $("#nextStepTxt").textContent="اكتب الشكوى 👇";
           return;
         }
 
@@ -253,36 +225,30 @@
         $("#v_risk").textContent = c.risk ?? "—";
         $("#v_decision").textContent = c.decision ?? "—";
 
-        const hasSymptoms = !!(c.symptoms && String(c.symptoms).trim().length);
+        const hasSymptoms = !!(c.symptoms && String(c.symptoms).trim());
         const hasVitals = !!(c.vitals && (c.vitals.hr || c.vitals.spo2 || c.vitals.temp || c.vitals.bp));
         const hasAI = !!(c.decision || c.priority || c.risk);
 
-        const step = !hasSymptoms ? 1 : (!hasVitals ? 2 : (!hasAI ? 3 : 4));
-        setStep(step);
-
-        const nextTxt = step===1 ? "اكتب الشكوى ثم احفظ" :
-                        step===2 ? "شغّل القياسات" :
-                        step===3 ? "شغّل الفرز الذكي" :
-                                  "ابدأ زيارة الآن ✅";
-        $("#nextStepTxt").textContent = nextTxt;
+        $("#nextStepTxt").textContent =
+          !hasSymptoms ? "اكتب الشكوى ثم احفظ" :
+          !hasVitals ? "شغّل القياسات" :
+          !hasAI ? "شغّل الفرز الذكي" :
+          "ابدأ زيارة إذا احتجت ✅";
 
         $("#lastUpdateTxt").textContent = c.updatedAt || c.createdAt || "—";
       }
 
-      function renderNotifications() {
+      function renderNotifications(){
         const db = window.SSC && window.SSC.db;
         const box = $("#notifyList");
-        if (!db || !box) return;
+        if(!db || !box) return;
 
-        const role = "student";
-        const items = (db.notifications||[]).filter(n => n.toRole === role).slice(0,8);
-
-        if (!items.length) {
+        const items = (db.notifications||[]).filter(n=>n.toRole==="student").slice(0,6);
+        if(!items.length){
           box.innerHTML = `<div class="empty muted">لا يوجد تنبيهات حالياً.</div>`;
           return;
         }
-
-        box.innerHTML = items.map(n => `
+        box.innerHTML = items.map(n=>`
           <div class="rowCard">
             <div class="rowTitle">${escapeHtml(n.title)}</div>
             <div class="rowMeta">${escapeHtml(n.message)} • <span class="muted">${escapeHtml(n.at)}</span></div>
@@ -290,39 +256,12 @@
         `).join("");
       }
 
-      // Primary flow button
-      function wirePrimary(){
-        const b = $("#btnPrimaryFlow");
-        if(!b) return;
-        b.addEventListener("click", () => {
-          // 1) focus symptoms
-          const t = $("#symptoms");
-          if (t) { t.scrollIntoView({behavior:"smooth", block:"center"}); t.focus(); }
-        });
-      }
-
-      // Firebase state badge
-      async function showFB(){
-        const el = $("#fbState");
-        if(!el) return;
-        try{
-          // wait a moment for module to load
-          let tries=0;
-          while(!window.FB && tries++<40) await new Promise(r=>setTimeout(r,50));
-          el.textContent = window.FB ? "متصل" : "غير جاهز";
-        }catch(_){
-          el.textContent = "غير جاهز";
-        }
-      }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        wirePrimary();
+      document.addEventListener("DOMContentLoaded", async()=>{
+        await showFB();
         renderVitals();
         renderNotifications();
-        showFB();
-
-        window.bus?.on?.("case:update", () => renderVitals());
-        window.bus?.on?.("notify:update", () => renderNotifications());
+        window.bus?.on?.("case:update", renderVitals);
+        window.bus?.on?.("notify:update", renderNotifications);
       });
     })();
   </script>
