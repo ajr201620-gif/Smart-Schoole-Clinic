@@ -1,473 +1,108 @@
 <!doctype html>
 <html lang="ar" dir="rtl" data-theme="dark">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Smart Clinic OS — إدارة المدرسة</title>
-  <link rel="stylesheet" href="shell.css">
-<script src="rbac.js"></script>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Smart Clinic OS — Admin</title>
+  <link rel="stylesheet" href="ar.css"/>
+  <link rel="stylesheet" href="shell.css"/>
+  <script src="bus.js"></script>
+  <script src="rbac.js"></script>
 </head>
-<script>window.SCRBAC && window.SCRBAC.mount();</script>
 <body>
 
-  <!-- Topbar -->
-  <header class="topbar">
-    <div class="brand">
-      <div class="logo">SC</div>
-      <div>
-        <div class="brand-title">Smart Clinic OS</div>
-        <div class="brand-sub">School Admin Console — لوحة إدارة المدرسة</div>
+<div class="sc-top">
+  <div class="left">
+    <span class="sc-chip">Admin</span>
+    <div class="sc-title">
+      <b>لوحة إدارة المدرسة</b>
+      <small>مؤشرات يومية + متابعة + إحالات</small>
+    </div>
+  </div>
+  <div class="sc-actions">
+    <span class="sc-status" id="st">🟢 Ready</span>
+    <a class="sc-primary" href="report.html#school">🧾 تقرير المدرسة</a>
+  </div>
+</div>
+
+<div class="sc-shell">
+  <aside class="sc-side">
+    <div class="sc-chip">التنقّل</div>
+    <nav class="sc-nav">
+      <a class="sc-nav-item" href="index.html">🏠 البوابة</a>
+      <a class="sc-nav-item" href="#dash">📊 لوحة المؤشرات</a>
+      <a class="sc-nav-item" href="#follow">🟡 المتابعة</a>
+      <a class="sc-nav-item" href="report.html#school">🧾 التقارير</a>
+    </nav>
+    <div style="margin-top:14px" class="sc-chip">Quick</div>
+    <div class="sc-quick">
+      <button class="sc-qa" id="btnRefresh">🔄 تحديث</button>
+    </div>
+  </aside>
+
+  <main class="sc-main">
+    <div style="padding:16px">
+      <div class="panel" id="dash">
+        <div class="h"><h2>مؤشرات المدرسة</h2><div class="muted">تجميعي بدون تفاصيل حساسة</div></div>
+
+        <div class="kpis">
+          <div class="kpi"><b>عدد الطلاب اللي كشفوا</b><span id="mChecked">—</span></div>
+          <div class="kpi"><b>حالات متعبة (MED+)</b><span id="mSick">—</span></div>
+          <div class="kpi"><b>راحة/متابعة</b><span id="mRest">—</span></div>
+          <div class="kpi"><b>إحالات</b><span id="mRef">—</span></div>
+          <div class="kpi"><b>تحتاج متابعة</b><span id="mFollow">—</span></div>
+          <div class="kpi"><b>موافقة ولي أمر معلّقة</b><span id="mConsent">—</span></div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="panel" id="follow" style="padding:12px; border-radius:14px;">
+          <b>قائمة متابعة (آخر 6 حالات)</b>
+          <div class="muted small">يعرض الحالات عالية/معلقة/إحالة</div>
+          <div id="list" style="margin-top:10px"></div>
+        </div>
       </div>
     </div>
-
-    <div class="top-actions">
-  <button class="btn ghost" id="btnTheme">🌓</button>
+  </main>
 </div>
-  </header>
 
-  <div class="layout">
+<script>
+localStorage.setItem("SC_ROLE","admin");
+const $ = (s)=>document.querySelector(s);
 
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="nav-title">القائمة</div>
-      <nav class="nav" id="adminNav">
-        <button class="nav-item active" data-view="dashboard"><span class="ico">📊</span><span>Dashboard</span></button>
-        <button class="nav-item" data-view="reports"><span class="ico">🧾</span><span>تقارير إدارية</span></button>
-        <button class="nav-item" data-view="users"><span class="ico">👥</span><span>Users & Roles</span></button>
-      </nav>
+function refresh(){
+  const bus = window.SCBUS?.load?.() || {cases:[], requests:[]};
+  const cases = bus.cases || [];
+  const requests = bus.requests || [];
 
-      <div class="sidebar-foot">
-        <div class="pill">
-          <span class="dot" id="dotLive"></span>
-          <div>
-            <div style="font-weight:1000;">System</div>
-            <div class="muted small" id="sysStatus">System: Ready</div>
-          </div>
-        </div>
+  const checked = requests.length; // اعتبر كل Request = كشف
+  const sick = cases.filter(c => ["MED","HIGH","CRIT"].includes(c.priority)).length;
 
-        <button class="btn ghost" id="btnShowLog">عرض سجل النظام</button>
+  const ref = cases.filter(c => c.status==="REFERRED").length;
+  const consent = cases.filter(c => c.status==="CONSENT_REQUIRED").length;
 
-        <div class="divider"></div>
-        <div class="muted small">ملاحظة: هذه واجهة إدارة بدون تفاصيل سريرية حساسة.</div>
-      </div>
-    </aside>
+  const rest = cases.filter(c => (c.plan||"").includes("راحة") || c.status==="APPROVED").length;
+  const follow = cases.filter(c => ["HIGH","CRIT"].includes(c.priority) || c.status==="CONSENT_REQUIRED").length;
 
-    <!-- Main -->
-    <main class="main">
+  $("#mChecked").textContent = checked;
+  $("#mSick").textContent = sick;
+  $("#mRest").textContent = rest;
+  $("#mRef").textContent = ref;
+  $("#mFollow").textContent = follow;
+  $("#mConsent").textContent = consent;
 
-      <!-- Hero -->
-      <section class="hero">
-        <div class="hero-left">
-          <div class="kicker">🏫 School Admin</div>
-          <h1>لوحة إدارة المدرسة</h1>
-          <p class="hero-desc">
-            مؤشرات مجمّعة، إجراءات إدارية، حوكمة وصلاحيات، وسجل تدقيق (Audit).
-          </p>
+  const top = cases.slice(0,6);
+  $("#list").innerHTML = top.map(c=>{
+    const tag = c.status || "OPEN";
+    return `<div class="sc-nav-item" style="justify-content:space-between">
+      <span>Case ${c.id} • ${c.priority||"—"}</span>
+      <span class="sc-chip">${tag}</span>
+    </div>`;
+  }).join("") || `<div class="muted">لا توجد بيانات بعد</div>`;
+}
 
-          <div class="hero-cta">
-            <button class="btn" id="btnOpenUsers">فتح Users & Roles</button>
-            <button class="btn ghost" id="btnOpenAudit">فتح Audit Log</button>
-          </div>
-
-          <div class="hero-badges">
-            <span class="badge">RBAC: Enabled</span>
-            <span class="badge ghost">No Sensitive Clinical Details</span>
-            <span class="badge">GitHub Pages Ready</span>
-          </div>
-        </div>
-
-        <div class="hero-right">
-          <div class="scorecard">
-            <div class="scorecard-head">
-              <div>
-                <div class="score-title">مؤشر السلامة المدرسية</div>
-                <div class="score-sub">قيمة تجريبية للعرض</div>
-              </div>
-              <div class="ring">
-                <div class="ring-inner">
-                  <div class="ring-num" id="safetyScore">92</div>
-                  <div class="ring-lbl">/100</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="scorecard-grid">
-              <div class="mini">
-                <div class="mini-k">تنبيهات اليوم</div>
-                <div class="mini-v danger" id="kpiAlerts">2</div>
-              </div>
-              <div class="mini">
-                <div class="mini-k">حالات متابعة</div>
-                <div class="mini-v warn" id="kpiFollow">5</div>
-              </div>
-              <div class="mini">
-                <div class="mini-k">غياب صحي</div>
-                <div class="mini-v" id="kpiAbsence">-12%</div>
-              </div>
-              <div class="mini">
-                <div class="mini-k">جاهزية تقارير</div>
-                <div class="mini-v" id="kpiReports">+40%</div>
-              </div>
-            </div>
-
-            <div class="scorecard-foot muted small">* جميع الأرقام تجريبية (Demo).</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Views -->
-      <section class="views">
-
-        <!-- Dashboard -->
-        <section class="view show" id="view-dashboard">
-          <div class="section-head">
-            <div>
-              <h2>Dashboard</h2>
-              <div class="muted">نظرة عامة على الوضع الصحي داخل المدرسة (مجمّع)</div>
-            </div>
-            <div class="section-actions">
-              <button class="btn ghost" id="btnRefresh">تحديث الأرقام</button>
-              <button class="btn" id="btnSimAdminEvent">محاكاة إجراء إداري</button>
-            </div>
-          </div>
-
-          <div class="grid-4">
-            <div class="card kpi">
-              <div class="kpi-top">
-                <div class="kpi-ico">📌</div>
-                <div>
-                  <div class="kpi-label">قائمة الإجراءات</div>
-                  <div class="kpi-value" id="kpiQueue">3</div>
-                </div>
-              </div>
-              <div class="kpi-note">عدد المهام الإدارية المفتوحة اليوم.</div>
-              <div class="kpi-bar"><span style="width:58%"></span></div>
-            </div>
-
-            <div class="card kpi">
-              <div class="kpi-top">
-                <div class="kpi-ico">🧑‍🤝‍🧑</div>
-                <div>
-                  <div class="kpi-label">تفاعل أولياء الأمور</div>
-                  <div class="kpi-value" id="kpiParentAck">76%</div>
-                </div>
-              </div>
-              <div class="kpi-note">نسبة تأكيد استلام التنبيهات (Demo).</div>
-              <div class="kpi-bar"><span style="width:76%"></span></div>
-            </div>
-
-            <div class="card kpi">
-              <div class="kpi-top">
-                <div class="kpi-ico">🧼</div>
-                <div>
-                  <div class="kpi-label">جاهزية التوعية</div>
-                  <div class="kpi-value" id="kpiAwareness">ممتازة</div>
-                </div>
-              </div>
-              <div class="kpi-note">خطط توعوية صفية عند نمط أعراض.</div>
-              <div class="kpi-bar"><span style="width:86%"></span></div>
-            </div>
-
-            <div class="card kpi">
-              <div class="kpi-top">
-                <div class="kpi-ico">🛡️</div>
-                <div>
-                  <div class="kpi-label">التزام الحوكمة</div>
-                  <div class="kpi-value">RBAC</div>
-                </div>
-              </div>
-              <div class="kpi-note">الصلاحيات مفعّلة + سجل تدقيق (Audit).</div>
-              <div class="kpi-bar"><span style="width:92%"></span></div>
-            </div>
-          </div>
-
-          <div class="grid-2">
-            <div class="card">
-              <div class="card-head">
-                <h3>إجراءات مطلوبة</h3>
-                <div class="muted small">Work Queue</div>
-              </div>
-
-              <div class="queue" id="adminQueue">
-                <div class="qitem">
-                  <b>استدعاء ولي أمر</b>
-                  <span class="muted">حالة متابعة — (Demo)</span>
-                  <span class="tag">OPEN</span>
-                </div>
-                <div class="qitem">
-                  <b>تنسيق إحالة/نقل</b>
-                  <span class="muted">تنبيه عالي — (Demo)</span>
-                  <span class="tag">OPEN</span>
-                </div>
-                <div class="qitem">
-                  <b>توعية صفية</b>
-                  <span class="muted">نمط أعراض — (Demo)</span>
-                  <span class="tag">PLANNED</span>
-                </div>
-              </div>
-
-              <div class="card-actions">
-                <button class="btn ghost" id="btnCloseOne">إغلاق مهمة (Demo)</button>
-                <button class="btn" id="btnEscalate">تصعيد للإشراف (Demo)</button>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-head">
-                <h3>سجل النظام (مختصر)</h3>
-                <div class="muted small">System log preview</div>
-              </div>
-
-              <div class="log" id="sysLog">
-                <div class="logline"><span class="muted">--:--:--</span><span>بانتظار الأحداث…</span></div>
-              </div>
-
-              <div class="card-actions">
-                <button class="btn ghost" id="btnSyncSensors">محاكاة Sync حساسات</button>
-                <button class="btn" id="btnCreateAdminAlert">إنشاء تنبيه إداري</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Reports -->
-        <section class="view" id="view-reports">
-          <div class="section-head">
-            <div>
-              <h2>تقارير إدارية</h2>
-              <div class="muted">ملخصات مجمّعة بدون تفاصيل حساسة</div>
-            </div>
-            <div class="section-actions">
-              <button class="btn" id="btnExportDaily">تصدير ملخص اليوم</button>
-              <button class="btn ghost" id="btnExportWeekly">تصدير ملخص أسبوعي</button>
-            </div>
-          </div>
-
-          <div class="card report" id="reportBox">
-            <div class="report-title">ملخص إداري — Demo</div>
-            <div class="report-meta">النطاق: مدرسة A — التاريخ: <span id="repDate"></span></div>
-            <div class="report-body rb">
-              <div>• الحالات: <b>مجمّعة</b> (بدون تشخيص سريري)</div>
-              <div>• التنبيهات: <b>حسب المستوى</b> (LOW/MED/HIGH)</div>
-              <div>• الإجراءات: <b>متابعة/استدعاء ولي أمر/توعية</b></div>
-              <div>• الحوكمة: <b>RBAC + Audit</b></div>
-            </div>
-            <div class="report-foot muted small">* هذا تقرير تجريبي للعرض والتحكيم.</div>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="grid-2">
-            <div class="card copy">
-              <div class="card-head">
-                <h3>تنبيه إداري مقترح</h3>
-                <div class="muted small">Template</div>
-              </div>
-              <p>
-                بناءً على نمط الأعراض المسجل هذا اليوم، نوصي بتفعيل إجراء توعوي صفّي
-                وتعزيز التحقق الوقائي، مع إشعار أولياء الأمور بالمتابعة عند الحاجة.
-              </p>
-              <div class="card-actions">
-                <button class="btn" id="btnCreateAdminAlert2">اعتماد التنبيه (Demo)</button>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-head">
-                <h3>مؤشرات الامتثال</h3>
-                <div class="muted small">Governance</div>
-              </div>
-              <ul class="bullets">
-                <li>تقييد الوصول حسب الدور (Role-Based Access)</li>
-                <li>عدم عرض تفاصيل سريرية للإدارة (Masked by design)</li>
-                <li>سجل تدقيق للأحداث (Audit Log)</li>
-                <li>قابلية التوسع لتكاملات رسمية لاحقًا</li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        <!-- Users -->
-        <section class="view" id="view-users">
-          <div class="section-head">
-            <div>
-              <h2>Users & Roles</h2>
-              <div class="muted">إظهار الصلاحيات وسجل التدقيق (Demo)</div>
-            </div>
-            <div class="section-actions">
-              <button class="btn" id="btnAddUser">إضافة مستخدم (Demo)</button>
-              <button class="btn ghost" id="btnExportUsers">تصدير Users</button>
-            </div>
-          </div>
-
-          <div class="grid-2">
-            <div class="card">
-              <div class="card-head">
-                <h3>Users</h3>
-                <div class="muted small">School scope</div>
-              </div>
-              <div class="table" id="usersTable"></div>
-            </div>
-
-            <div class="card">
-              <div class="card-head">
-                <h3>Audit Log</h3>
-                <div class="muted small">آخر 40 حدث</div>
-              </div>
-              <div class="table" id="auditTable"></div>
-              <div class="card-actions">
-                <button class="btn ghost" id="btnClearAudit">مسح السجل</button>
-                <button class="btn" id="btnExportAudit">تصدير Audit</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-      </section>
-    </main>
-  </div>
-
-  <!-- Scripts -->
-  <script src="bus.js"></script>
-<script src="engine.js"></script>
-<script src="rbac.js"></script>
-<script src="auth-demo.js"></script>
-<script src="audit-users.js"></script>
-<script src="role-switcher.js"></script>
-
-  <script>
-    // --- Admin Page Controller (small + safe) ---
-    (function(){
-      const $ = (s,r=document)=>r.querySelector(s);
-      const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
-      const rand = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
-
-      // Force role to school for this page (Admin)
-      try{
-        localStorage.setItem("sc_role", "school");
-        window.SCRBAC?.applyRBAC?.();
-      }catch(_){}
-
-      // Date
-      const d = new Date();
-      const repDate = $("#repDate");
-      if(repDate) repDate.textContent = d.toLocaleDateString("ar-SA");
-
-      // Theme toggle
-      $("#btnTheme")?.addEventListener("click", ()=>{
-        const html = document.documentElement;
-        const next = html.dataset.theme === "light" ? "dark" : "light";
-        html.dataset.theme = next;
-        try{ window.SCAUDIT?.audit?.("THEME_TOGGLE", { to: next }); }catch(_){}
-      });
-
-      // Simple nav switching
-      function openView(view){
-        $$(".nav-item").forEach(b=>b.classList.remove("active"));
-        $(`.nav-item[data-view="${view}"]`)?.classList.add("active");
-        $$(".view").forEach(v=>v.classList.remove("show"));
-        $(`#view-${view}`)?.classList.add("show");
-        try{ window.SCAUDIT?.audit?.("NAV_OPEN", { view }); }catch(_){}
-      }
-      $$("#adminNav .nav-item").forEach(btn=>{
-        btn.addEventListener("click", ()=> openView(btn.dataset.view));
-      });
-
-      $("#btnOpenUsers")?.addEventListener("click", ()=> openView("users"));
-      $("#btnOpenAudit")?.addEventListener("click", ()=> openView("users")); // audit داخل users
-
-      // Simulate admin events
-      $("#btnRefresh")?.addEventListener("click", ()=>{
-        $("#kpiAlerts").textContent = String(rand(0,3));
-        $("#kpiFollow").textContent = String(rand(2,8));
-        $("#safetyScore").textContent = String(rand(88,97));
-        $("#kpiParentAck").textContent = String(rand(60,92)) + "%";
-        $("#dotLive")?.classList.add("pulse");
-        setTimeout(()=>$("#dotLive")?.classList.remove("pulse"), 900);
-        try{ window.SCAUDIT?.audit?.("DASH_REFRESH", {}); }catch(_){}
-      });
-
-      $("#btnSimAdminEvent")?.addEventListener("click", ()=>{
-        try{ window.SCAUDIT?.audit?.("ADMIN_ACTION_SIMULATED", { type:"queue_update" }); }catch(_){}
-        alert("تم تسجيل إجراء إداري (Demo) في Audit Log ✅");
-      });
-
-      $("#btnSyncSensors")?.addEventListener("click", ()=>{
-        try{ window.ClinicEngine?.syncSensors?.(); }catch(_){}
-        try{ window.SCAUDIT?.audit?.("SENSORS_SYNC_CLICK", { from:"admin" }); }catch(_){}
-      });
-
-      $("#btnCreateAdminAlert")?.addEventListener("click", ()=>{
-        try{ window.SCAUDIT?.audit?.("ADMIN_ALERT_CREATED", { level:"MED" }); }catch(_){}
-        alert("تم إنشاء تنبيه إداري (Demo) ✅");
-      });
-
-      $("#btnCreateAdminAlert2")?.addEventListener("click", ()=>{
-        try{ window.SCAUDIT?.audit?.("ADMIN_ALERT_APPROVED", {}); }catch(_){}
-        alert("تم اعتماد التنبيه (Demo) ✅");
-      });
-
-      $("#btnCloseOne")?.addEventListener("click", ()=>{
-        const q = $("#adminQueue");
-        const first = q?.querySelector(".qitem");
-        if(first) first.remove();
-        try{ window.SCAUDIT?.audit?.("QUEUE_ITEM_CLOSED", {}); }catch(_){}
-      });
-
-      $("#btnEscalate")?.addEventListener("click", ()=>{
-        try{ window.SCAUDIT?.audit?.("ESCALATION_SENT", { to:"supervision" }); }catch(_){}
-        alert("تم التصعيد (Demo) ✅");
-      });
-
-      // Exports (simple)
-      function download(name, text){
-        const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url; a.download = name;
-        document.body.appendChild(a);
-        a.click(); a.remove();
-        setTimeout(()=>URL.revokeObjectURL(url), 600);
-      }
-
-      $("#btnExportDaily")?.addEventListener("click", ()=>{
-        const txt = [
-          "Administrative Daily Summary (Demo)",
-          "----------------------------------",
-          `Date: ${new Date().toLocaleDateString("ar-SA")}`,
-          `Alerts: ${$("#kpiAlerts")?.textContent || "2"}`,
-          `Follow-ups: ${$("#kpiFollow")?.textContent || "5"}`,
-          "Note: Aggregate only (no clinical sensitive details)."
-        ].join("\n");
-        download("daily-summary.txt", txt);
-        try{ window.SCAUDIT?.audit?.("DAILY_SUMMARY_EXPORTED", {}); }catch(_){}
-      });
-
-      $("#btnExportWeekly")?.addEventListener("click", ()=>{
-        download("weekly-summary.txt", "Weekly Summary (Demo)\n- Aggregate KPIs\n- Actions\n- Governance: RBAC + Audit");
-        try{ window.SCAUDIT?.audit?.("WEEKLY_SUMMARY_EXPORTED", {}); }catch(_){}
-      });
-
-      $("#btnExportAdmin")?.addEventListener("click", ()=>{
-        download("admin-executive-summary.txt", "Executive Summary (Demo)\nRBAC enabled\nAudit enabled\nAggregate KPIs only");
-        try{ window.SCAUDIT?.audit?.("EXEC_SUMMARY_EXPORTED", {}); }catch(_){}
-      });
-
-      // Log viewer shortcut
-      $("#btnShowLog")?.addEventListener("click", ()=>{
-        openView("dashboard");
-        const el = $("#sysLog");
-        el?.scrollIntoView({behavior:"smooth", block:"center"});
-    
-      });
-
-    })();
-  </script>
+$("#btnRefresh").addEventListener("click", refresh);
+refresh();
+</script>
 </body>
 </html>
-window.addEventListener("sc:bus:update", ()=>{
-  // هنا تنادي دوال التحديث عندك
-  // مثال:
-  // renderAlertsFromBus();
-  // renderCasesFromBus();
-});
