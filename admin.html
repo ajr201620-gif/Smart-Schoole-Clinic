@@ -1,108 +1,127 @@
 <!doctype html>
-<html lang="ar" dir="rtl" data-theme="dark">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Smart Clinic OS — Admin</title>
-  <link rel="stylesheet" href="ar.css"/>
-  <link rel="stylesheet" href="shell.css"/>
-  <script src="bus.js"></script>
-  <script src="rbac.js"></script>
+  <title>بوابة الإدارة — Smart School Clinic OS</title>
+
+  <link rel="stylesheet" href="assets/css/app.css"/>
+
+  <script src="js/bus.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin-heatmap.js"></script>
+  <script src="js/audit-log.js"></script>
 </head>
+
 <body>
-
-<div class="sc-top">
-  <div class="left">
-    <span class="sc-chip">Admin</span>
-    <div class="sc-title">
-      <b>لوحة إدارة المدرسة</b>
-      <small>مؤشرات يومية + متابعة + إحالات</small>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">🏫</div>
+    <div class="brandText">
+      <div class="name">بوابة الإدارة</div>
+      <div class="tagline">مؤشرات • متابعة • سندات • سجل إجراءات</div>
     </div>
   </div>
-  <div class="sc-actions">
-    <span class="sc-status" id="st">🟢 Ready</span>
-    <a class="sc-primary" href="report.html#school">🧾 تقرير المدرسة</a>
+  <div class="topActions">
+    <button class="btn ghost" onclick="location.href='index.html'">⬅️ رجوع</button>
   </div>
-</div>
+</header>
 
-<div class="sc-shell">
-  <aside class="sc-side">
-    <div class="sc-chip">التنقّل</div>
-    <nav class="sc-nav">
-      <a class="sc-nav-item" href="index.html">🏠 البوابة</a>
-      <a class="sc-nav-item" href="#dash">📊 لوحة المؤشرات</a>
-      <a class="sc-nav-item" href="#follow">🟡 المتابعة</a>
-      <a class="sc-nav-item" href="report.html#school">🧾 التقارير</a>
-    </nav>
-    <div style="margin-top:14px" class="sc-chip">Quick</div>
-    <div class="sc-quick">
-      <button class="sc-qa" id="btnRefresh">🔄 تحديث</button>
+<main class="container">
+
+  <!-- KPIs -->
+  <section class="panel">
+    <div class="h">
+      <h2>📊 المؤشرات العامة</h2>
+      <div class="muted">نظرة سريعة على الوضع الصحي</div>
     </div>
-  </aside>
 
-  <main class="sc-main">
-    <div style="padding:16px">
-      <div class="panel" id="dash">
-        <div class="h"><h2>مؤشرات المدرسة</h2><div class="muted">تجميعي بدون تفاصيل حساسة</div></div>
-
-        <div class="kpis">
-          <div class="kpi"><b>عدد الطلاب اللي كشفوا</b><span id="mChecked">—</span></div>
-          <div class="kpi"><b>حالات متعبة (MED+)</b><span id="mSick">—</span></div>
-          <div class="kpi"><b>راحة/متابعة</b><span id="mRest">—</span></div>
-          <div class="kpi"><b>إحالات</b><span id="mRef">—</span></div>
-          <div class="kpi"><b>تحتاج متابعة</b><span id="mFollow">—</span></div>
-          <div class="kpi"><b>موافقة ولي أمر معلّقة</b><span id="mConsent">—</span></div>
-        </div>
-
-        <div class="sep"></div>
-
-        <div class="panel" id="follow" style="padding:12px; border-radius:14px;">
-          <b>قائمة متابعة (آخر 6 حالات)</b>
-          <div class="muted small">يعرض الحالات عالية/معلقة/إحالة</div>
-          <div id="list" style="margin-top:10px"></div>
-        </div>
-      </div>
+    <div class="kpiGrid">
+      <div class="kpi"><div class="k">Requests</div><div class="v" id="kReq">—</div></div>
+      <div class="kpi"><div class="k">Cases</div><div class="v" id="kCases">—</div></div>
+      <div class="kpi"><div class="k">Critical</div><div class="v" id="kCrit">—</div></div>
+      <div class="kpi"><div class="k">Follow-up</div><div class="v" id="kFollow">—</div></div>
     </div>
-  </main>
-</div>
+  </section>
+
+  <div class="sep"></div>
+
+  <!-- Heatmap -->
+  <section class="panel">
+    <div class="h">
+      <h2>🔥 لوحة المتابعة (Heatmap)</h2>
+      <div class="muted">توزيع الحالات حسب الشدة والحالة</div>
+    </div>
+    <div id="heatmapBox"></div>
+  </section>
+
+  <div class="sep"></div>
+
+  <!-- Latest Cases -->
+  <section class="panel">
+    <div class="h">
+      <h2>🗂️ آخر الحالات</h2>
+      <div class="muted">للمراجعة السريعة</div>
+    </div>
+    <div id="casesList"></div>
+  </section>
+
+  <div class="sep"></div>
+
+  <!-- Audit Log -->
+  <section class="panel">
+    <div class="h">
+      <h2>📜 سجل الإجراءات</h2>
+      <div class="muted">توثيق كل إجراء إداري</div>
+    </div>
+    <div id="auditList"></div>
+  </section>
+
+</main>
 
 <script>
-localStorage.setItem("SC_ROLE","admin");
-const $ = (s)=>document.querySelector(s);
+(function(){
+  SCAUTH.requireRole("admin");
+  const $ = (s)=>document.querySelector(s);
 
-function refresh(){
-  const bus = window.SCBUS?.load?.() || {cases:[], requests:[]};
-  const cases = bus.cases || [];
-  const requests = bus.requests || [];
+  function refresh(){
+    const bus = SCBUS.load();
+    const cases = bus.cases || [];
+    const reqs  = bus.requests || [];
 
-  const checked = requests.length; // اعتبر كل Request = كشف
-  const sick = cases.filter(c => ["MED","HIGH","CRIT"].includes(c.priority)).length;
+    $("#kReq").textContent = reqs.length;
+    $("#kCases").textContent = cases.length;
+    $("#kCrit").textContent = cases.filter(c=>c.priority==="CRIT").length;
+    $("#kFollow").textContent = cases.filter(c=>c.status==="FOLLOW_UP").length;
 
-  const ref = cases.filter(c => c.status==="REFERRED").length;
-  const consent = cases.filter(c => c.status==="CONSENT_REQUIRED").length;
+    $("#casesList").innerHTML = cases.slice(0,6).map(c=>`
+      <div class="sc-nav-item">
+        <b>${c.studentName}</b>
+        <div class="muted small">
+          Case ${c.id} • ${c.priority} • ${c.status}
+        </div>
+      </div>
+    `).join("") || `<div class="muted">لا توجد حالات</div>`;
 
-  const rest = cases.filter(c => (c.plan||"").includes("راحة") || c.status==="APPROVED").length;
-  const follow = cases.filter(c => ["HIGH","CRIT"].includes(c.priority) || c.status==="CONSENT_REQUIRED").length;
+    // Heatmap
+    window.SCHEAT && window.SCHEAT.render("heatmapBox");
 
-  $("#mChecked").textContent = checked;
-  $("#mSick").textContent = sick;
-  $("#mRest").textContent = rest;
-  $("#mRef").textContent = ref;
-  $("#mFollow").textContent = follow;
-  $("#mConsent").textContent = consent;
+    // Audit
+    const rows = window.SCAUDIT?.list(10) || [];
+    $("#auditList").innerHTML = rows.map(a=>`
+      <div class="sc-nav-item">
+        <b>${a.action}</b>
+        <div class="muted small">
+          ${new Date(a.at).toLocaleString("ar-SA")}
+          • ${a.actor || "system"}
+        </div>
+      </div>
+    `).join("") || `<div class="muted">لا يوجد سجل بعد</div>`;
+  }
 
-  const top = cases.slice(0,6);
-  $("#list").innerHTML = top.map(c=>{
-    const tag = c.status || "OPEN";
-    return `<div class="sc-nav-item" style="justify-content:space-between">
-      <span>Case ${c.id} • ${c.priority||"—"}</span>
-      <span class="sc-chip">${tag}</span>
-    </div>`;
-  }).join("") || `<div class="muted">لا توجد بيانات بعد</div>`;
-}
-
-$("#btnRefresh").addEventListener("click", refresh);
-refresh();
+  refresh();
+  setInterval(refresh, 2000);
+})();
 </script>
 </body>
 </html>
