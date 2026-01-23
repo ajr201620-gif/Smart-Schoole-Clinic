@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Clinic AR — Student</title>
+  <link rel="stylesheet" href="ar.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">AR</div>
+    <div>
+      <b>AR Student Coach</b>
+      <small>تعليم صحي + إرشاد + SOS</small>
+    </div>
+  </div>
+  <div class="actions">
+    <a class="btn ghost" href="student.html">🎓 رجوع للطالب</a>
+    <a class="btn ghost" href="index.html">🏠 البوابة</a>
+    <button class="btn" id="btnStart">📷 تشغيل الكاميرا</button>
+    <button class="btn ghost" id="btnStop">⛔ إيقاف</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+    <div class="stage">
+      <video id="cam" autoplay playsinline muted></video>
+      <canvas id="hud"></canvas>
+    </div>
+
+    <div class="panel">
+      <div class="h">
+        <h2>المدرب الصحي</h2>
+        <div class="muted">Guided AR</div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi"><b>Step</b><span id="kStep">—</span></div>
+        <div class="kpi"><b>Guide</b><span id="kGuide">—</span></div>
+        <div class="kpi"><b>Mode</b><span>Coach</span></div>
+        <div class="kpi"><b>Safety</b><span>On</span></div>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="row">
+        <button class="btn ghost" id="btnBack">⬅️ السابق</button>
+        <button class="btn" id="btnNext">التالي ➡️</button>
+        <button class="btn" id="btnSOS">🆘 SOS للعيادة</button>
+      </div>
+
+      <div class="row">
+        <button class="btn ghost" id="btnSnapshot">📸 لقطة (تعليمي)</button>
+        <a class="btn ghost" href="doctor.html">👨‍⚕️ صفحة الطبيب</a>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="small">
+        زر <b>SOS</b> يرسل طلب للعيادة في <b>BUS</b> (إذا موجود).<br>
+        الهدف: الطالب يحصل على توجيه بسيط + وصول سريع للمساعدة.
+      </div>
+
+      <div class="sep"></div>
+
+      <img id="shot" alt="snapshot" style="display:none; width:100%; border-radius:16px; border:1px solid var(--stroke);" />
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><b>—</b><small>—</small></div>
+
+<script src="bus.js"></script>
+<script src="ar-kit.js"></script>
+<script>
+  window.SCARKIT.initStudent();
+</script>
+</body>
+</html>
