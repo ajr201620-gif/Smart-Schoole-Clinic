@@ -1,47 +1,28 @@
-/* ===========================================================
-   Admin Slips Panel (offline demo)
-   =========================================================== */
-(function(){
-  const $ = (s)=>document.querySelector(s);
-  function load(){ return window.SCBUS?.load?.() || {slips:[]}; }
+(() => {
+  "use strict";
 
-  function render(containerId="slipsList"){
-    const el = $("#"+containerId);
-    if(!el) return;
+  const issueSlip = ({ caseId, type, days, notes }) => {
+    const id = SSC.uid("slip");
+    const slip = {
+      id,
+      caseId,
+      type: type || "راحة", // راحة | إحالة
+      days: days || 1,
+      notes: notes || "",
+      issuedAt: SSC.nowISO()
+    };
 
-    const bus = load();
-    const slips = bus.slips || [];
+    SSC.updateDB((db) => {
+      db.slips.unshift(slip);
+      db.slips = db.slips.slice(0, 300);
+      return db;
+    });
 
-    el.innerHTML = slips.slice(0,12).map(s=>`
-      <div class="sc-nav-item" style="display:block">
-        <div style="display:flex;justify-content:space-between;gap:10px">
-          <b>${s.action || "سند موافقة"} • Case ${s.caseId}</b>
-          <span class="sc-chip">${s.consent || "—"}</span>
-        </div>
-        <div class="muted small" style="margin-top:6px">
-          ${new Date(s.createdAt).toLocaleString("ar-SA")} • ${s.studentName || "—"}
-        </div>
-        <div class="row" style="margin-top:10px">
-          <button class="btn ghost" data-open-slip="${s.id}">🧾 عرض السند</button>
-        </div>
-      </div>
-    `).join("") || `<div class="muted">لا توجد سندات موافقة بعد</div>`;
-  }
+    SSC.audit("slip.issue", { id, caseId, type, days });
+    SSC.toast("تم إصدار إجراء", `${slip.type} (${slip.days} يوم)`);
+    SSC.emit("slip.created", slip);
+    return slip;
+  };
 
-  function openSlipById(id){
-    const bus = load();
-    const s = (bus.slips||[]).find(x=>x.id===id);
-    if(!s) return alert("السند غير موجود");
-    // استخدام نفس مولّد HTML
-    if(window.SCSLIP) window.SCSLIP.openSlip(s);
-    else alert("permission-slip.js غير محمّل");
-  }
-
-  document.addEventListener("click",(e)=>{
-    const btn = e.target.closest("[data-open-slip]");
-    if(!btn) return;
-    openSlipById(btn.getAttribute("data-open-slip"));
-  });
-
-  window.SCADMINSLIPS = { render };
+  window.SSC_SLIPS = { issueSlip };
 })();
