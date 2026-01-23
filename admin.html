@@ -35,9 +35,16 @@
           <b data-user-name>إدارة المدرسة</b>
         </div>
 
-        <button class="btn ghost" id="btnTheme" data-action="common:theme-toggle">🌓</button>
-        <button class="btn bad" id="btnLogout" data-action="common:logout">خروج</button>
-      </div>
+        <input class="input" id="requestId" type="text" placeholder="Request ID (للموافقة/الرفض)">
+<input class="input" id="caseId" type="text" placeholder="Case ID (للإسناد)">
+
+<button class="btn" id="btnRequests" data-action="btnRequests">📥 الطلبات</button>
+<button class="btn primary" id="btnApprove" data-action="btnApprove">✅ موافقة</button>
+<button class="btn danger" id="btnReject" data-action="btnReject">❌ رفض</button>
+<button class="btn" id="btnAssign" data-action="btnAssign">🩺 إسناد لطبيب</button>
+<button class="btn" id="btnHeatmap" data-action="btnHeatmap">🗺️ Heatmap</button>
+<button class="btn ghost" id="btnHelp" data-action="btnHelp">🆘 مساعدة</button>
+<button class="btn danger" id="btnLogout" data-action="btnLogout">خروج</button>
     </div>
   </header>
 
