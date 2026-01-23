@@ -1,107 +1,142 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="dark">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Smart School Clinic OS — Portal</title>
-  <meta name="theme-color" content="#0b1020"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart School Clinic OS</title>
+  <link rel="stylesheet" href="app.css" />
+  <meta name="theme-color" content="#070815" />
+</head>
 
-  <link rel="stylesheet" href="app.css">
+<body data-page="index">
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar__left">
+      <div class="brand">
+        <div class="brand__logo">🏥</div>
+        <div class="brand__txt">
+          <div class="brand__name">Smart School Clinic OS</div>
+          <div class="brand__sub">بوابة الأدوار • منصة شبه حقيقية جاهزة للربط</div>
+        </div>
+      </div>
+    </div>
 
+    <div class="topbar__right">
+      <button class="btn ghost" id="btnTheme" type="button">🌓 الثيم</button>
+      <a class="btn ghost" href="admin.html" title="دخول سريع (Demo)">⚙️ الإدارة</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <main class="shell">
+    <section class="hero">
+      <div class="hero__glass">
+        <h1 class="hero__title">عيادة مدرسية ذكية — إخراج تحكيمي “Premium”</h1>
+        <p class="hero__desc">
+          اختر دورك وابدأ فورًا: حساسات افتراضية • فرز ذكي AI • زيارة افتراضية • لوحة إدارة • ولي أمر.
+        </p>
+
+        <div class="hero__meta">
+          <label class="check">
+            <input type="checkbox" id="autoEnter" />
+            <span>دخول تلقائي آخر مرة</span>
+          </label>
+          <div class="pill">Static + Ready for Backend</div>
+          <div class="pill">RBAC صلاحيات</div>
+          <div class="pill">LocalStorage بيانات</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Role Cards -->
+    <section class="grid">
+      <button class="card role" data-role="student" type="button">
+        <div class="role__icon">🎒</div>
+        <div class="role__title">الطالب</div>
+        <div class="role__desc">شكوى + توليد حساسيات + فرز AI + طلب زيارة افتراضية</div>
+        <div class="role__chips">
+          <span class="chip">Sensors</span><span class="chip">Triage AI</span><span class="chip">Virtual Visit</span>
+        </div>
+      </button>
+
+      <button class="card role" data-role="doctor" type="button">
+        <div class="role__icon">🩺</div>
+        <div class="role__title">الطبيب</div>
+        <div class="role__desc">مراجعة الحالات + قراءة ثانية + Copilot + قرارات + إحالة/راحة</div>
+        <div class="role__chips">
+          <span class="chip">Copilot</span><span class="chip">Decision</span><span class="chip">Reports</span>
+        </div>
+      </button>
+
+      <button class="card role" data-role="admin" type="button">
+        <div class="role__icon">🏫</div>
+        <div class="role__title">إدارة المدرسة</div>
+        <div class="role__desc">لوحة مؤشرات: عدد الحالات، الحرجة، المتابعة، والإحالات + تصدير</div>
+        <div class="role__chips">
+          <span class="chip">KPIs</span><span class="chip">Heatmap</span><span class="chip">Export</span>
+        </div>
+      </button>
+
+      <button class="card role" data-role="parent" type="button">
+        <div class="role__icon">👨‍👩‍👧</div>
+        <div class="role__title">ولي الأمر</div>
+        <div class="role__desc">متابعة الحالة + موافقات الإجراء + طلب الانضمام للزيارة</div>
+        <div class="role__chips">
+          <span class="chip">Consent</span><span class="chip">Follow-up</span><span class="chip">Join Visit</span>
+        </div>
+      </button>
+    </section>
+
+    <!-- Optional Login (Demo identity) -->
+    <section class="panel">
+      <div class="panel__head">
+        <div class="panel__title">تحديد اسم/معرّف (اختياري)</div>
+        <div class="panel__sub">للعرض فقط — بدون سيرفر</div>
+      </div>
+
+      <div class="panel__body form">
+        <div class="field">
+          <label>الدور</label>
+          <select id="loginRole">
+            <option value="">— اختر —</option>
+            <option value="student">طالب</option>
+            <option value="doctor">طبيب</option>
+            <option value="admin">إدارة</option>
+            <option value="parent">ولي أمر</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>الاسم</label>
+          <input id="loginName" placeholder="مثال: عبدالعزيز / د. أحمد" />
+        </div>
+
+        <div class="field">
+          <label>المعرف (اختياري)</label>
+          <input id="loginId" placeholder="طالب: رقم الطالب • ولي أمر: الهوية • طبيب: رقم الترخيص" />
+        </div>
+
+        <div class="field">
+          <button class="btn solid" id="btnLogin" type="button">🚀 دخول</button>
+          <button class="btn ghost" type="button" id="btnResetDemo" data-action="admin:resetDemo">🧹 تصفير بيانات الديمو</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div>© Smart School Clinic OS • Demo Build</div>
+      <div class="muted">إذا صارت الصفحة بيضاء… أنت غالبًا ناسي تربط CSS/JS في صفحة الدور 😅</div>
+    </footer>
+  </main>
+
+  <!-- Scripts -->
   <script src="bus.js"></script>
   <script src="auth.js"></script>
-  <script src="triage-ai.js"></script>
+  <script src="app-init.js"></script>
+  <script src="actions.js"></script>
   <script src="sensor-sim.js"></script>
+  <script src="triage-ai.js"></script>
   <script src="visit-session.js"></script>
   <script src="doctor-copilot.js"></script>
-  <script src="protocols.js"></script>
-  <script src="audit-log.js"></script>
-  <script src="admin-heatmap.js"></script>
-  <script src="admin-slips.js"></script>
-  <script src="parent-summary.js"></script>
-
-  <!-- app-init.js موجود عندك (لا أرسله) -->
-  <script src="actions.js"></script>
-</head>
-<body>
-
-<header class="topbar">
-  <div class="inner">
-    <div class="brand">
-      <div class="logo">SC</div>
-      <div class="brandText">
-        <div class="name">Smart School Clinic OS</div>
-        <div class="tagline">نظام عيادة مدرسية ذكية — Demo محلي (بدون سيرفر)</div>
-      </div>
-    </div>
-    <div class="pills">
-      <span class="pill" id="roleBadge">Role: guest</span>
-      <span class="pill" id="permBadge">Local Demo</span>
-      <a class="btn ghost" href="report-view.html">📄 التقارير</a>
-    </div>
-  </div>
-</header>
-
-<div class="container">
-
-  <div class="grid">
-    <div class="card">
-      <div class="cardHeader">
-        <h2 class="sectionTitle"><span class="emoji">🧠</span> اختر بوابتك</h2>
-        <span class="small">سيفتح النظام الواجهة المناسبة ويحمّل صلاحياتها</span>
-      </div>
-      <div class="cardBody">
-        <div class="row">
-          <button class="btn primary" onclick="SSC_AUTH.setRole('student','طالب')">🎓 بوابة الطالب</button>
-          <button class="btn primary" onclick="SSC_AUTH.setRole('doctor','طبيب')">🩺 بوابة الطبيب</button>
-          <button class="btn primary" onclick="SSC_AUTH.setRole('admin','إدارة')">🏛️ بوابة الإدارة</button>
-          <button class="btn primary" onclick="SSC_AUTH.setRole('parent','ولي أمر')">👨‍👩‍👧 بوابة ولي الأمر</button>
-        </div>
-
-        <hr>
-
-        <div class="kpis">
-          <div class="kpi">
-            <div class="label">AI Triage</div>
-            <div class="value">Risk / Priority</div>
-            <div class="hint">قرار مقترح + توصية</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Sensors Simulator</div>
-            <div class="value">HR / SpO₂ / Temp</div>
-            <div class="hint">محاكاة حالات واقعية</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Virtual Visit</div>
-            <div class="value">Student ↔ Doctor</div>
-            <div class="hint">قبول/رفض/دعوة ولي الأمر</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Admin Dashboard</div>
-            <div class="value">Cases & Slips</div>
-            <div class="hint">Heatmap + سجل الإجراءات</div>
-          </div>
-        </div>
-      </div>
-      <div class="cardFooter">
-        <button class="btn warn" onclick="localStorage.removeItem(SSC.DB_KEY); location.reload()">🧹 تصفير بيانات العرض</button>
-        <a class="btn" href="report-view.html">📑 عرض التقرير (Demo)</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="cardHeader">
-        <h2 class="sectionTitle"><span class="emoji">📌</span> حالة النظام</h2>
-      </div>
-      <div class="cardBody">
-        <div class="small">آخر نشاط سيتم تسجيله في Audit Log.</div>
-        <hr>
-        <div class="small">ملاحظة: هذه نسخة عرض على GitHub Pages — كل شيء محفوظ محليًا في المتصفح.</div>
-      </div>
-    </div>
-  </div>
-
-</div>
-
 </body>
 </html>
