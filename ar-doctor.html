@@ -1,81 +1,0 @@
-<!doctype html>
-<html lang="ar" dir="rtl" data-theme="dark">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Smart Clinic AR — Doctor</title>
-  <link rel="stylesheet" href="ar.css" />
-</head>
-<body>
-
-<header class="topbar">
-  <div class="brand">
-    <div class="logo">AR</div>
-    <div>
-      <b>AR Doctor HUD</b>
-      <small>كاميرا + HUD + لقطة + حالة</small>
-    </div>
-  </div>
-  <div class="actions">
-    <a class="btn ghost" href="doctor.html">👨‍⚕️ رجوع للطبيب</a>
-    <a class="btn ghost" href="index.html">🏠 البوابة</a>
-    <button class="btn" id="btnStart">📷 تشغيل الكاميرا</button>
-    <button class="btn ghost" id="btnStop">⛔ إيقاف</button>
-  </div>
-</header>
-
-<div class="wrap">
-  <div class="grid">
-    <div class="stage">
-      <video id="cam" autoplay playsinline muted></video>
-      <canvas id="hud"></canvas>
-    </div>
-
-    <div class="panel">
-      <div class="h">
-        <h2>مؤشرات فورية</h2>
-        <div class="muted">Live (Demo)</div>
-      </div>
-
-      <div class="kpis">
-        <div class="kpi"><b>Temp</b><span id="kTemp">—</span></div>
-        <div class="kpi"><b>HR</b><span id="kHr">—</span></div>
-        <div class="kpi"><b>SpO₂</b><span id="kSp">—</span></div>
-        <div class="kpi"><b>Risk</b><span id="kRisk">—</span></div>
-        <div class="kpi"><b>Priority</b><span id="kPri">—</span></div>
-        <div class="kpi"><b>Status</b><span>Ready</span></div>
-      </div>
-
-      <div class="sep"></div>
-
-      <div class="row">
-        <button class="btn" id="btnSnapshot">📸 لقطة للحالة</button>
-        <button class="btn ghost" id="btnMakeCase">🧾 إنشاء حالة</button>
-        <a class="btn ghost" href="report.html">🧾 فتح التقرير</a>
-      </div>
-
-      <div class="sep"></div>
-
-      <div class="badge">✅ تعمل على GitHub Pages</div>
-      <div class="small" style="margin-top:10px;">
-        - “لقطة الحالة” تُحفظ داخل آخر Case في <b>BUS</b> (إذا موجود).<br>
-        - “إنشاء حالة” يرسل إشعار لولي الأمر + الإدارة (BUS).<br>
-        - تقدر تطبع تقرير رسمي من <b>report.html</b>.
-      </div>
-
-      <div class="sep"></div>
-
-      <img id="shot" alt="snapshot" style="display:none; width:100%; border-radius:16px; border:1px solid var(--stroke);" />
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"><b>—</b><small>—</small></div>
-
-<script src="bus.js"></script>
-<script src="ar-kit.js"></script>
-<script>
-  window.SCARKIT.initDoctor();
-</script>
-</body>
-</html>
