@@ -1,251 +1,50 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="dark">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Smart Clinic OS — تقرير رسمي</title>
-
-  <script src="js/bus.js"></script>
-  <script src="js/permission-slip.js"></script>
-
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:#f6f7fb;color:#111;margin:0;padding:20px}
-    .paper{max-width:920px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:18px}
-    .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-    .brand{font-weight:900;font-size:18px}
-    .sub{color:#6b7280;font-size:12px;margin-top:4px}
-    .tag{font-size:12px;padding:6px 10px;border:1px solid #e5e7eb;border-radius:999px;background:#fafafa}
-    h2{margin:18px 0 10px;font-size:14px}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .card{border:1px solid #e5e7eb;border-radius:14px;padding:12px;background:#fff}
-    .row{display:flex;gap:10px;padding:6px 0;border-bottom:1px dashed #eef0f4}
-    .row:last-child{border-bottom:none}
-    .k{min-width:140px;color:#6b7280;font-size:12px}
-    .v{flex:1;font-size:12px;font-weight:650}
-    pre{white-space:pre-wrap;font-size:12px;margin:0;color:#111}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    .btn{cursor:pointer;border-radius:12px;padding:10px 12px;border:1px solid #e5e7eb;background:#111;color:#fff;font-weight:800}
-    .btn.ghost{background:#fff;color:#111}
-    .muted{color:#6b7280;font-size:12px}
-    @media print{body{background:#fff;padding:0}.paper{border:none;border-radius:0}.actions{display:none}}
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>عرض التقرير — العيادة المدرسية الذكية</title>
+  <link rel="stylesheet" href="app.css" />
+  <link rel="stylesheet" href="ui.css" />
 </head>
 
-<body>
-<div class="paper">
-  <div class="top">
-    <div>
-      <div class="brand">Smart Clinic OS — تقرير زيارة/حالة</div>
-      <div class="sub" id="meta">—</div>
+<body data-page="report-view">
+  <header class="topbar">
+    <div class="topbar__left">
+      <a class="btn ghost" href="report.html">↩︎ رجوع</a>
+      <div class="brand mini">
+        <div class="brand__logo">👁️</div>
+        <div class="brand__txt">
+          <div class="brand__name">عرض التقرير</div>
+          <div class="brand__sub">واجهة عرض فخمة للطباعة/العرض</div>
+        </div>
+      </div>
     </div>
-    <div class="tag" id="tag">Status: —</div>
-  </div>
 
-  <div class="actions">
-    <button class="btn ghost" id="btnBack">⬅️ رجوع</button>
-    <button class="btn ghost" id="btnPrint">🖨️ طباعة</button>
-    <button class="btn ghost" id="btnCopy">📋 نسخ التقرير</button>
+    <div class="topbar__right">
+      <button class="btn primary" data-action="report:download">⬇️ تنزيل</button>
+      <button class="btn ghost" id="btnTheme" data-action="common:theme-toggle">🌓</button>
+    </div>
+  </header>
 
-    <button class="btn" id="btnConsentYes" style="display:none">✅ موافقة</button>
-    <button class="btn ghost" id="btnConsentNo" style="display:none">⛔ رفض</button>
-  </div>
+  <main class="shell">
+    <section class="card">
+      <header class="card__head">
+        <h2 class="card__title">🧾 التقرير التنفيذي</h2>
+        <div class="card__tools"><span class="pill"><span class="dot ok"></span> Ready</span></div>
+      </header>
+      <div class="card__body">
+        <div id="reportView" class="list">
+          <div class="empty muted">يتم تحميل التقرير…</div>
+        </div>
+      </div>
+    </section>
+  </main>
 
-  <div class="muted" id="notice" style="margin-top:6px"></div>
-
-  <h2>بيانات الحالة</h2>
-  <div class="card" id="caseBox"></div>
-
-  <h2>الشكوى</h2>
-  <div class="card"><pre id="complaint">—</pre></div>
-
-  <h2>العلامات الحيوية</h2>
-  <div class="grid">
-    <div class="card" id="vitalsBox"></div>
-    <div class="card" id="aiBox"></div>
-  </div>
-
-  <h2>تشخيص الطبيب</h2>
-  <div class="card"><pre id="dx">—</pre></div>
-
-  <h2>الخطة</h2>
-  <div class="card"><pre id="plan">—</pre></div>
-
-  <h2>ملاحظات الزيارة</h2>
-  <div class="card"><pre id="notes">—</pre></div>
-
-  <div class="muted" style="margin-top:14px">
-    ملاحظة: هذا نموذج عرض (Demo) وليس بديلاً عن التقييم السريري.
-  </div>
-</div>
-
-<script>
-const $ = (s)=>document.querySelector(s);
-const qs = new URLSearchParams(location.search);
-const caseId = qs.get("case") || "";
-const role = (qs.get("role") || localStorage.getItem("SC_ROLE") || "parent").toLowerCase();
-const autoPrint = qs.get("autoprint")==="1";
-
-function esc(x){ return String(x??"").replace(/[&<>"]/g,(m)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[m])); }
-function line(k,v){ return `<div class="row"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div></div>`; }
-
-function getCase(){
-  const bus = window.SCBUS?.load?.() || {cases:[]};
-  return (bus.cases||[]).find(c=>String(c.id)===String(caseId)) || null;
-}
-function patchCase(patch){
-  const bus = window.SCBUS.load();
-  const idx = (bus.cases||[]).findIndex(c=>String(c.id)===String(caseId));
-  if(idx<0) return null;
-  bus.cases[idx] = Object.assign({}, bus.cases[idx], patch);
-  window.SCBUS.save(bus);
-  return bus.cases[idx];
-}
-
-function buildText(c){
-  const v=c.vitals||{}, ai=c.ai||{};
-  return [
-    "Smart Clinic OS — تقرير",
-    "—".repeat(40),
-    `Case: ${c.id}`,
-    `Status: ${c.status||"—"}`,
-    `Priority: ${c.priority||ai.priority||"—"} | Risk: ${(c.riskScore??ai.risk??"—")}/100`,
-    "",
-    "الشكوى:",
-    (c.requestDesc||c.desc||c.complaint||"—"),
-    "",
-    "Vitals:",
-    `Temp: ${v.temp??"—"}  HR: ${v.hr??"—"}  SpO2: ${v.spo2??"—"}  BP: ${v.bp??"—"}`,
-    "",
-    "Dx:",
-    (c.dx||"—"),
-    "",
-    "Plan:",
-    (c.plan||"—"),
-    "",
-    "Visit Notes:",
-    (c.visit?.notes||"—"),
-    "—".repeat(40)
-  ].join("\n");
-}
-
-function render(){
-  const c = getCase();
-  if(!c){
-    $("#notice").textContent = "لم يتم العثور على الحالة. تأكد من رقم case في الرابط.";
-    return;
-  }
-  const ai = c.ai||{};
-  const v = c.vitals||{};
-  $("#meta").textContent = `Case ${c.id} • Role: ${role} • Generated: ${new Date().toLocaleString("ar-SA")}`;
-  $("#tag").textContent = `Status: ${c.status||"—"}`;
-
-  $("#caseBox").innerHTML = [
-    line("رقم الحالة", c.id),
-    line("Priority", c.priority||ai.priority||"—"),
-    line("Risk", (c.riskScore??ai.risk??"—") + "/100"),
-    line("القرار", c.decision||ai.recommendation||"—"),
-    line("موافقة ولي الأمر", c.consent || "—")
-  ].join("");
-
-  $("#complaint").textContent = c.requestDesc||c.desc||c.complaint||"—";
-  $("#vitalsBox").innerHTML = [
-    line("Temp", v.temp ? v.temp+"°C" : "—"),
-    line("HR", v.hr ? v.hr+" bpm" : "—"),
-    line("SpO₂", v.spo2 ? v.spo2+"%" : "—"),
-    line("BP", v.bp || "—")
-  ].join("");
-
-  $("#aiBox").innerHTML = [
-    line("AI Recommendation", ai.recommendation || "—"),
-    line("Flags", (ai.flags||[]).join(", ") || "—")
-  ].join("");
-
-  $("#dx").textContent = c.dx || "—";
-  $("#plan").textContent = c.plan || "—";
-  $("#notes").textContent = c.visit?.notes || "—";
-
-  const needConsent = (c.status === "CONSENT_REQUIRED");
-  const isParent = (role === "parent");
-  $("#btnConsentYes").style.display = (needConsent && isParent) ? "" : "none";
-  $("#btnConsentNo").style.display  = (needConsent && isParent) ? "" : "none";
-
-  $("#notice").textContent = (needConsent && isParent)
-    ? "هذه الحالة تتطلب موافقتك. اختر موافقة/رفض وسيتم تحديث الحالة فورًا، وعند الموافقة سيتم إنشاء سند رسمي."
-    : "";
-}
-
-$("#btnBack").addEventListener("click", ()=>{
-  location.href = role==="doctor" ? "doctor.html" : role==="admin" ? "admin.html" : role==="student" ? "student.html" : "parent.html";
-});
-$("#btnPrint").addEventListener("click", ()=> window.print());
-$("#btnCopy").addEventListener("click", async ()=>{
-  const c = getCase();
-  if(!c) return;
-  const txt = buildText(c);
-  try{ await navigator.clipboard.writeText(txt); alert("تم النسخ ✅"); }
-  catch(_){ alert("ماقدرت أنسخ تلقائيًا، انسخه يدويًا."); }
-});
-
-$("#btnConsentYes").addEventListener("click", ()=>{
-  const c = getCase();
-  if(!c) return;
-
-  // توقيع إلكتروني (Demo)
-  const guardianName = prompt("اكتب اسم ولي الأمر للتوقيع الإلكتروني:","") || "";
-  const guardianPhone = prompt("رقم الجوال (اختياري للعرض):","") || "";
-  const ok = confirm("تأكيد: أوافق إلكترونيًا على الخطة/الإجراء المذكور في التقرير.");
-  if(!ok) return;
-
-  patchCase({
-    consent:"APPROVED",
-    status:"APPROVED_BY_PARENT",
-    guardianSig: { name: guardianName.trim()||"ولي أمر (Demo)", phone: guardianPhone.trim()||"—", at: new Date().toISOString() }
-  });
-
-  // إنشاء سند موافقة رسمي + فتحه
-  const slip = window.SCSLIP?.createSlip(c.id, "موافقة على إجراء/خطة علاج", {
-    guardianName: guardianName.trim()||"ولي أمر (Demo)",
-    guardianPhone: guardianPhone.trim()||"—",
-    signedAt: new Date().toISOString()
-  });
-  if(slip) window.SCSLIP.openSlip(slip);
-
-  alert("تمت الموافقة ✅ وتم إنشاء سند موافقة رسمي");
-  render();
-});
-
-$("#btnConsentNo").addEventListener("click", ()=>{
-  const c = getCase();
-  if(!c) return;
-
-  const fallbackPlan =
-`خطة بديلة (بسبب عدم الموافقة):
-• متابعة داخل المدرسة
-• راحة + سوائل + إرشاد صحي
-• إعادة قراءة بعد 30–60 دقيقة إذا استمرت الأعراض
-• التواصل مع ولي الأمر إذا ساءت الحالة`;
-
-  patchCase({
-    consent:"REJECTED",
-    status:"FOLLOW_UP",
-    plan: fallbackPlan
-  });
-
-  try{ window.SCBUS.pushAlert("admin","MED","رفض موافقة ولي الأمر","تم تحويل الحالة لمتابعة", { caseId: c.id }); }catch(_){}
-
-  alert("تم الرفض ⛔ وتم تحويل الحالة لمتابعة بخطة بديلة");
-  render();
-});
-
-render();
-if(autoPrint) setTimeout(()=>window.print(), 500);
-</script>
-    <!-- باقي سكربتاتك -->
-  
-
-  <!-- Firebase (لازم آخر شيء وقبل </body>) -->
- <script type="module" src="./firebase-init.js"></script>
-<script src="./rbac.js"></script>
-<script src="./actions.js"></script>
+  <script src="./bus.js"></script>
+  <script src="./auth.js"></script>
+  <script type="module" src="./firebase-init.js"></script>
+  <script src="./rbac.js"></script>
+  <script src="./actions.js"></script>
 </body>
 </html>
