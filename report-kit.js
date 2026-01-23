@@ -229,7 +229,16 @@
               <div class="kv"><span>SpO2</span><b>${esc(String(c.vitals?.spo2 ?? "—"))}</b></div>
               <div class="kv"><span>BP</span><b>${esc(String(c.vitals?.bp ?? "—"))}</b></div>
             </div>
-
+    const atts = (c.media?.attachments || []).slice(0, 6);
+const attHtml = atts.length
+  ? `<div class="attgrid">${atts.map(a=>`
+      <div class="att">
+        <img src="${esc(a.dataUrl)}" alt="att" />
+        <div class="muted small">${esc(a.title || "Attachment")} • ${esc(a.t || "")}</div>
+      </div>
+    `).join("")}</div>`
+  : `<div class="muted">لا توجد مرفقات بعد</div>`;
+     
             <div class="sc-rk-card sc-rk-wide">
               <h3>التشخيص والخطة</h3>
               <div class="blk"><b>Diagnosis</b><div>${esc(c.dx)}</div></div>
