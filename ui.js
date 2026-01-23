@@ -1,26 +1,19 @@
-// ui.js — Theme switcher for data-ui
-(function(){
-  const KEY="UI_MODE";
-  const order=["pro","clean","neo"];
-
-  function apply(v){
-    document.documentElement.setAttribute("data-ui", v);
-    localStorage.setItem(KEY, v);
-  }
-
-  function init(){
-    const saved = localStorage.getItem(KEY) || "pro";
-    apply(saved);
-
-    document.addEventListener("click", (e)=>{
-      const btn = e.target.closest?.("[data-ui-toggle]");
-      if(!btn) return;
-      const cur = document.documentElement.getAttribute("data-ui") || "pro";
-      const idx = order.indexOf(cur);
-      const next = order[(idx+1+order.length)%order.length];
-      apply(next);
-      btn.textContent = next === "pro" ? "PRO" : next === "clean" ? "CLEAN" : "NEO";
+// ui.js — tiny premium polish (reveal + auto tag)
+(() => {
+  const reveal = () => {
+    document.querySelectorAll(".hero__left, .hero__right, .card").forEach((el) => {
+      el.setAttribute("data-reveal", "1");
     });
+    requestAnimationFrame(() => {
+      document.querySelectorAll("[data-reveal]").forEach((el, i) => {
+        setTimeout(() => el.classList.add("on"), 60 + i * 60);
+      });
+    });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", reveal);
+  } else {
+    reveal();
   }
-  document.addEventListener("DOMContentLoaded", init);
 })();
