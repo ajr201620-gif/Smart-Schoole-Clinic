@@ -1,357 +1,572 @@
+/* actions.js — Smart School Clinic OS (Static)
+   - Works with: bus.js, auth.js, sensor-sim.js, triage-ai.js, visit-session.js
+   - Persists everything to localStorage
+*/
+
 (() => {
   "use strict";
 
-  const $ = (s, r=document) => r.querySelector(s);
-  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const KEY = {
+    STATE: "ssc_state_v1",
+    CASES: "ssc_cases_v1",
+    VISITS: "ssc_visits_v1",
+    AUDIT: "ssc_audit_v1",
+    USER: "ssc_user_v1",
+  };
 
-  const getActiveCaseId = () => SSC.getDB().settings?.activeCaseId || null;
-  const setActiveCaseId = (id) => SSC.updateDB(db => { db.settings.activeCaseId = id; return db; });
+  const now = () => new Date().toISOString();
+  const uid = () => Math.random().toString(16).slice(2) + "-" + Date.now().toString(16);
+  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const LS = {
+    get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+    set(k, v) { localStorage.setItem(k, JSON.stringify(v)); return v; }
+  };
 
-  const ensureToastHost = () => {
-    if ($(".toastWrap")) return;
-    const wrap = document.createElement("div");
-    wrap.className = "toastWrap";
-    document.body.appendChild(wrap);
-
-    SSC.on("toast", (t) => {
-      const el = document.createElement("div");
-      el.className = "toast";
-      el.innerHTML = `<div class="t">${t.title}</div><div class="m">${t.message}</div>`;
-      wrap.prepend(el);
-      setTimeout(() => el.remove(), 4200);
+  // ---------- App State ----------
+  function getState() {
+    return LS.get(KEY.STATE, {
+      lastCaseId: null,
+      lastVisitId: null,
+      counters: { requests: 0, cases: 0, critical: 0, followup: 0 },
+      version: 1
     });
-  };
+  }
+  function setState(patch) {
+    const s = { ...getState(), ...patch };
+    LS.set(KEY.STATE, s);
+    return s;
+  }
 
-  const renderBadges = () => {
-    const role = SSC_AUTH.getRole();
-    const elRole = $("#roleBadge");
-    const elP = $("#permBadge");
-    if (elRole) elRole.textContent = `Role: ${role}`;
-    if (elP) elP.textContent = SSC.getDB().settings?.demoMode ? "Local Demo" : "Live";
-  };
+  function getCases() { return LS.get(KEY.CASES, []); }
+  function setCases(list) { return LS.set(KEY.CASES, list); }
 
-  // ---------- Case helpers ----------
-  const createCaseFromStudentUI = () => {
-    if (!SSC_AUTH.can("case.create")) return SSC.toast("صلاحيات", "غير مسموح");
+  function getVisits() { return LS.get(KEY.VISITS, []); }
+  function setVisits(list) { return LS.set(KEY.VISITS, list); }
 
-    const complaint = ($("#complaint")?.value || "").trim();
-    if (!complaint) {
-      SSC.toast("الشكوى", "اكتب الشكوى أولاً");
-      return;
-    }
+  function getAudit() { return LS.get(KEY.AUDIT, []); }
+  function pushAudit(entry) {
+    const list = getAudit();
+    list.unshift({ id: uid(), at: now(), ...entry });
+    LS.set(KEY.AUDIT, list.slice(0, 400));
+  }
 
-    const vitals = {
-      hr: Number($("#v_hr")?.textContent || $("#hr")?.value || 0) || 0,
-      spo2: Number($("#v_spo2")?.textContent || $("#spo2")?.value || 0) || 0,
-      temp: Number($("#v_temp")?.textContent || $("#temp")?.value || 0) || 0,
-      bpSys: Number($("#v_bpSys")?.textContent || $("#bpSys")?.value || 0) || 0,
-      bpDia: Number($("#v_bpDia")?.textContent || $("#bpDia")?.value || 0) || 0,
+  function getUser() {
+    return LS.get(KEY.USER, { role: "student", name: "طالب (Demo)", schoolId: "S-1001" });
+  }
+
+  // ---------- Helpers ----------
+  function computeCounters(cases, visits) {
+    const requests = visits.filter(v => v.status === "pending").length;
+    const all = cases.length;
+    const critical = cases.filter(c => c.ai?.priority === "High" || c.ai?.risk === "High").length;
+    const followup = cases.filter(c => c.plan?.type === "Follow-up").length;
+    return { requests, cases: all, critical, followup };
+  }
+
+  function normalizeVitals(v) {
+    return {
+      hr: Math.round(clamp(v.hr ?? 0, 30, 200)),
+      spo2: Math.round(clamp(v.spo2 ?? 0, 70, 100)),
+      temp: +(clamp(v.temp ?? 0, 34, 41).toFixed(1)),
+      bpSys: Math.round(clamp(v.bpSys ?? 0, 70, 200)),
+      bpDia: Math.round(clamp(v.bpDia ?? 0, 40, 130)),
     };
+  }
 
-    const triage = SSC_TRIAGE.runTriage({ ...vitals, complaintText: complaint, complaint });
+  function ensurePatientIdentity(payload = {}) {
+    const u = getUser();
+    const name = payload.patientName || u.name || "طالب (Demo)";
+    const schoolId = payload.patientId || u.schoolId || "S-1001";
+    const grade = payload.grade || pick(["خامس", "سادس", "أول متوسط", "ثاني متوسط", "ثالث متوسط"]);
+    const age = payload.age || pick([10, 11, 12, 13, 14, 15, 16]);
+    return { name, schoolId, grade, age };
+  }
 
+  // ---------- Core: Create/Update Case ----------
+  function createCase({ complaint, vitals, ai, meta }) {
+    const patient = ensurePatientIdentity(meta);
+    const cases = getCases();
+
+    const id = uid();
     const c = {
-      id: SSC.uid("case"),
-      createdAt: SSC.nowISO(),
-      updatedAt: SSC.nowISO(),
-      student: { name: SSC.getDB().user?.name || "طالب" },
-      complaint,
-      vitals,
-      triage,
-      status: "ready",
-      history: [{ at: SSC.nowISO(), what: "case.created" }]
+      id,
+      createdAt: now(),
+      updatedAt: now(),
+      status: "open",        // open | in_review | resolved
+      patient,
+      complaint: complaint?.trim() || "",
+      vitals: normalizeVitals(vitals || {}),
+      ai: ai || null,
+      plan: null,            // doctor plan
+      attachments: [],
+      notes: [],
+      flags: { parentRequested: false, consentRequired: false },
     };
 
-    SSC.updateDB((db) => {
-      db.cases.unshift(c);
-      db.cases = db.cases.slice(0, 300);
-      db.settings.activeCaseId = c.id;
-      return db;
+    cases.unshift(c);
+    setCases(cases);
+
+    const counters = computeCounters(cases, getVisits());
+    setState({ lastCaseId: id, counters });
+
+    pushAudit({ type: "CASE_CREATED", role: getUser().role, ref: id, summary: `إنشاء حالة للطالب ${patient.name}` });
+
+    // notify UI
+    window.bus?.emit("case:created", c);
+    window.bus?.emit("stats:update", counters);
+
+    return c;
+  }
+
+  function updateCase(caseId, patch) {
+    const cases = getCases();
+    const i = cases.findIndex(c => c.id === caseId);
+    if (i < 0) return null;
+
+    const before = cases[i];
+    const after = { ...before, ...patch, updatedAt: now() };
+    cases[i] = after;
+    setCases(cases);
+
+    const counters = computeCounters(cases, getVisits());
+    setState({ lastCaseId: caseId, counters });
+
+    window.bus?.emit("case:updated", after);
+    window.bus?.emit("stats:update", counters);
+
+    return after;
+  }
+
+  // ---------- Student Flow ----------
+  function studentGenerateVitals(mode = "mixed") {
+    const v = window.SensorSim?.generate(mode) || { hr: 88, spo2: 98, temp: 36.8, bpSys: 112, bpDia: 72 };
+    const vitals = normalizeVitals(v);
+    window.bus?.emit("vitals:generated", vitals);
+    pushAudit({ type: "VITALS_GENERATED", role: "student", summary: `توليد قراءات حساسات (${mode})` });
+    return vitals;
+  }
+
+  function studentRunTriage({ complaint, vitals }) {
+    const vit = normalizeVitals(vitals || {});
+    const ai = window.TriageAI?.triage({ complaint, vitals: vit }) || null;
+    window.bus?.emit("triage:result", ai);
+    pushAudit({ type: "AI_TRIAGE", role: "student", summary: `فرز ذكي AI: ${ai?.priority || "—"} / ${ai?.risk || "—"}` });
+    return ai;
+  }
+
+  function studentCreateCaseFromUI({ complaint, vitals, ai }) {
+    const c = createCase({ complaint, vitals, ai, meta: {} });
+    return c;
+  }
+
+  function studentRequestVirtualVisit({ caseId, reason }) {
+    const cases = getCases();
+    const c = cases.find(x => x.id === caseId);
+    if (!c) return null;
+
+    const visits = getVisits();
+    const id = uid();
+    const v = {
+      id,
+      createdAt: now(),
+      updatedAt: now(),
+      caseId: c.id,
+      patient: c.patient,
+      status: "pending", // pending | accepted | rejected | completed | cancelled
+      requestedBy: "student",
+      requestedReason: reason || "طلب زيارة افتراضية",
+      doctorDecision: null,
+      allowParent: false,
+      consent: { required: false, approved: false },
+      room: { joinCode: Math.random().toString(10).slice(2, 8), urlHash: "#visit" },
+      timeline: [{ at: now(), txt: "تم إنشاء طلب الزيارة الافتراضية" }],
+    };
+
+    visits.unshift(v);
+    setVisits(visits);
+
+    // Case flags
+    updateCase(c.id, { status: "in_review" });
+
+    const counters = computeCounters(getCases(), visits);
+    setState({ lastVisitId: id, counters });
+
+    pushAudit({ type: "VISIT_REQUESTED", role: "student", ref: id, summary: `طلب زيارة افتراضية للحالة ${c.id}` });
+
+    window.bus?.emit("visit:created", v);
+    window.bus?.emit("stats:update", counters);
+
+    return v;
+  }
+
+  // ---------- Doctor Flow ----------
+  function doctorRequestRecheck(caseId, which = "all") {
+    const c = getCases().find(x => x.id === caseId);
+    if (!c) return null;
+
+    // generate a second reading (slightly different)
+    const v2 = normalizeVitals(window.SensorSim?.generate("mixed") || c.vitals);
+    const note = { at: now(), by: "doctor", txt: `طلب إعادة قياس (${which}) — تم استلام قراءة ثانية.` };
+
+    const updated = updateCase(caseId, {
+      vitals: v2,
+      notes: [note, ...(c.notes || [])]
     });
 
-    SSC.audit("case.create", { caseId: c.id });
-    SSC.toast("تم إنشاء الحالة", `Risk ${triage.risk}/100 — ${triage.priorityLabel}`);
-    SSC.emit("case.updated", c);
+    pushAudit({ type: "DOCTOR_RECHECK", role: "doctor", ref: caseId, summary: "طلب قراءة ثانية للحساسات" });
+    window.bus?.emit("toast", { type: "info", msg: "تم تحديث القراءات (قراءة ثانية)" });
 
-    renderStudentCase(c);
-  };
+    return updated;
+  }
 
-  const renderStudentCase = (c) => {
-    if (!c) return;
+  function doctorAskCopilot({ caseId, question }) {
+    const c = getCases().find(x => x.id === caseId);
+    if (!c) return null;
+    const res = window.DoctorCopilot?.answer({ case: c, question }) || { answer: "—" };
+    pushAudit({ type: "DOCTOR_COPILOT", role: "doctor", ref: caseId, summary: `سؤال مساعد الطبيب: ${question?.slice(0,60)}` });
+    window.bus?.emit("copilot:answer", res);
+    return res;
+  }
 
-    const setText = (id, txt) => { const el = $(id); if (el) el.textContent = txt; };
-    setText("#out_risk", c.triage?.risk ?? "—");
-    setText("#out_priority", c.triage?.priorityLabel ?? "—");
-    setText("#out_rec", c.triage?.recommendation ?? "—");
-    setText("#out_decision", c.triage?.suggestedDecision ?? "—");
+  function doctorSetPlan(caseId, plan) {
+    const c = getCases().find(x => x.id === caseId);
+    if (!c) return null;
 
-    const vit = c.vitals || {};
-    setText("#v_hr", vit.hr ?? "—");
-    setText("#v_spo2", vit.spo2 ?? "—");
-    setText("#v_temp", vit.temp ?? "—");
-    setText("#v_bp", (vit.bpSys && vit.bpDia) ? `${vit.bpSys}/${vit.bpDia}` : "—");
-  };
+    const updated = updateCase(caseId, { plan: { ...plan, at: now(), by: "doctor" }, status: "resolved" });
+    pushAudit({ type: "DOCTOR_PLAN", role: "doctor", ref: caseId, summary: `خطة علاج/قرار: ${plan?.type || "—"}` });
+    window.bus?.emit("toast", { type: "ok", msg: "تم حفظ قرار الطبيب" });
+    return updated;
+  }
 
-  const simulateSensorsToStudentUI = (preset="mixed") => {
-    if (!SSC_AUTH.can("case.simulateSensors")) return SSC.toast("صلاحيات", "غير مسموح");
+  function doctorDecisionOnVisit(visitId, decision, opts = {}) {
+    const visits = getVisits();
+    const i = visits.findIndex(v => v.id === visitId);
+    if (i < 0) return null;
 
-    const vit = SSC_SENSORS.simulate(preset);
+    const v = visits[i];
+    const d = {
+      at: now(),
+      by: "doctor",
+      decision, // accept | reject | parent_join | consent_required | refer
+      note: opts.note || "",
+    };
 
-    const setText = (id, txt) => { const el = $(id); if (el) el.textContent = String(txt); };
-    setText("#v_hr", vit.hr);
-    setText("#v_spo2", vit.spo2);
-    setText("#v_temp", vit.temp);
-    setText("#v_bp", `${vit.bpSys}/${vit.bpDia}`);
+    let status = v.status;
+    if (decision === "accept") status = "accepted";
+    if (decision === "reject") status = "rejected";
+    if (decision === "refer") status = "accepted"; // still can be handled in visit page + plan
+    // parent_join/consent_required keep pending until student/parent approves
+    if (decision === "parent_join") status = "pending";
+    if (decision === "consent_required") status = "pending";
 
-    SSC.audit("sensors.simulate", { preset });
-    SSC.toast("محاكاة الحساسات", `HR ${vit.hr} • SpO₂ ${vit.spo2}% • Temp ${vit.temp}`);
-  };
+    const allowParent = decision === "parent_join" ? true : v.allowParent;
+    const consentRequired = decision === "consent_required" ? true : (v.consent?.required || false);
 
-  const requestVisitFromStudent = () => {
-    if (!SSC_AUTH.can("visit.request")) return SSC.toast("صلاحيات", "غير مسموح");
-    const caseId = getActiveCaseId();
-    if (!caseId) return SSC.toast("زيارة افتراضية", "أنشئ حالة أولاً");
+    const updated = {
+      ...v,
+      updatedAt: now(),
+      status,
+      allowParent,
+      consent: { required: consentRequired, approved: v.consent?.approved || false },
+      doctorDecision: d,
+      timeline: [{ at: now(), txt: `قرار الطبيب: ${decision}` }, ...(v.timeline || [])],
+    };
 
-    const c = SSC.getDB().cases.find(x => x.id === caseId);
-    const v = SSC_VISIT.createVisit({ caseId, fromRole: "student", studentName: c?.student?.name || "طالب" });
+    visits[i] = updated;
+    setVisits(visits);
 
-    // Open visit page as student
-    window.location.href = `visit.html?visit=${encodeURIComponent(v.id)}&as=student`;
-  };
+    // Update counters
+    const counters = computeCounters(getCases(), visits);
+    setState({ lastVisitId: visitId, counters });
+    window.bus?.emit("visit:updated", updated);
+    window.bus?.emit("stats:update", counters);
 
-  // ---------- Doctor side ----------
-  const getSelectedDoctorCase = () => {
-    const id = $("#doctorCaseSelect")?.value || getActiveCaseId();
-    if (!id) return null;
-    return SSC.getDB().cases.find(x => x.id === id) || null;
-  };
+    pushAudit({ type: "VISIT_DECISION", role: "doctor", ref: visitId, summary: `قرار الطبيب على الزيارة: ${decision}` });
 
-  const doctorRequestRecheck = () => {
-    if (!SSC_AUTH.can("case.requestRecheck")) return SSC.toast("صلاحيات", "غير مسموح");
-    const c = getSelectedDoctorCase();
-    if (!c) return SSC.toast("قراءة ثانية", "اختر حالة");
+    return updated;
+  }
 
-    SSC.updateDB(db => {
-      const x = db.cases.find(k => k.id === c.id);
-      if (!x) return db;
-      x.history.unshift({ at: SSC.nowISO(), what: "doctor.requestRecheck" });
-      x.status = "recheck_requested";
-      return db;
-    });
+  // ---------- Parent Flow ----------
+  function parentApproveConsent(visitId, approved = true) {
+    const visits = getVisits();
+    const i = visits.findIndex(v => v.id === visitId);
+    if (i < 0) return null;
+    const v = visits[i];
 
-    SSC.audit("case.requestRecheck", { caseId: c.id });
-    SSC.toast("طلب قراءة ثانية", "تم إرسال طلب إعادة قياس للطالب (نسخة عرض)");
-    SSC.emit("case.updated", SSC.getDB().cases.find(x=>x.id===c.id));
-  };
+    const updated = {
+      ...v,
+      updatedAt: now(),
+      consent: { required: true, approved: !!approved },
+      timeline: [{ at: now(), txt: approved ? "ولي الأمر: تمت الموافقة على الإجراء" : "ولي الأمر: تم رفض الموافقة" }, ...(v.timeline || [])],
+    };
 
-  const doctorIssueSlip = (type) => {
-    if (!SSC_AUTH.can("slip.issue")) return SSC.toast("صلاحيات", "غير مسموح");
-    const c = getSelectedDoctorCase();
-    if (!c) return SSC.toast("إجراء", "اختر حالة");
+    visits[i] = updated;
+    setVisits(visits);
 
-    const days = Number($("#slipDays")?.value || 1) || 1;
-    const notes = ($("#slipNotes")?.value || "").trim();
+    pushAudit({ type: "PARENT_CONSENT", role: "parent", ref: visitId, summary: approved ? "موافقة ولي الأمر" : "رفض ولي الأمر" });
+    window.bus?.emit("visit:updated", updated);
 
-    SSC_SLIPS.issueSlip({ caseId: c.id, type, days, notes });
+    return updated;
+  }
 
-    SSC.updateDB(db => {
-      const x = db.cases.find(k => k.id === c.id);
-      if (!x) return db;
-      x.history.unshift({ at: SSC.nowISO(), what: `slip.${type}` });
-      x.status = (type === "إحالة") ? "referred" : "rested";
-      return db;
-    });
+  function parentJoinRequest(visitId) {
+    const visits = getVisits();
+    const i = visits.findIndex(v => v.id === visitId);
+    if (i < 0) return null;
+    const v = visits[i];
+    const updated = {
+      ...v,
+      updatedAt: now(),
+      allowParent: true,
+      timeline: [{ at: now(), txt: "ولي الأمر طلب/فعّل الانضمام" }, ...(v.timeline || [])],
+    };
+    visits[i] = updated;
+    setVisits(visits);
 
-    SSC.emit("case.updated", SSC.getDB().cases.find(x=>x.id===c.id));
-  };
+    pushAudit({ type: "PARENT_JOIN", role: "parent", ref: visitId, summary: "تفعيل انضمام ولي الأمر" });
+    window.bus?.emit("visit:updated", updated);
+    return updated;
+  }
 
-  const doctorAcceptLatestVisit = () => {
-    if (!SSC_AUTH.can("visit.accept")) return SSC.toast("صلاحيات", "غير مسموح");
-    const v = SSC.getDB().visits.find(x => x.status === "requested");
-    if (!v) return SSC.toast("الزيارات", "لا يوجد طلبات جديدة");
-    SSC_VISIT.accept(v.id);
-    window.location.href = `visit.html?visit=${encodeURIComponent(v.id)}&as=doctor`;
-  };
+  // ---------- Visit Session ----------
+  function startVisit(visitId, who = "student") {
+    const visits = getVisits();
+    const i = visits.findIndex(v => v.id === visitId);
+    if (i < 0) return null;
+    const v = visits[i];
 
-  const doctorRejectLatestVisit = () => {
-    if (!SSC_AUTH.can("visit.reject")) return SSC.toast("صلاحيات", "غير مسموح");
-    const v = SSC.getDB().visits.find(x => x.status === "requested");
-    if (!v) return SSC.toast("الزيارات", "لا يوجد طلبات جديدة");
-    const reason = prompt("سبب الرفض؟ (اختياري)") || "";
-    SSC_VISIT.reject(v.id, reason);
-  };
+    const updated = window.VisitSession?.start(v, who) || v;
+    visits[i] = updated;
+    setVisits(visits);
 
-  const doctorInviteParent = () => {
-    if (!SSC_AUTH.can("visit.inviteParent")) return SSC.toast("صلاحيات", "غير مسموح");
-    const id = $("#visitId")?.value?.trim();
-    if (!id) return SSC.toast("دعوة ولي الأمر", "اكتب Visit ID أولاً");
-    SSC_VISIT.inviteParent(id);
-  };
+    pushAudit({ type: "VISIT_START", role: who, ref: visitId, summary: "بدء جلسة زيارة افتراضية" });
+    window.bus?.emit("visit:updated", updated);
+    return updated;
+  }
 
-  const doctorAskCopilot = () => {
-    if (!SSC_AUTH.can("copilot.ask")) return SSC.toast("صلاحيات", "غير مسموح");
+  function completeVisit(visitId, summaryText = "") {
+    const visits = getVisits();
+    const i = visits.findIndex(v => v.id === visitId);
+    if (i < 0) return null;
+    const v = visits[i];
 
-    const c = getSelectedDoctorCase();
-    if (!c) return SSC.toast("Copilot", "اختر حالة أولاً");
+    const updated = {
+      ...v,
+      updatedAt: now(),
+      status: "completed",
+      timeline: [{ at: now(), txt: "تم إنهاء الزيارة الافتراضية" }, ...(v.timeline || [])],
+      sessionSummary: summaryText
+    };
+    visits[i] = updated;
+    setVisits(visits);
 
-    const q = ($("#copilotQ")?.value || "").trim();
-    const txt = SSC_COPILOT.answer({
-      complaint: c.complaint,
-      vitals: c.vitals,
-      triage: c.triage,
-      question: q
-    });
+    const counters = computeCounters(getCases(), visits);
+    setState({ lastVisitId: visitId, counters });
+    window.bus?.emit("visit:updated", updated);
+    window.bus?.emit("stats:update", counters);
 
-    const out = $("#copilotOut");
-    if (out) out.value = txt;
-
-    SSC.audit("copilot.ask", { caseId: c.id });
-    SSC.toast("Copilot", "تم توليد مساعدة للطبيب");
-  };
+    pushAudit({ type: "VISIT_DONE", role: "doctor", ref: visitId, summary: "إنهاء الزيارة الافتراضية" });
+    return updated;
+  }
 
   // ---------- Admin ----------
-  const adminRefresh = () => {
-    if (!SSC_AUTH.can("dash.view")) return;
-    const s = SSC_ADMIN.stats();
+  function adminExportJSON() {
+    const payload = {
+      exportedAt: now(),
+      state: getState(),
+      cases: getCases(),
+      visits: getVisits(),
+      audit: getAudit(),
+    };
+    const txt = JSON.stringify(payload, null, 2);
+    const blob = new Blob([txt], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `ssc-export-${Date.now()}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+    pushAudit({ type: "ADMIN_EXPORT", role: "admin", summary: "تصدير بيانات النظام JSON" });
+  }
 
-    const set = (id,val) => { const el = $(id); if(el) el.textContent = val; };
-    set("#adm_total", s.totalCases);
-    set("#adm_critical", s.critical);
-    set("#adm_urgent", s.urgent);
-    set("#adm_routine", s.routine);
-    set("#adm_slips", s.slips);
-    set("#adm_follow", s.followUp);
+  function adminResetAll() {
+    if (!confirm("تأكيد: مسح كل البيانات؟")) return;
+    localStorage.removeItem(KEY.STATE);
+    localStorage.removeItem(KEY.CASES);
+    localStorage.removeItem(KEY.VISITS);
+    localStorage.removeItem(KEY.AUDIT);
+    pushAudit({ type: "ADMIN_RESET", role: "admin", summary: "تم مسح البيانات" });
+    location.reload();
+  }
 
-    // render last 12 cases
-    const tbody = $("#adm_cases");
-    if (tbody) {
-      const rows = (SSC.getDB().cases || []).slice(0,12).map(c => {
-        const pri = c.triage?.priorityLabel || "—";
-        const r = c.triage?.risk ?? "—";
-        const st = c.status || "—";
-        return `<tr>
-          <td><span class="badge">${c.id.slice(-6)}</span></td>
-          <td>${c.student?.name || "—"}</td>
-          <td>${pri} • ${r}</td>
-          <td>${st}</td>
-          <td class="small">${new Date(c.createdAt).toLocaleString("ar-SA")}</td>
-        </tr>`;
-      }).join("");
-      tbody.innerHTML = rows || `<tr><td colspan="5" class="small">لا توجد بيانات بعد</td></tr>`;
-    }
+  // ---------- Bind Buttons (generic) ----------
+  function byId(id) { return document.getElementById(id); }
+  function val(id) { const el = byId(id); return el ? (el.value || "").trim() : ""; }
 
-    const audit = $("#adm_audit");
-    if (audit) {
-      audit.value = SSC_AUDIT.get(60).map(a => `${a.at} | ${a.role} | ${a.action} | ${JSON.stringify(a.details)}`).join("\n");
-    }
-  };
+  function bindStudent() {
+    const gen = byId("btnGenVitals");
+    const tri = byId("btnRunAI");
+    const mk  = byId("btnCreateCase");
+    const req = byId("btnRequestVisit");
 
-  // ---------- Parent ----------
-  const parentRefresh = () => {
-    if (!SSC_AUTH.can("report.viewChild")) return;
+    let currentVitals = null;
+    let currentAI = null;
+    let currentCase = null;
 
-    const list = $("#parent_cases");
-    if (list) {
-      const cases = SSC_PARENT.myChildCases();
-      list.innerHTML = cases.map(c => {
-        const pri = c.triage?.priorityLabel || "—";
-        const r = c.triage?.risk ?? "—";
-        return `<div class="kpi">
-          <div class="label">حالة ${c.id.slice(-6)}</div>
-          <div class="value">${pri}</div>
-          <div class="hint">Risk ${r}/100 • ${new Date(c.createdAt).toLocaleString("ar-SA")}</div>
-        </div>`;
-      }).join("") || `<div class="small">لا توجد حالات بعد</div>`;
-    }
-
-    const v = SSC.getDB().visits.find(x => x.participants?.parent?.invited && (x.status === "accepted" || x.status === "active"));
-    const vBox = $("#parent_visit");
-    if (vBox) {
-      if (!v) vBox.innerHTML = `<div class="small">لا توجد دعوة زيارة حالياً</div>`;
-      else vBox.innerHTML = `
-        <div class="row">
-          <span class="badge">Visit ${v.id.slice(-6)}</span>
-          <span class="badge ${v.status === "accepted" ? "warn" : "good"}">${v.status}</span>
-          <span class="badge">Room ${v.roomCode}</span>
-        </div>
-        <div class="row" style="margin-top:10px">
-          <button class="btn good" data-action="parent_consent_yes" data-visit="${v.id}">✅ موافقة على الزيارة</button>
-          <button class="btn bad" data-action="parent_consent_no" data-visit="${v.id}">⛔ رفض الزيارة</button>
-          <a class="btn primary" href="visit.html?visit=${encodeURIComponent(v.id)}&as=parent">🎥 دخول الزيارة</a>
-        </div>
-      `;
-    }
-  };
-
-  // ---------- Action router ----------
-  const ACTIONS = {
-    // Student
-    student_sim_mixed: () => simulateSensorsToStudentUI("mixed"),
-    student_sim_normal: () => simulateSensorsToStudentUI("normal"),
-    student_sim_fever: () => simulateSensorsToStudentUI("fever"),
-    student_sim_asthma: () => simulateSensorsToStudentUI("asthma"),
-    student_create_case: () => createCaseFromStudentUI(),
-    student_request_visit: () => requestVisitFromStudent(),
-
-    // Doctor
-    doctor_recheck: () => doctorRequestRecheck(),
-    doctor_issue_rest: () => doctorIssueSlip("راحة"),
-    doctor_issue_ref: () => doctorIssueSlip("إحالة"),
-    doctor_accept_visit: () => doctorAcceptLatestVisit(),
-    doctor_reject_visit: () => doctorRejectLatestVisit(),
-    doctor_invite_parent: () => doctorInviteParent(),
-    doctor_ask_copilot: () => doctorAskCopilot(),
-
-    // Admin
-    admin_refresh: () => adminRefresh(),
-
-    // Parent
-    parent_refresh: () => parentRefresh(),
-    parent_consent_yes: (btn) => {
-      const id = btn?.dataset?.visit;
-      if (!id) return;
-      SSC_PARENT.consentForVisit(id, true);
-      parentRefresh();
-    },
-    parent_consent_no: (btn) => {
-      const id = btn?.dataset?.visit;
-      if (!id) return;
-      SSC_PARENT.consentForVisit(id, false);
-      parentRefresh();
-    },
-  };
-
-  const wireActions = () => {
-    ensureToastHost();
-    renderBadges();
-
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-action]");
-      if (!btn) return;
-      const name = btn.dataset.action;
-      const fn = ACTIONS[name];
-      if (!fn) {
-        SSC.toast("زر غير مفعّل", `هذا الزر يحتاج Action: ${name}`);
-        return;
-      }
-      fn(btn);
+    if (gen) gen.addEventListener("click", () => {
+      currentVitals = studentGenerateVitals("mixed");
     });
 
-    // Page-specific auto refresh
-    const role = SSC_AUTH.getRole();
-    if (role === "admin") setInterval(adminRefresh, 1200);
-    if (role === "parent") setInterval(parentRefresh, 1200);
+    if (tri) tri.addEventListener("click", () => {
+      const complaint = val("complaint");
+      currentAI = studentRunTriage({ complaint, vitals: currentVitals || {} });
+    });
 
-    // If student page: load last case
-    const last = SSC.getDB().cases?.[0];
-    if (role === "student" && last) renderStudentCase(last);
+    if (mk) mk.addEventListener("click", () => {
+      const complaint = val("complaint");
+      if (!complaint) return window.bus?.emit("toast", { type: "warn", msg: "اكتب الشكوى أولاً" });
+      currentCase = studentCreateCaseFromUI({ complaint, vitals: currentVitals || {}, ai: currentAI || null });
+      window.bus?.emit("toast", { type: "ok", msg: "تم إنشاء الحالة" });
+    });
 
-    if (role === "admin") adminRefresh();
-    if (role === "parent") parentRefresh();
+    if (req) req.addEventListener("click", () => {
+      const complaint = val("complaint") || "طلب زيارة افتراضية";
+      const useCaseId = currentCase?.id || getState().lastCaseId;
+      if (!useCaseId) return window.bus?.emit("toast", { type: "warn", msg: "أنشئ حالة أولاً" });
+      const v = studentRequestVirtualVisit({ caseId: useCaseId, reason: complaint });
+      if (v) location.href = "visit.html?visit=" + encodeURIComponent(v.id);
+    });
+
+    window.bus?.emit("student:ready", true);
+  }
+
+  function bindDoctor() {
+    const recheck = byId("btnRecheck");
+    const accept = byId("btnAcceptVisit");
+    const reject = byId("btnRejectVisit");
+    const parent = byId("btnParentJoin");
+    const consent = byId("btnConsentReq");
+    const refer = byId("btnRefer");
+    const planSave = byId("btnSavePlan");
+    const ask = byId("btnAskAI");
+
+    const caseId = new URLSearchParams(location.search).get("case") || getState().lastCaseId;
+    const visitId = new URLSearchParams(location.search).get("visit") || getState().lastVisitId;
+
+    if (recheck) recheck.addEventListener("click", () => {
+      if (!caseId) return window.bus?.emit("toast", { type:"warn", msg:"لا توجد حالة محددة" });
+      doctorRequestRecheck(caseId, "all");
+    });
+
+    if (ask) ask.addEventListener("click", () => {
+      if (!caseId) return window.bus?.emit("toast", { type:"warn", msg:"اختر حالة أولاً" });
+      const q = val("docQuestion") || "اقترح تشخيصًا تفريقيًا وخطة مبدئية بناءً على الشكوى والقراءات.";
+      doctorAskCopilot({ caseId, question: q });
+    });
+
+    if (accept) accept.addEventListener("click", () => {
+      if (!visitId) return window.bus?.emit("toast", { type:"warn", msg:"لا يوجد طلب زيارة" });
+      doctorDecisionOnVisit(visitId, "accept");
+      location.href = "visit.html?visit=" + encodeURIComponent(visitId);
+    });
+
+    if (reject) reject.addEventListener("click", () => {
+      if (!visitId) return window.bus?.emit("toast", { type:"warn", msg:"لا يوجد طلب زيارة" });
+      doctorDecisionOnVisit(visitId, "reject", { note: "يرجى المراجعة حضوريًا/أو تحديث القياسات" });
+    });
+
+    if (parent) parent.addEventListener("click", () => {
+      if (!visitId) return window.bus?.emit("toast", { type:"warn", msg:"لا يوجد طلب زيارة" });
+      doctorDecisionOnVisit(visitId, "parent_join");
+    });
+
+    if (consent) consent.addEventListener("click", () => {
+      if (!visitId) return window.bus?.emit("toast", { type:"warn", msg:"لا يوجد طلب زيارة" });
+      doctorDecisionOnVisit(visitId, "consent_required", { note: "يتطلب موافقة ولي الأمر على الإجراء" });
+    });
+
+    if (refer) refer.addEventListener("click", () => {
+      if (!visitId) return window.bus?.emit("toast", { type:"warn", msg:"لا يوجد طلب زيارة" });
+      doctorDecisionOnVisit(visitId, "refer", { note: "إحالة للجهة المختصة/طوارئ حسب الحالة" });
+    });
+
+    if (planSave) planSave.addEventListener("click", () => {
+      if (!caseId) return window.bus?.emit("toast", { type:"warn", msg:"لا توجد حالة" });
+      const type = val("planType") || "Advice";
+      const dx = val("diagnosis") || "غير محدد";
+      const meds = val("meds") || "";
+      const note = val("planNote") || "";
+      doctorSetPlan(caseId, { type, diagnosis: dx, meds, note });
+    });
+
+    window.bus?.emit("doctor:ready", true);
+  }
+
+  function bindAdmin() {
+    const exp = byId("btnExport");
+    const reset = byId("btnReset");
+    if (exp) exp.addEventListener("click", adminExportJSON);
+    if (reset) reset.addEventListener("click", adminResetAll);
+    window.bus?.emit("admin:ready", true);
+  }
+
+  function bindParent() {
+    const approve = byId("btnApprove");
+    const reject = byId("btnReject");
+    const join = byId("btnJoin");
+
+    const visitId = new URLSearchParams(location.search).get("visit") || getState().lastVisitId;
+
+    if (approve) approve.addEventListener("click", () => {
+      if (!visitId) return window.bus?.emit("toast", { type:"warn", msg:"لا يوجد طلب" });
+      parentApproveConsent(visitId, true);
+      window.bus?.emit("toast", { type:"ok", msg:"تمت الموافقة" });
+    });
+
+    if (reject) reject.addEventListener("click", () => {
+      if (!visitId) return window.bus?.emit("toast", { type:"warn", msg:"لا يوجد طلب" });
+      parentApproveConsent(visitId, false);
+      window.bus?.emit("toast", { type:"warn", msg:"تم الرفض" });
+    });
+
+    if (join) join.addEventListener("click", () => {
+      if (!visitId) return window.bus?.emit("toast", { type:"warn", msg:"لا يوجد طلب" });
+      parentJoinRequest(visitId);
+      location.href = "visit.html?visit=" + encodeURIComponent(visitId) + "&who=parent";
+    });
+
+    window.bus?.emit("parent:ready", true);
+  }
+
+  function autoBindByPage() {
+    const page = document.body?.dataset?.page;
+    if (page === "student") bindStudent();
+    if (page === "doctor") bindDoctor();
+    if (page === "admin") bindAdmin();
+    if (page === "parent") bindParent();
+  }
+
+  // ---------- Public API ----------
+  window.Actions = {
+    // store
+    getState, getCases, getVisits, getAudit, getUser,
+    // student
+    studentGenerateVitals, studentRunTriage, studentCreateCaseFromUI, studentRequestVirtualVisit,
+    // doctor
+    doctorRequestRecheck, doctorAskCopilot, doctorSetPlan, doctorDecisionOnVisit,
+    // parent
+    parentApproveConsent, parentJoinRequest,
+    // visit
+    startVisit, completeVisit,
+    // admin
+    adminExportJSON, adminResetAll,
+    // bind
+    autoBindByPage,
   };
 
-  window.addEventListener("DOMContentLoaded", wireActions);
+  // auto bind after DOM
+  document.addEventListener("DOMContentLoaded", () => {
+    autoBindByPage();
+  });
 
-  // Public
-  window.SSC_ACTIONS = { ACTIONS };
 })();
