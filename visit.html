@@ -109,6 +109,10 @@
       alert("فشل تشغيل الزيارة. تأكد من السماح بالكاميرا/المايك.");
     }
   });
+  // Auto-join if requested
+if(qs.get("autojoin") === "1"){
+  setTimeout(()=> $("#btnJoin").click(), 450);
+}
 })();
 </script>
 </body>
