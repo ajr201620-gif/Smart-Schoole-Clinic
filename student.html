@@ -8,178 +8,279 @@
 </head>
 
 <body data-page="student">
+  <!-- Topbar -->
   <header class="topbar">
     <div class="topbar__left">
-      <a class="btn ghost" href="index.html">⟵ الرئيسية</a>
+      <a class="btn ghost" href="index.html">↩︎ الرئيسية</a>
+
       <div class="brand mini">
-        <div class="brand__logo">🎒</div>
+        <div class="brand__logo">🩺</div>
         <div class="brand__txt">
-          <div class="brand__name">بوابة الطالب</div>
-          <div class="brand__sub">حساسات افتراضية • فرز AI • زيارة افتراضية</div>
+          <div class="brand__name">العيادة المدرسية الذكية</div>
+          <div class="brand__sub">بوابة الطالب • فرز ذكي • قياسات • زيارة</div>
         </div>
       </div>
     </div>
 
     <div class="topbar__right">
-      <div class="pill">مرحبًا: <b data-user-name>طالب</b></div>
-      <button class="btn ghost" id="btnTheme">🌓</button>
+      <div class="pill">
+        <span class="dot ok"></span>
+        <span>مرحبًا، <b data-user-name>طالب</b></span>
+      </div>
+
+      <button class="btn ghost" id="btnTheme" data-action="common:theme-toggle">🌓 المظهر</button>
+      <button class="btn danger" id="btnLogout" data-action="common:logout">خروج</button>
     </div>
   </header>
-  <main class="container">
 
-  <!-- 🧑‍🎓 بطاقة الطالب -->
-  <section class="card">
-    <h2>🧑‍🎓 بيانات الطالب</h2>
-
-    <div class="field">
-      <label>اسم الطالب</label>
-      <input id="studentName" type="text" placeholder="اكتب اسمك" />
-    </div>
-
-    <div class="field">
-      <label>الشكوى الصحية</label>
-      <textarea id="complaint" rows="3" placeholder="اشرح شعورك أو الأعراض"></textarea>
-    </div>
-  </section>
-
-  <!-- ❤️ محاكاة الحساسات -->
-  <section class="card">
-    <h2>❤️ قراءات الحساسات (محاكاة)</h2>
-
-    <div class="vitals-grid">
-      <div class="vital">BP: <span id="v_bp">--</span></div>
-      <div class="vital">SpO₂: <span id="v_spo2">--</span></div>
-      <div class="vital">HR: <span id="v_hr">--</span></div>
-      <div class="vital">Temp: <span id="v_temp">--</span></div>
-    </div>
-
-    <button class="btn ghost" id="btnSimulate">🔄 توليد قراءات</button>
-  </section>
-
-  <!-- 🤖 فرز ذكي + إرسال -->
-  <section class="card highlight">
-    <h2>🤖 التقييم الذكي</h2>
-
-    <p>سيتم إرسال الشكوى والقراءات للفرز الطبي الذكي</p>
-
-    <button class="btn primary" data-action="case:create">
-      🚑 إرسال للعيادة المدرسية
-    </button>
-  </section>
-
-</main>
-
+  <!-- Main -->
   <main class="shell">
-    <section class="grid2">
-      <!-- Left: Complaint + Actions -->
-      <div class="card pad">
-        <div class="card__title">📝 الشكوى</div>
-        <div class="muted">اكتب شكواك، ثم ولّد القياسات وشغّل الفرز الذكي.</div>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero__left">
+        <h1 class="hero__title">جاهز نفحصك… بدون ما نخوفك 😄</h1>
+        <p class="hero__lead">
+          اكتب شكواك، شغّل القياسات، ثم نفّذ الفرز الذكي. النظام بيحفظ كل شيء محليًا (وبعدين نربطه بفايربيس).
+        </p>
 
-        <textarea id="complaint" class="input area" placeholder="مثال: عندي حرارة وكحة وضيق بسيط..." rows="5"></textarea>
-
-        <div class="row actions">
-          <button class="btn solid" id="btnSimulateSensors" data-action="student:generateSensors">📟 توليد محاكاة الحساسات</button>
-          <button class="btn solid" id="btnAiTriage" data-action="student:aiTriage">🤖 فرز AI ذكي</button>
+        <div class="hero__actions">
+          <button class="btn primary" id="btnNewCase" data-action="student:new-case">➕ إنشاء حالة جديدة</button>
+          <button class="btn" id="btnSaveSymptoms" data-action="student:save-symptoms">💾 حفظ الأعراض</button>
+          <button class="btn" id="btnReport" data-action="common:download-report">⬇️ تنزيل تقرير</button>
         </div>
 
-        <div class="row actions">
-          <button class="btn ghost" id="btnCreateCase" data-action="student:createCase">🧾 إنشاء الحالة</button>
-          <button class="btn ghost" id="btnRequestVisit" data-action="student:requestVisit">🎥 طلب عيادة افتراضية</button>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="card__title">📌 نصيحة</div>
-        <div class="muted">
-          إذا ظهرت “P1” أو “Risk High” اطلب الزيارة فورًا (ولا تسوي نفسك قوي 😄).
+        <div class="kpis">
+          <div class="kpi">
+            <div class="kpi__label">حالة النظام</div>
+            <div class="kpi__value"><span class="dot ok"></span> جاهز</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">الدور</div>
+            <div class="kpi__value" data-user-role>student</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">الخصوصية</div>
+            <div class="kpi__value">محليًا (Demo)</div>
+          </div>
         </div>
       </div>
 
-      <!-- Right: KPIs -->
-      <div class="card pad">
-        <div class="card__title">📊 قراءات الحساسات</div>
-        <div class="kpis">
-          <div class="kpi">
-            <div class="kpi__label">HR</div>
-            <div class="kpi__val" id="kpiHR">—</div>
+      <div class="hero__right">
+        <div class="glassCard">
+          <div class="glassCard__title">ملخص سريع</div>
+          <div class="glassCard__body">
+            <div class="row">
+              <span class="muted">تذكير:</span>
+              <span>ابدأ بإنشاء حالة ثم القياسات ثم AI.</span>
+            </div>
+            <div class="row">
+              <span class="muted">نصيحة:</span>
+              <span>لا تكتب “مادري” بس… النظام بيحاول يفهم، بس هو مو قارئ أفكار 😅</span>
+            </div>
           </div>
-          <div class="kpi">
-            <div class="kpi__label">Temp</div>
-            <div class="kpi__val" id="kpiTemp">—</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi__label">SpO2</div>
-            <div class="kpi__val" id="kpiSpO2">—</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi__label">BP</div>
-            <div class="kpi__val" id="kpiBP">—</div>
-          </div>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="card__title">🧠 نتيجة الفرز الذكي</div>
-        <div class="kpis">
-          <div class="kpi">
-            <div class="kpi__label">Risk</div>
-            <div class="kpi__val" id="kpiRisk">—</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi__label">Priority</div>
-            <div class="kpi__val" id="kpiPriority">—</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi__label">Status</div>
-            <div class="kpi__val" id="kpiStatus">—</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi__label">Decision</div>
-            <div class="kpi__val" id="kpiDecision">—</div>
-          </div>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="card__title">📣 توصية النظام</div>
-        <pre class="pre" id="aiRecommendation">—</pre>
-
-        <div class="row actions">
-          <a class="btn ghost" href="doctor.html">🩺 فتح بوابة الطبيب</a>
-          <a class="btn ghost" href="parent.html">👨‍👩‍👧 فتح ولي الأمر</a>
-          <a class="btn ghost" href="admin.html">🏫 فتح الإدارة</a>
         </div>
       </div>
     </section>
+
+    <!-- Grid -->
+    <section class="grid2">
+      <!-- Symptoms / Complaint -->
+      <section class="card">
+        <header class="card__head">
+          <h2 class="card__title">📝 الشكوى / الأعراض</h2>
+          <div class="card__tools">
+            <button class="btn ghost sm" data-action="student:save-symptoms">حفظ</button>
+          </div>
+        </header>
+
+        <div class="card__body">
+          <label class="field">
+            <div class="field__label">وش تحس فيه؟ (اكتبها بوضوح)</div>
+            <textarea id="symptoms" class="input" rows="5" placeholder="مثال: صداع + حرارة + سعال + ألم حلق…"></textarea>
+          </label>
+
+          <div class="rowActions">
+            <button class="btn" id="btnRunSensors" data-action="student:run-sensors">📟 تشغيل القياسات (محاكاة)</button>
+            <button class="btn primary" id="btnSubmitAI" data-action="student:submit-ai">🤖 فرز ذكي (AI)</button>
+          </div>
+
+          <div class="hint">
+            ✅ القياسات هنا “محاكاة” للتجربة. لاحقًا نربطها مع IoT الحقيقي.
+          </div>
+        </div>
+      </section>
+
+      <!-- Vitals -->
+      <section class="card">
+        <header class="card__head">
+          <h2 class="card__title">📊 القياسات (Vitals)</h2>
+          <div class="card__tools">
+            <span class="pill"><span class="dot warn"></span> Demo</span>
+          </div>
+        </header>
+
+        <div class="card__body">
+          <div class="vitals">
+            <div class="vital">
+              <div class="vital__label">نبض القلب</div>
+              <div class="vital__value" id="v_hr">—</div>
+              <div class="vital__unit">BPM</div>
+            </div>
+
+            <div class="vital">
+              <div class="vital__label">الأكسجين</div>
+              <div class="vital__value" id="v_spo2">—</div>
+              <div class="vital__unit">%</div>
+            </div>
+
+            <div class="vital">
+              <div class="vital__label">الحرارة</div>
+              <div class="vital__value" id="v_temp">—</div>
+              <div class="vital__unit">°C</div>
+            </div>
+
+            <div class="vital">
+              <div class="vital__label">الضغط</div>
+              <div class="vital__value" id="v_bp">—</div>
+              <div class="vital__unit">mmHg</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="miniCards">
+            <div class="miniCard">
+              <div class="miniCard__label">الحالة</div>
+              <div class="miniCard__value" id="v_status">—</div>
+            </div>
+            <div class="miniCard">
+              <div class="miniCard__label">الأولوية</div>
+              <div class="miniCard__value" id="v_priority">—</div>
+            </div>
+            <div class="miniCard">
+              <div class="miniCard__label">المخاطر</div>
+              <div class="miniCard__value" id="v_risk">—</div>
+            </div>
+            <div class="miniCard">
+              <div class="miniCard__label">قرار AI</div>
+              <div class="miniCard__value" id="v_decision">—</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Visit -->
+      <section class="card">
+        <header class="card__head">
+          <h2 class="card__title">📅 الزيارة / الإحالة</h2>
+          <div class="card__tools">
+            <a class="btn ghost sm" href="visit.html">فتح صفحة الزيارة</a>
+          </div>
+        </header>
+
+        <div class="card__body">
+          <p class="muted">
+            بعد الفرز الذكي تقدر تبدأ زيارة (حضورية/افتراضية) — وبيروح إشعار لولي الأمر + الإدارة.
+          </p>
+
+          <div class="rowActions">
+            <button class="btn primary" id="btnStartVisit" data-action="student:start-visit">🚀 بدء زيارة</button>
+            <a class="btn" href="parent.html">👨‍👩‍👧‍👦 بوابة ولي الأمر</a>
+          </div>
+
+          <div class="hint">
+            🧠 إذا ما في “حالة” موجودة، الزيارة بتقول لك: ابدأ حالة أول… (منطقي، مو كذا؟ 😄)
+          </div>
+        </div>
+      </section>
+
+      <!-- Notifications -->
+      <section class="card">
+        <header class="card__head">
+          <h2 class="card__title">🔔 التنبيهات</h2>
+          <div class="card__tools">
+            <span class="pill"><span class="dot ok"></span> لحظي</span>
+          </div>
+        </header>
+
+        <div class="card__body">
+          <div id="notifyList" class="list">
+            <div class="empty muted">لا يوجد تنبيهات حالياً.</div>
+          </div>
+        </div>
+      </section>
+    </section>
   </main>
 
-  <!-- Scripts -->
-  <script src="bus.js"></script>
-  <script src="auth.js"></script>
-  <script src="app-init.js"></script>
-  <script src="sensor-sim.js"></script>
-  <script src="triage-ai.js"></script>
-  <script src="doctor-copilot.js"></script>
-  <script src="visit-session.js"></script>
-  <script src="app.js"></script>
-  <script src="actions.js"></script>
+  <!-- Scripts (order matters) -->
+  <script src="./bus.js"></script>
+  <script src="./auth.js"></script>
+  <script src="./triage-ai.js"></script>
+  <script src="./sensor-sim.js"></script>
+  <script src="./student-notify.js"></script>
 
-  <script>
-    // Theme toggle (simple)
-    document.addEventListener("DOMContentLoaded", () => {
-      const btn = document.getElementById("btnTheme");
-      btn?.addEventListener("click", () => {
-        const html = document.documentElement;
-        const isDark = html.getAttribute("data-theme") !== "light";
-        html.setAttribute("data-theme", isDark ? "light" : "dark");
-      });
-    });
-  </script>
-    <!-- باقي سكربتاتك -->
+  <!-- Firebase init (module) -->
+  <script type="module" src="./firebase-init.js"></script>
+
+  <!-- Actions wiring -->
   <script src="./actions.js"></script>
 
-  <!-- Firebase (لازم آخر شيء وقبل </body>) -->
-  <script type="module" src="./firebase-init.js"></script>
+  <!-- Small UI binder (reads SSC.db and reflects vitals/decision on screen) -->
+  <script>
+    (function(){
+      "use strict";
+      function $(s,r=document){return r.querySelector(s);}
+      function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));}
+
+      function renderVitals() {
+        const db = window.SSC && window.SSC.db;
+        if (!db) return;
+
+        const userId = db.session?.currentUserId;
+        const c = db.cases?.find(x => x.owner?.id === userId) || db.cases?.[0];
+        if (!c) return;
+
+        $("#v_hr").textContent = c.vitals?.hr ?? "—";
+        $("#v_spo2").textContent = c.vitals?.spo2 ?? "—";
+        $("#v_temp").textContent = c.vitals?.temp ?? "—";
+        $("#v_bp").textContent = c.vitals?.bp ?? "—";
+
+        $("#v_status").textContent = c.status ?? "—";
+        $("#v_priority").textContent = c.priority ?? "—";
+        $("#v_risk").textContent = c.risk ?? "—";
+        $("#v_decision").textContent = c.decision ?? "—";
+      }
+
+      function renderNotifications() {
+        const db = window.SSC && window.SSC.db;
+        const box = $("#notifyList");
+        if (!db || !box) return;
+
+        const role = "student";
+        const items = (db.notifications||[]).filter(n => n.toRole === role).slice(0,8);
+
+        if (!items.length) {
+          box.innerHTML = `<div class="empty muted">لا يوجد تنبيهات حالياً.</div>`;
+          return;
+        }
+
+        box.innerHTML = items.map(n => `
+          <div class="rowCard">
+            <div class="rowTitle">${escapeHtml(n.title)}</div>
+            <div class="rowMeta">${escapeHtml(n.message)} • <span class="muted">${escapeHtml(n.at)}</span></div>
+          </div>
+        `).join("");
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        renderVitals();
+        renderNotifications();
+
+        // refresh when actions update DB
+        window.bus?.on?.("case:update", () => renderVitals());
+        window.bus?.on?.("notify:update", () => renderNotifications());
+      });
+    })();
+  </script>
 </body>
 </html>
