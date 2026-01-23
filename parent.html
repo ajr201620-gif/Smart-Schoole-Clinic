@@ -1,120 +1,108 @@
 <!doctype html>
-<html lang="ar" dir="rtl" data-theme="dark">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Smart Clinic OS — Parent</title>
-  <link rel="stylesheet" href="ar.css"/>
-  <link rel="stylesheet" href="shell.css"/>
-  <script src="bus.js"></script>
-  <script src="rbac.js"></script>
+  <title>بوابة ولي الأمر — Smart School Clinic OS</title>
+
+  <link rel="stylesheet" href="assets/css/app.css"/>
+
+  <script src="js/bus.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/parent-summary.js"></script>
 </head>
+
 <body>
-
-<div class="sc-top">
-  <div class="left">
-    <span class="sc-chip">Parent</span>
-    <div class="sc-title">
-      <b>بوابة ولي الأمر</b>
-      <small>موافقات + تنبيهات + تقارير</small>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">👨‍👩‍👧</div>
+    <div class="brandText">
+      <div class="name">بوابة ولي الأمر</div>
+      <div class="tagline">ملخص • تقرير رسمي • موافقة/رفض</div>
     </div>
   </div>
-  <div class="sc-actions">
-    <span class="sc-status" id="st">🟢 Ready</span>
-    <a class="sc-primary" href="report.html#parent">🧾 تقرير</a>
+  <div class="topActions">
+    <button class="btn ghost" onclick="location.href='index.html'">⬅️ رجوع</button>
   </div>
-</div>
+</header>
 
-<div class="sc-shell">
-  <aside class="sc-side">
-    <div class="sc-chip">التنقّل</div>
-    <nav class="sc-nav">
-      <a class="sc-nav-item" href="index.html">🏠 البوابة</a>
-      <a class="sc-nav-item" href="#consent">✅ الموافقات</a>
-      <a class="sc-nav-item" href="#cases">🩺 الحالات</a>
-      <a class="sc-nav-item" href="report.html#parent">🧾 التقارير</a>
-    </nav>
-    <div style="margin-top:14px" class="sc-chip">Quick</div>
-    <div class="sc-quick">
-      <button class="sc-qa" id="btnRefresh">🔄 تحديث</button>
+<main class="container">
+
+  <section class="panel">
+    <div class="h">
+      <h2>👀 آخر حالة</h2>
+      <div class="muted" id="caseMeta">—</div>
     </div>
-  </aside>
 
-  <main class="sc-main">
-    <div style="padding:16px">
-
-      <div class="panel" id="consent">
-        <div class="h"><h2>موافقات معلّقة</h2><div class="muted">اعتماد إجراء/زيارة/إحالة</div></div>
-        <div id="consentList"></div>
-      </div>
-
-      <div class="panel" id="cases" style="margin-top:16px">
-        <div class="h"><h2>حالات الابن (Demo)</h2><div class="muted">عرض مبسط</div></div>
-        <div id="caseList"></div>
-      </div>
-
+    <div class="kpiGrid" style="margin-top:12px">
+      <div class="kpi"><div class="k">Status</div><div class="v" id="pStatus">—</div></div>
+      <div class="kpi"><div class="k">Priority</div><div class="v" id="pPri">—</div></div>
+      <div class="kpi"><div class="k">Risk</div><div class="v" id="pRisk">—</div></div>
+      <div class="kpi"><div class="k">Decision</div><div class="v" id="pDec">—</div></div>
     </div>
-  </main>
-</div>
+
+    <div class="sep"></div>
+
+    <div class="row">
+      <button class="btn ghost" id="btnSummary">📌 ملخص مبسط</button>
+      <button class="btn ghost" id="btnReport">🧾 تقرير رسمي للطباعة</button>
+      <button class="btn" id="btnConsentJump" style="display:none">✅ فتح الموافقة الآن</button>
+    </div>
+
+    <div class="sep"></div>
+
+    <pre id="summaryOut" style="white-space:pre-wrap;font-size:12px"></pre>
+  </section>
+
+</main>
 
 <script>
-localStorage.setItem("SC_ROLE","parent");
-const $=(s)=>document.querySelector(s);
+(function(){
+  SCAUTH.requireRole("parent");
+  const $ = (s)=>document.querySelector(s);
 
-function saveCase(caseId, patch){
-  const bus = window.SCBUS.load();
-  const idx = (bus.cases||[]).findIndex(c=>c.id===caseId);
-  if(idx<0) return;
-  bus.cases[idx] = Object.assign({}, bus.cases[idx], patch);
-  window.SCBUS.save(bus);
-}
-
-function refresh(){
-  const bus = window.SCBUS?.load?.() || {cases:[]};
-  const cases = bus.cases || [];
-
-  const pending = cases.filter(c=>c.status==="CONSENT_REQUIRED" || c.parentJoinRequested);
-  $("#consentList").innerHTML = pending.map(c=>{
-    return `<div class="sc-nav-item" style="display:block">
-      <div style="display:flex; justify-content:space-between; gap:10px">
-        <b>Case ${c.id}</b>
-        <span class="sc-chip">${c.status || (c.parentJoinRequested?"JOIN_REQ":"—")}</span>
-      </div>
-      <div class="muted small" style="margin-top:6px">${(c.plan||c.decision||"—")}</div>
-      <div class="row" style="margin-top:10px">
-        <button class="btn" data-yes="${c.id}">✅ موافقة</button>
-        <button class="btn ghost" data-no="${c.id}">⛔ رفض</button>
-      </div>
-    </div>`;
-  }).join("") || `<div class="muted">لا يوجد موافقات حالياً</div>`;
-
-  $("#caseList").innerHTML = cases.slice(0,8).map(c=>{
-    return `<div class="sc-nav-item" style="justify-content:space-between">
-      <span>Case ${c.id} • ${c.priority||"—"}</span>
-      <span class="sc-chip">${c.status||"OPEN"}</span>
-    </div>`;
-  }).join("") || `<div class="muted">لا توجد بيانات بعد</div>`;
-}
-
-document.addEventListener("click",(e)=>{
-  const y = e.target.closest("[data-yes]");
-  const n = e.target.closest("[data-no]");
-  if(y){
-    const id = y.getAttribute("data-yes");
-    saveCase(id, { consent:"APPROVED", status:"APPROVED_BY_PARENT" });
-    alert("تمت الموافقة ✅");
-    return refresh();
+  function latestCase(){
+    const bus = SCBUS.load();
+    return (bus.cases||[])[0] || null;
   }
-  if(n){
-    const id = n.getAttribute("data-no");
-    saveCase(id, { consent:"REJECTED", status:"REJECTED_BY_PARENT" });
-    alert("تم الرفض ⛔");
-    return refresh();
-  }
-});
 
-$("#btnRefresh").addEventListener("click", refresh);
-refresh();
+  function render(){
+    const c = latestCase();
+    if(!c){
+      $("#caseMeta").textContent = "لا توجد حالات";
+      return;
+    }
+
+    $("#caseMeta").textContent = `Case ${c.id} • الطالب: ${c.studentName || "—"}`;
+    $("#pStatus").textContent = c.status || "—";
+    $("#pPri").textContent = c.priority || c.ai?.priority || "—";
+    $("#pRisk").textContent = (c.riskScore ?? c.ai?.risk ?? "—") + "/100";
+    $("#pDec").textContent = c.decision || c.ai?.recommendation || "—";
+
+    $("#btnConsentJump").style.display = (c.status === "CONSENT_REQUIRED") ? "" : "none";
+  }
+
+  $("#btnSummary").addEventListener("click", ()=>{
+    const c = latestCase();
+    if(!c) return alert("لا توجد حالة");
+    $("#summaryOut").textContent = window.SCPARENT.sum(c);
+  });
+
+  $("#btnReport").addEventListener("click", ()=>{
+    const c = latestCase();
+    if(!c) return alert("لا توجد حالة");
+    location.href = `report-view.html?case=${encodeURIComponent(c.id)}&role=parent&autoprint=1`;
+  });
+
+  $("#btnConsentJump").addEventListener("click", ()=>{
+    const c = latestCase();
+    if(!c) return;
+    location.href = `report-view.html?case=${encodeURIComponent(c.id)}&role=parent`;
+  });
+
+  render();
+  setInterval(render, 1500);
+})();
 </script>
 </body>
 </html>
