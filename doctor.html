@@ -8,156 +8,269 @@
 </head>
 
 <body data-page="doctor">
+
+  <!-- Topbar -->
   <header class="topbar">
-    <div class="topbar__left">
-      <a class="btn ghost" href="index.html">⟵ الرئيسية</a>
-      <div class="brand mini">
-        <div class="brand__logo">🩺</div>
-        <div class="brand__txt">
-          <div class="brand__name">بوابة الطبيب</div>
-          <div class="brand__sub">مراجعة الحالة • قرار • تقارير • زيارة افتراضية</div>
+    <div class="inner">
+      <div class="topbar_left">
+        <a class="btn ghost" href="index.html">↩︎ الرئيسية</a>
+
+        <div class="brand">
+          <div class="brand__logo"></div>
+          <div class="brand__txt">
+            <div class="brand__name">العيادة المدرسية الذكية</div>
+            <div class="brand__sub">بوابة الطبيب • Queue • قرارات • متابعة</div>
+          </div>
+        </div>
+
+        <div class="pill">
+          <small>الدور</small>
+          <b data-user-role>doctor</b>
         </div>
       </div>
-    </div>
 
-    <div class="topbar__right">
-      <div class="pill">مرحبًا: <b data-user-name>طبيب</b></div>
-      <button class="btn ghost" id="btnTheme">🌓</button>
+      <div class="topbar_right">
+        <div class="pill">
+          <small>مرحبًا</small>
+          <b data-user-name>طبيب</b>
+        </div>
+        <button class="btn ghost" id="btnTheme" data-action="common:theme-toggle">🌓</button>
+        <button class="btn bad" id="btnLogout" data-action="common:logout">خروج</button>
+      </div>
     </div>
   </header>
 
-  <main class="shell">
-    <section class="grid2">
-      <!-- Left: Case Overview -->
-      <div class="card pad">
-        <div class="card__title">📌 بيانات الحالة</div>
-        <div class="muted">هذه آخر حالة تم إنشاؤها (Demo). لاحقًا تربطها بقاعدة بيانات.</div>
+  <main class="container">
 
-        <div class="block">
-          <div class="label">الشكوى</div>
-          <div class="box" id="doctorComplaint">—</div>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="card__title">📟 القياسات</div>
-        <div class="kpis">
-          <div class="kpi"><div class="kpi__label">HR</div><div class="kpi__val" id="docHR">—</div></div>
-          <div class="kpi"><div class="kpi__label">Temp</div><div class="kpi__val" id="docTemp">—</div></div>
-          <div class="kpi"><div class="kpi__label">SpO2</div><div class="kpi__val" id="docSpO2">—</div></div>
-          <div class="kpi"><div class="kpi__label">BP</div><div class="kpi__val" id="docBP">—</div></div>
-        </div>
-
-        <div class="row actions">
-          <button class="btn ghost" id="btnRequestSecondReading" data-action="doctor:requestSecondReading">
-            🔁 طلب قراءة ثانية
-          </button>
-          <button class="btn ghost" id="btnDoctorAiSuggest" data-action="doctor:aiSuggest">
-            🧠 مساعد الطبيب (AI)
-          </button>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="card__title">🧠 AI Triage (من الطالب)</div>
-        <div class="kpis">
-          <div class="kpi"><div class="kpi__label">Risk</div><div class="kpi__val" id="docRisk">—</div></div>
-          <div class="kpi"><div class="kpi__label">Priority</div><div class="kpi__val" id="docPriority">—</div></div>
-          <div class="kpi"><div class="kpi__label">Visit</div><div class="kpi__val" id="docVisitState">—</div></div>
-          <div class="kpi"><div class="kpi__label">Mode</div><div class="kpi__val">Doctor</div></div>
-        </div>
-
-        <div class="block">
-          <div class="label">توصية AI</div>
-          <pre class="pre" id="docAiRec">—</pre>
-        </div>
-      </div>
-
-      <!-- Right: Actions + Plan -->
-      <div class="card pad">
-        <div class="card__title">🎥 إدارة الزيارة الافتراضية</div>
-        <div class="muted">اقبل/ارفض/اطلب انضمام ولي الأمر/اطلب موافقة إجراء.</div>
-
-        <div class="row actions">
-          <button class="btn solid" id="btnApproveVisit" data-action="doctor:approveVisit">✅ قبول الزيارة</button>
-          <button class="btn ghost" id="btnRejectVisit" data-action="doctor:rejectVisit">❌ رفض الزيارة</button>
-        </div>
-
-        <div class="row actions">
-          <button class="btn ghost" id="btnJoinParent" data-action="doctor:joinParent">👨‍👩‍👧 طلب انضمام ولي الأمر</button>
-          <button class="btn ghost" data-action="doctor:makeDecision" data-decision="يتطلب موافقة إجراء">📝 طلب موافقة إجراء</button>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="card__title">🧾 التشخيص والخطة</div>
-        <div class="form">
-          <div class="field">
-            <label>التشخيص</label>
-            <input id="doctorDiagnosis" class="input" placeholder="مثال: التهاب تنفسي علوي" />
+    <!-- Hero -->
+    <section class="panel hero">
+      <div class="heroRow">
+        <div>
+          <div class="heroTitle">🩺 لوحة الطبيب — القرار عندك</div>
+          <div class="heroDesc">
+            راجع الحالات الواردة، اطلب قراءة ثانية للحساسات، استخدم المساعد الطبي (تجريبي)،
+            ثم اتخذ القرار: متابعة، زيارة، أو إغلاق.
           </div>
 
-          <div class="field">
-            <label>الخطة/التوصية الطبية</label>
-            <textarea id="doctorPlan" class="input area" rows="4" placeholder="خافض حرارة + سوائل + متابعة..."></textarea>
-          </div>
-
-          <div class="row actions">
-            <button class="btn solid" id="btnSaveDiagnosis" data-action="doctor:saveDiagnosis">💾 حفظ</button>
-            <button class="btn ghost" id="btnMarkFollowup" data-action="doctor:markFollowup">📌 تحتاج متابعة</button>
-            <button class="btn ghost" id="btnResolveCase" data-action="doctor:resolveCase">✅ إغلاق الحالة</button>
+          <div class="heroActions mt12">
+            <button class="btn" id="btnDoctorQueue" data-action="doctor:view-queue">📋 عرض قائمة الانتظار</button>
+            <button class="btn primary" id="btnOpenCase" data-action="doctor:open-case">📂 فتح الحالة المحددة</button>
+            <a class="btn ghost" href="visit.html">🎥 فتح غرفة الزيارة</a>
           </div>
         </div>
 
-        <div class="hr"></div>
-
-        <div class="card__title">⚡ قرارات سريعة</div>
-        <div class="row actions">
-          <button class="btn ghost" data-action="doctor:makeDecision" data-decision="راحة اليوم الدراسي">🛌 راحة</button>
-          <button class="btn ghost" data-action="doctor:makeDecision" data-decision="عودة للفصل مع متابعة">🏫 عودة للفصل</button>
-          <button class="btn ghost" data-action="doctor:makeDecision" data-decision="إحالة للمركز الصحي">🏥 إحالة</button>
-          <button class="btn ghost" data-action="doctor:makeDecision" data-decision="تحويل طوارئ">🚑 طوارئ</button>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="card__title">🧠 Copilot Output</div>
-        <textarea id="doctorCopilotBox" class="input area" rows="8" placeholder="اضغط مساعد الطبيب (AI) لتوليد محتوى هنا..."></textarea>
-
-        <div class="row actions">
-          <a class="btn ghost" href="visit.html">🎥 فتح غرفة الزيارة</a>
-          <a class="btn ghost" href="admin.html">🏫 لوحة الإدارة</a>
-          <a class="btn ghost" href="parent.html">👨‍👩‍👧 ولي الأمر</a>
+        <div class="kpiRow" style="min-width:320px;">
+          <div class="kpi">
+            <div class="kLabel">الحالات الواردة</div>
+            <div class="kVal" id="d_k_in">0</div>
+            <div class="kMeta">Assigned / New</div>
+          </div>
+          <div class="kpi warn">
+            <div class="kLabel">تحتاج متابعة</div>
+            <div class="kVal" id="d_k_follow">0</div>
+            <div class="kMeta">Followup</div>
+          </div>
+          <div class="kpi bad">
+            <div class="kLabel">حرجة</div>
+            <div class="kVal" id="d_k_critical">0</div>
+            <div class="kMeta">Critical</div>
+          </div>
         </div>
       </div>
     </section>
+
+    <div class="grid mt16">
+
+      <!-- Queue -->
+      <section class="panel card col-6">
+        <div class="cardHeader">
+          <div class="cardTitle"><span class="ico">📋</span> قائمة الانتظار</div>
+          <span class="chip">Queue</span>
+        </div>
+
+        <div class="cardBody">
+          <div id="d_queue">
+            <div class="subtle">لا توجد حالات حالياً.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Case Details -->
+      <section class="panel card col-6">
+        <div class="cardHeader">
+          <div class="cardTitle"><span class="ico">📂</span> تفاصيل الحالة</div>
+          <span class="chip warn">Live</span>
+        </div>
+
+        <div class="cardBody">
+          <div class="rowCard">
+            <div class="rowTitle">الطالب</div>
+            <div class="rowMeta" id="d_owner">—</div>
+          </div>
+
+          <div class="rowCard">
+            <div class="rowTitle">الشكوى</div>
+            <div class="rowMeta" id="d_symptoms">—</div>
+          </div>
+
+          <div class="rowCard">
+            <div class="rowTitle">القرار الحالي</div>
+            <div class="rowMeta" id="d_decision">—</div>
+          </div>
+
+          <div class="flex mt12">
+            <button class="btn small" id="btnRunSensors2" data-action="student:run-sensors">📟 طلب قراءة ثانية</button>
+            <button class="btn small ghost" data-action="common:download-report">⬇️ تقرير</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vitals -->
+      <section class="panel card col-6">
+        <div class="cardHeader">
+          <div class="cardTitle"><span class="ico">📊</span> القياسات</div>
+          <span class="chip warn">Demo</span>
+        </div>
+
+        <div class="cardBody">
+          <div class="vitals">
+            <div class="vital">
+              <div class="vLabel">نبض القلب</div>
+              <div class="vVal" id="d_hr">—</div>
+            </div>
+            <div class="vital">
+              <div class="vLabel">الأكسجين</div>
+              <div class="vVal" id="d_spo2">—</div>
+            </div>
+            <div class="vital">
+              <div class="vLabel">الحرارة</div>
+              <div class="vVal" id="d_temp">—</div>
+            </div>
+            <div class="vital">
+              <div class="vLabel">الضغط</div>
+              <div class="vVal" id="d_bp">—</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- AI Assistant + Decision -->
+      <section class="panel card col-6">
+        <div class="cardHeader">
+          <div class="cardTitle"><span class="ico">🤖</span> مساعد الطبيب (AI)</div>
+          <span class="chip">Assist</span>
+        </div>
+
+        <div class="cardBody">
+          <div class="field">
+            <label>مقترح تشخيص/خطة (تجريبي)</label>
+            <textarea id="ai_suggest" class="input" rows="4" placeholder="مثال: أعراض عدوى تنفسية خفيفة — راحة وسوائل ومتابعة بعد 24 ساعة."></textarea>
+          </div>
+
+          <div class="field">
+            <label>قرار الطبيب النهائي</label>
+            <textarea id="txtDecision" class="input" rows="3" placeholder="اكتب قرارك هنا…"></textarea>
+          </div>
+
+          <div class="flex mt12">
+            <button class="btn primary" id="btnUpdateDecision" data-action="doctor:update-decision">💾 حفظ القرار</button>
+            <button class="btn warn" id="btnFollowup" data-action="doctor:request-followup">🔁 طلب متابعة</button>
+            <button class="btn bad" id="btnCloseCase" data-action="doctor:close-case">🔒 إغلاق الحالة</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Parent / Visit -->
+      <section class="panel card col-12">
+        <div class="cardHeader">
+          <div class="cardTitle"><span class="ico">👨‍👩‍👧‍👦</span> ولي الأمر والزيارة</div>
+          <span class="chip ok">Actions</span>
+        </div>
+
+        <div class="cardBody">
+          <div class="flex">
+            <button class="btn" data-action="parent:approve-consent">📨 طلب موافقة ولي الأمر</button>
+            <a class="btn ghost" href="parent.html">فتح بوابة ولي الأمر</a>
+            <a class="btn primary" href="visit.html">🎥 بدء/الانضمام لزيارة</a>
+          </div>
+          <div class="subtle mt8">
+            *طلب موافقة ولي الأمر يُرسل تنبيه (تجريبي) ويمكنه الموافقة من صفحته.*
+          </div>
+        </div>
+      </section>
+
+    </div>
   </main>
 
   <!-- Scripts -->
-  <script src="bus.js"></script>
-  <script src="auth.js"></script>
-  <script src="app-init.js"></script>
-  <script src="sensor-sim.js"></script>
-  <script src="triage-ai.js"></script>
-  <script src="doctor-copilot.js"></script>
-  <script src="visit-session.js"></script>
-  <script src="app.js"></script>
-  <script src="actions.js"></script>
+  <script src="./bus.js"></script>
+  <script src="./auth.js"></script>
+  <script src="./sensor-sim.js"></script>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const btn = document.getElementById("btnTheme");
-      btn?.addEventListener("click", () => {
-        const html = document.documentElement;
-        const isDark = html.getAttribute("data-theme") !== "light";
-        html.setAttribute("data-theme", isDark ? "light" : "dark");
-      });
-    });
-  </script>
-    <!-- باقي سكربتاتك -->
+  <!-- Firebase init (module) -->
+  <script type="module" src="./firebase-init.js"></script>
+
+  <!-- Actions -->
   <script src="./actions.js"></script>
 
-  <!-- Firebase (لازم آخر شيء وقبل </body>) -->
-  <script type="module" src="./firebase-init.js"></script>
+  <!-- Doctor binder -->
+  <script>
+    (function(){
+      "use strict";
+      const $ = (s,r=document)=>r.querySelector(s);
+      const esc = (s)=>String(s??"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+
+      function stats(){
+        const DB = window.SSC?.db;
+        if(!DB) return;
+        const cases = DB.cases||[];
+        $("#d_k_in").textContent = cases.length;
+        $("#d_k_follow").textContent = cases.filter(c=>c.status==="followup_required").length;
+        $("#d_k_critical").textContent = cases.filter(c=>c.priority==="critical"||c.risk==="high").length;
+      }
+
+      function renderQueue(){
+        const DB = window.SSC?.db;
+        const box = $("#d_queue");
+        if(!DB || !box) return;
+        const cases = DB.cases||[];
+        box.innerHTML = cases.length
+          ? cases.slice(0,8).map(c=>`
+            <div class="rowCard">
+              <div class="rowTitle">${esc(c.owner?.name||"طالب")} • <span class="subtle">#${esc(c.id)}</span></div>
+              <div class="rowMeta">الحالة: <b>${esc(c.status||"—")}</b> • الأولوية: <b>${esc(c.priority||"—")}</b></div>
+              <div class="rowMeta">${esc((c.symptoms||"—").slice(0,80))}</div>
+            </div>
+          `).join("")
+          : `<div class="subtle">لا توجد حالات حالياً.</div>`;
+      }
+
+      function renderCase(){
+        const DB = window.SSC?.db;
+        if(!DB) return;
+        const c = DB.cases?.[0];
+        if(!c){
+          $("#d_owner").textContent = "—";
+          $("#d_symptoms").textContent = "—";
+          $("#d_decision").textContent = "—";
+          return;
+        }
+        $("#d_owner").textContent = c.owner?.name || "—";
+        $("#d_symptoms").textContent = c.symptoms || "—";
+        $("#d_decision").textContent = c.decision || "—";
+
+        $("#d_hr").textContent = c.vitals?.hr ?? "—";
+        $("#d_spo2").textContent = c.vitals?.spo2 ?? "—";
+        $("#d_temp").textContent = c.vitals?.temp ?? "—";
+        $("#d_bp").textContent = c.vitals?.bp ?? "—";
+      }
+
+      document.addEventListener("DOMContentLoaded", ()=>{
+        stats(); renderQueue(); renderCase();
+        window.bus?.on?.("case:update", ()=>{ stats(); renderQueue(); renderCase(); });
+      });
+    })();
+  </script>
+
 </body>
 </html>
