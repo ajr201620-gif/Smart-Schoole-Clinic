@@ -5,13 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>بوابة الإدارة — Smart School Clinic OS</title>
 
-  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="app.css" />
 
-  <script src="js/bus.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/admin-heatmap.js"></script>
-  <script src="js/audit-log.js"></script>
-  <script src="actions.js"></script>
+<script src="bus.js"></script>
+<script src="auth.js"></script>
+<script src="protocols.js"></script>
+<script src="audit-log.js"></script>
+<script src="admin-heatmap.js"></script>
+
+<script src="actions.js"></script>
+<script src="app-init.js"></script>
 </head>
 
 <body>
@@ -27,6 +30,67 @@
     <button class="btn ghost" onclick="location.href='index.html'">⬅️ رجوع</button>
   </div>
 </header>
+  <main class="page admin-page">
+
+  <section class="card">
+    <div class="row between">
+      <h3>🏫 لوحة الإدارة</h3>
+      <div class="row" style="gap:10px; flex-wrap:wrap;">
+        <button class="btn ghost" data-action="admin.refresh">🔄 تحديث</button>
+        <button class="btn ghost" data-action="admin.exportAudit">🧾 تصدير سجل</button>
+      </div>
+    </div>
+
+    <div class="grid-4" style="margin-top:10px;">
+      <div class="kpi"><div class="label">Requests</div><div class="value" id="aRequests">—</div></div>
+      <div class="kpi"><div class="label">Cases</div><div class="value" id="aCases">—</div></div>
+      <div class="kpi"><div class="label">Critical</div><div class="value" id="aCritical">—</div></div>
+      <div class="kpi"><div class="label">Follow-up</div><div class="value" id="aFollowup">—</div></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="row between">
+      <h3>🔥 Heatmap (مراجعة سريعة)</h3>
+      <button class="btn ghost" data-action="admin.buildHeatmap">🧩 إعادة بناء</button>
+    </div>
+    <div id="aHeatmap" class="heatmap muted">—</div>
+  </section>
+
+  <section class="card">
+    <div class="row between">
+      <h3>📚 آخر الحالات</h3>
+      <button class="btn ghost" data-action="admin.seedDemo">✨ توليد بيانات تجريبية</button>
+    </div>
+
+    <div id="aCaseList" class="list">
+      <div class="muted">لا توجد حالات بعد.</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h3>🧷 تفاصيل الحالة المختارة</h3>
+
+    <div class="grid-3">
+      <div><div class="label">الطالب</div><div class="value" id="aStudent">—</div></div>
+      <div><div class="label">الحالة</div><div class="value" id="aStatus">—</div></div>
+      <div><div class="label">القرار</div><div class="value" id="aDecision">—</div></div>
+    </div>
+
+    <div class="label" style="margin-top:10px;">ملخص</div>
+    <div class="box" id="aSummary">—</div>
+
+    <div class="row" style="margin-top:12px; gap:10px; flex-wrap:wrap;">
+      <button class="btn warn" data-action="admin.notifyParent">👨‍👩‍👦 إشعار ولي الأمر</button>
+      <button class="btn ghost" data-action="admin.notifyDoctor">👨‍⚕️ إشعار الطبيب</button>
+      <button class="btn primary" data-action="admin.markFollowup">📌 وضع متابعة</button>
+      <button class="btn danger" data-action="admin.markCritical">🚨 تصعيد Critical</button>
+    </div>
+
+    <div class="muted" id="aResult" style="margin-top:10px;"></div>
+  </section>
+
+</main>
 
 <main class="container">
 
