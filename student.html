@@ -13,6 +13,7 @@
   <script src="js/sensor-sim.js"></script>
   <script src="js/student-notify.js"></script>
   <script src="actions.js"></script>
+ <script src="app-init.js"></script>
 </head>
 
 <body>
@@ -28,6 +29,51 @@
     <button class="btn ghost" onclick="location.href='index.html'">⬅️ رجوع</button>
   </div>
 </header>
+  <main class="page student-page">
+
+  <!-- 📝 الشكوى -->
+  <section class="card">
+    <h3>🩺 الشكوى</h3>
+    <textarea
+      id="studentComplaint"
+      placeholder="اكتب شكواك الصحية هنا..."
+      rows="3"></textarea>
+  </section>
+
+  <!-- 🧪 محاكاة الحساسات -->
+  <section class="card">
+    <h3>📟 محاكاة الحساسات</h3>
+
+    <div class="vitals-grid">
+      <div>HR: <span id="vHR">—</span></div>
+      <div>SpO₂: <span id="vSpO2">—</span></div>
+      <div>Temp: <span id="vTemp">—</span></div>
+      <div>BP: <span id="vBP">—</span></div>
+    </div>
+
+    <!-- ✅ زر يولّد القراءات -->
+    <button class="btn primary" data-action="student.simulate">
+      ⚡ توليد قراءات افتراضية
+    </button>
+  </section>
+
+  <!-- 🤖 الفرز الذكي -->
+  <section class="card">
+    <h3>🤖 الفرز الذكي (AI)</h3>
+
+    <div>Risk: <strong id="aiRisk">—</strong></div>
+    <div>Priority: <strong id="aiPriority">—</strong></div>
+    <div id="aiRec">—</div>
+  </section>
+
+  <!-- 👨‍⚕️ العيادة الافتراضية -->
+  <section class="card">
+    <button class="btn success" data-action="student.requestVisit">
+      🎥 طلب عيادة افتراضية مع الطبيب
+    </button>
+  </section>
+
+</main>
 
 <main class="container" id="scPageContent">
 
