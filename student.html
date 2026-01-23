@@ -8,6 +8,7 @@
 </head>
 
 <body data-page="student">
+
   <!-- Topbar -->
   <header class="topbar">
     <div class="topbar__left">
@@ -24,12 +25,11 @@
 
     <div class="topbar__right">
       <div class="pill">
-        <span class="dot ok"></span>
         <span>مرحبًا، <b data-user-name>طالب</b></span>
       </div>
 
-      <button class="btn ghost" id="btnTheme" data-action="common:theme-toggle">🌓 المظهر</button>
-      <button class="btn danger" id="btnLogout" data-action="common:logout">خروج</button>
+      <button class="btn ghost" id="btnTheme">🌓 المظهر</button>
+      <button class="btn danger" id="btnLogout" data-action="btnLogout">خروج</button>
     </div>
   </header>
 
@@ -40,31 +40,30 @@
       <div class="hero__left">
         <h1 class="hero__title">جاهز نفحصك… بدون ما نخوفك 😄</h1>
         <p class="hero__lead">
-          اكتب شكواك، شغّل القياسات، ثم نفّذ الفرز الذكي. النظام بيحفظ كل شيء محليًا (وبعدين نربطه بفايربيس).
+          اكتب شكواك، شغّل القياسات، ثم نفّذ الفرز الذكي. الآن مربوط بـ Firebase/Firestore ✅
         </p>
 
         <div class="hero__actions">
-         <button class="btn primary" id="btnTriage" data-action="btnTriage">🤖 تشغيل الفرز الذكي</button>
-<button class="btn" id="btnCreateCase" data-action="btnCreateCase">🧾 إنشاء حالة</button>
-<button class="btn ghost" id="btnVisit" data-action="btnVisit">🎥 طلب زيارة افتراضية</button>
-<button class="btn" id="btnMyCases" data-action="btnMyCases">📋 عرض حالاتي</button>
-<button class="btn ghost" id="btnMyReport" data-action="btnMyReport">⬇️ تقرير</button>
-<button class="btn ghost" id="btnHelp" data-action="btnHelp">🆘 مساعدة</button>
-<button class="btn danger" id="btnLogout" data-action="btnLogout">خروج</button>
+          <button class="btn primary" id="btnTriage" data-action="btnTriage">🤖 تشغيل الفرز الذكي</button>
+          <button class="btn" id="btnCreateCase" data-action="btnCreateCase">🧾 إنشاء حالة</button>
+          <button class="btn ghost" id="btnVisit" data-action="btnVisit">🎥 طلب زيارة افتراضية</button>
+          <button class="btn" id="btnMyCases" data-action="btnMyCases">📋 عرض حالاتي</button>
+          <button class="btn ghost" id="btnMyReport" data-action="btnMyReport">⬇️ تقرير</button>
+          <button class="btn ghost" id="btnHelp" data-action="btnHelp">🆘 مساعدة</button>
         </div>
 
         <div class="kpis">
           <div class="kpi">
             <div class="kpi__label">حالة النظام</div>
-            <div class="kpi__value"><span class="dot ok"></span> جاهز</div>
+            <div class="kpi__value">جاهز</div>
           </div>
           <div class="kpi">
             <div class="kpi__label">الدور</div>
             <div class="kpi__value" data-user-role>student</div>
           </div>
           <div class="kpi">
-            <div class="kpi__label">الخصوصية</div>
-            <div class="kpi__value">محليًا (Demo)</div>
+            <div class="kpi__label">البيانات</div>
+            <div class="kpi__value">Firestore ✅</div>
           </div>
         </div>
       </div>
@@ -75,11 +74,11 @@
           <div class="glassCard__body">
             <div class="row">
               <span class="muted">تذكير:</span>
-              <span>ابدأ بإنشاء حالة ثم القياسات ثم AI.</span>
+              <span>الأفضل: قياسات → فرز → إنشاء حالة → زيارة.</span>
             </div>
             <div class="row">
               <span class="muted">نصيحة:</span>
-              <span>لا تكتب “مادري” بس… النظام بيحاول يفهم، بس هو مو قارئ أفكار 😅</span>
+              <span>إذا كتبت “مادري”… AI بيحاول… بس مو ساحر 😅</span>
             </div>
           </div>
         </div>
@@ -88,12 +87,13 @@
 
     <!-- Grid -->
     <section class="grid2">
+
       <!-- Symptoms / Complaint -->
       <section class="card">
         <header class="card__head">
           <h2 class="card__title">📝 الشكوى / الأعراض</h2>
           <div class="card__tools">
-            <button class="btn ghost sm" data-action="student:save-symptoms">حفظ</button>
+            <button class="btn ghost sm" id="btnSaveSymptoms">حفظ</button>
           </div>
         </header>
 
@@ -104,13 +104,13 @@
           </label>
 
           <div class="rowActions">
-            <button class="btn" id="btnRunSensors" data-action="student:run-sensors">📟 تشغيل القياسات (محاكاة)</button>
-            <button class="btn primary" id="btnSubmitAI" data-action="student:submit-ai">🤖 فرز ذكي (AI)</button>
+            <!-- نربطها تحت بــ Actions.runTriage() -->
+            <button class="btn" id="btnRunSensors">📟 تشغيل القياسات (محاكاة)</button>
+            <!-- نربطها تحت بــ Actions.createCaseFromLast() -->
+            <button class="btn primary" id="btnSubmitAI">🤖 فرز ذكي (AI)</button>
           </div>
 
-          <div class="hint">
-            ✅ القياسات هنا “محاكاة” للتجربة. لاحقًا نربطها مع IoT الحقيقي.
-          </div>
+          <div class="hint">✅ القياسات هنا محاكاة للتجربة. لاحقًا نربطها IoT.</div>
         </div>
       </section>
 
@@ -119,7 +119,7 @@
         <header class="card__head">
           <h2 class="card__title">📊 القياسات (Vitals)</h2>
           <div class="card__tools">
-            <span class="pill"><span class="dot warn"></span> Demo</span>
+            <span class="pill">Demo</span>
           </div>
         </header>
 
@@ -184,26 +184,24 @@
 
         <div class="card__body">
           <p class="muted">
-            بعد الفرز الذكي تقدر تبدأ زيارة (حضورية/افتراضية) — وبيروح إشعار لولي الأمر + الإدارة.
+            بعد الفرز الذكي تقدر تبدأ زيارة — (Demo) ثم تروح لصفحة الزيارة.
           </p>
 
           <div class="rowActions">
-            <button class="btn primary" id="btnStartVisit" data-action="student:start-visit">🚀 بدء زيارة</button>
+            <button class="btn primary" id="btnStartVisit">🚀 بدء زيارة</button>
             <a class="btn" href="parent.html">👨‍👩‍👧‍👦 بوابة ولي الأمر</a>
           </div>
 
-          <div class="hint">
-            🧠 إذا ما في “حالة” موجودة، الزيارة بتقول لك: ابدأ حالة أول… (منطقي، مو كذا؟ 😄)
-          </div>
+          <div class="hint">إذا ما فيه حالة: سَوّي قياسات وفرز أول.</div>
         </div>
       </section>
 
-      <!-- Notifications -->
+      <!-- Notifications (Demo placeholder) -->
       <section class="card">
         <header class="card__head">
           <h2 class="card__title">🔔 التنبيهات</h2>
           <div class="card__tools">
-            <span class="pill"><span class="dot ok"></span> لحظي</span>
+            <span class="pill">لحظي</span>
           </div>
         </header>
 
@@ -213,81 +211,102 @@
           </div>
         </div>
       </section>
+
     </section>
   </main>
 
-  <!-- Scripts (order matters) -->
-  <script src="./bus.js"></script>
-  <script src="./auth.js"></script>
-  <script src="./triage-ai.js"></script>
-  <script src="./sensor-sim.js"></script>
-  <script src="./student-notify.js"></script>
-
-  <!-- Firebase init (module) -->
+  <!-- ✅ Required scripts (ONE TIME, order matters) -->
   <script type="module" src="./firebase-init.js"></script>
-
-  <!-- Actions wiring -->
+  <script src="./rbac.js"></script>
   <script src="./actions.js"></script>
 
-  <!-- Small UI binder (reads SSC.db and reflects vitals/decision on screen) -->
+  <!-- Page glue: map your custom buttons -> Actions + update UI -->
   <script>
     (function(){
-      "use strict";
-      function $(s,r=document){return r.querySelector(s);}
-      function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));}
+      const $ = (s,r=document)=>r.querySelector(s);
 
-      function renderVitals() {
-        const db = window.SSC && window.SSC.db;
-        if (!db) return;
-
-        const userId = db.session?.currentUserId;
-        const c = db.cases?.find(x => x.owner?.id === userId) || db.cases?.[0];
-        if (!c) return;
-
-        $("#v_hr").textContent = c.vitals?.hr ?? "—";
-        $("#v_spo2").textContent = c.vitals?.spo2 ?? "—";
-        $("#v_temp").textContent = c.vitals?.temp ?? "—";
-        $("#v_bp").textContent = c.vitals?.bp ?? "—";
-
-        $("#v_status").textContent = c.status ?? "—";
-        $("#v_priority").textContent = c.priority ?? "—";
-        $("#v_risk").textContent = c.risk ?? "—";
-        $("#v_decision").textContent = c.decision ?? "—";
-      }
-
-      function renderNotifications() {
-        const db = window.SSC && window.SSC.db;
-        const box = $("#notifyList");
-        if (!db || !box) return;
-
-        const role = "student";
-        const items = (db.notifications||[]).filter(n => n.toRole === role).slice(0,8);
-
-        if (!items.length) {
-          box.innerHTML = `<div class="empty muted">لا يوجد تنبيهات حالياً.</div>`;
-          return;
-        }
-
-        box.innerHTML = items.map(n => `
-          <div class="rowCard">
-            <div class="rowTitle">${escapeHtml(n.title)}</div>
-            <div class="rowMeta">${escapeHtml(n.message)} • <span class="muted">${escapeHtml(n.at)}</span></div>
-          </div>
-        `).join("");
-      }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        renderVitals();
-        renderNotifications();
-
-        // refresh when actions update DB
-        window.bus?.on?.("case:update", () => renderVitals());
-        window.bus?.on?.("notify:update", () => renderNotifications());
+      // Theme toggle (simple)
+      $("#btnTheme")?.addEventListener("click", () => {
+        const html = document.documentElement;
+        const cur = html.getAttribute("data-theme") || "dark";
+        const nxt = cur === "dark" ? "light" : "dark";
+        html.setAttribute("data-theme", nxt);
+        localStorage.setItem("THEME", nxt);
       });
+
+      // Restore theme
+      const savedTheme = localStorage.getItem("THEME");
+      if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
+
+      // Save symptoms locally (and used by actions via complaint)
+      $("#btnSaveSymptoms")?.addEventListener("click", () => {
+        localStorage.setItem("SYMPTOMS", ($("#symptoms")?.value || "").trim());
+        alert("تم الحفظ ✅");
+      });
+
+      // IMPORTANT: actions.js reads complaint from #complaint or #txtComplaint
+      // so we provide a hidden alias input for compatibility
+      const ta = $("#symptoms");
+      if (ta && !$("#txtComplaint")) {
+        const alias = document.createElement("textarea");
+        alias.id = "txtComplaint";
+        alias.className = "input";
+        alias.style.display = "none";
+        ta.insertAdjacentElement("afterend", alias);
+      }
+      function syncComplaint(){
+        const v = ($("#symptoms")?.value || localStorage.getItem("SYMPTOMS") || "").trim();
+        const alias = $("#txtComplaint");
+        if (alias) alias.value = v;
+      }
+      $("#symptoms")?.addEventListener("input", syncComplaint);
+      syncComplaint();
+
+      // Wire your custom buttons to Actions
+      $("#btnRunSensors")?.addEventListener("click", async () => {
+        syncComplaint();
+        await window.Actions?.runTriage?.(); // creates triage doc + emits triage:update
+      });
+
+      $("#btnSubmitAI")?.addEventListener("click", async () => {
+        syncComplaint();
+        // creates a case using last triage (or sim if none)
+        await window.Actions?.createCaseFromLast?.(); // emits case:update
+      });
+
+      $("#btnStartVisit")?.addEventListener("click", async () => {
+        syncComplaint();
+        await window.Actions?.createVisit?.(); // creates visit doc
+        location.href = "visit.html";
+      });
+
+      // Update UI from events
+      function paintFromTriage(detail){
+        const v = detail?.vitals || {};
+        const t = detail?.triage || {};
+        if ($("#v_hr")) $("#v_hr").textContent = v.hr ?? "—";
+        if ($("#v_spo2")) $("#v_spo2").textContent = v.spo2 ?? "—";
+        if ($("#v_temp")) $("#v_temp").textContent = v.temp ?? "—";
+        if ($("#v_bp")) $("#v_bp").textContent = v.bp ?? "—";
+
+        if ($("#v_status")) $("#v_status").textContent = "تم القياس";
+        if ($("#v_priority")) $("#v_priority").textContent = t.priority ?? "—";
+        if ($("#v_risk")) $("#v_risk").textContent = t.risk ?? "—";
+        if ($("#v_decision")) $("#v_decision").textContent = `Score ${t.score ?? "—"}`;
+      }
+
+      window.addEventListener("triage:update", (e) => paintFromTriage(e.detail));
+      window.addEventListener("case:update", (e) => {
+        // case:update from actions sometimes is patch-only; keep simple
+        if ($("#v_status")) $("#v_status").textContent = "تم إنشاء حالة";
+      });
+
+      // Auto-fill name/role labels
+      const name = localStorage.getItem("USER_NAME") || "طالب";
+      document.querySelectorAll("[data-user-name]").forEach(el=>el.textContent = name);
+      document.querySelectorAll("[data-user-role]").forEach(el=>el.textContent = "student");
     })();
   </script>
-  <script type="module" src="./firebase-init.js"></script>
-<script src="./rbac.js"></script>
-<script src="./actions.js"></script>
+
 </body>
 </html>
