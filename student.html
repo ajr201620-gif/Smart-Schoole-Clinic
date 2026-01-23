@@ -4,184 +4,92 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>بوابة الطالب — Smart School Clinic OS</title>
-
+  <meta name="theme-color" content="#0b1020"/>
   <link rel="stylesheet" href="app.css">
 
-  <script src="js/bus.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/ai-triage.js"></script>
-  <script src="js/sensor-sim.js"></script>
-  <script src="js/student-notify.js"></script>
+  <script src="bus.js"></script>
+  <script src="auth.js"></script>
+  <script src="triage-ai.js"></script>
+  <script src="sensor-sim.js"></script>
+  <script src="visit-session.js"></script>
   <script src="actions.js"></script>
- <script src="app-init.js"></script>
 </head>
-
 <body>
+
 <header class="topbar">
-  <div class="brand">
-    <div class="logo">🎓</div>
-    <div class="brandText">
-      <div class="name">بوابة الطالب</div>
-      <div class="tagline">شكوى • محاكاة حساسات • فرز ذكي</div>
-    </div>
-  </div>
-  <div class="topActions">
-    <button class="btn ghost" onclick="location.href='index.html'">⬅️ رجوع</button>
-  </div>
-</header>
-  <main class="page student-page">
-
-  <!-- 📝 الشكوى -->
-  <section class="card">
-    <h3>🩺 الشكوى</h3>
-    <textarea
-      id="studentComplaint"
-      placeholder="اكتب شكواك الصحية هنا..."
-      rows="3"></textarea>
-  </section>
-
-  <!-- 🧪 محاكاة الحساسات -->
-  <section class="card">
-    <h3>📟 محاكاة الحساسات</h3>
-
-    <div class="vitals-grid">
-      <div>HR: <span id="vHR">—</span></div>
-      <div>SpO₂: <span id="vSpO2">—</span></div>
-      <div>Temp: <span id="vTemp">—</span></div>
-      <div>BP: <span id="vBP">—</span></div>
-    </div>
-
-    <!-- ✅ زر يولّد القراءات -->
-    <button class="btn primary" data-action="student.simulate">
-      ⚡ توليد قراءات افتراضية
-    </button>
-  </section>
-
-  <!-- 🤖 الفرز الذكي -->
-  <section class="card">
-    <h3>🤖 الفرز الذكي (AI)</h3>
-
-    <div>Risk: <strong id="aiRisk">—</strong></div>
-    <div>Priority: <strong id="aiPriority">—</strong></div>
-    <div id="aiRec">—</div>
-  </section>
-
-  <!-- 👨‍⚕️ العيادة الافتراضية -->
-  <section class="card">
-    <button class="btn success" data-action="student.requestVisit">
-      🎥 طلب عيادة افتراضية مع الطبيب
-    </button>
-  </section>
-
-</main>
-
-<main class="container" id="scPageContent">
-
-  <!-- Complaint -->
-  <section class="panel">
-    <div class="h">
-      <h2>📝 الشكوى</h2>
-      <div class="muted">اشرح ما تشعر به الآن</div>
-    </div>
-
-    <textarea id="complaint" class="input" rows="3"
-      placeholder="مثال: صداع، دوخة، ألم في البطن..."></textarea>
-  </section>
-
-  <div class="sep"></div>
-
-  <!-- Sensors -->
-  <section class="panel">
-    <div class="h">
-      <h2>📟 محاكاة الحساسات</h2>
-      <div class="muted">هذه قراءات افتراضية للعرض</div>
-    </div>
-
-    <div class="row">
-      <button class="btn" id="btnSim">⚡ توليد قراءات</button>
-    </div>
-
-    <div class="kpiGrid" style="margin-top:12px">
-      <div class="kpi"><div class="k">Temp</div><div class="v" id="vTemp">—</div></div>
-      <div class="kpi"><div class="k">HR</div><div class="v" id="vHR">—</div></div>
-      <div class="kpi"><div class="k">SpO₂</div><div class="v" id="vSpO2">—</div></div>
-      <div class="kpi"><div class="k">BP</div><div class="v" id="vBP">—</div></div>
-    </div>
-  </section>
-
-  <div class="sep"></div>
-
-  <!-- AI Triage -->
-  <section class="panel">
-    <div class="h">
-      <h2>🤖 الفرز الذكي (AI)</h2>
-      <div class="muted">تقدير أولي للحالة</div>
-    </div>
-
-    <div class="kpiGrid">
-      <div class="kpi"><div class="k">Risk</div><div class="v" id="aiRisk">—</div></div>
-      <div class="kpi"><div class="k">Priority</div><div class="v" id="aiPriority">—</div></div>
-      <div class="kpi" style="grid-column:span 2">
-        <div class="k">Recommendation</div>
-        <div class="v" id="aiRec">—</div>
+  <div class="inner">
+    <div class="brand">
+      <div class="logo">SC</div>
+      <div class="brandText">
+        <div class="name">بوابة الطالب</div>
+        <div class="tagline">شكوى + محاكاة حساسات + فرز AI + طلب زيارة افتراضية</div>
       </div>
     </div>
-  </section>
-
-  <div class="sep"></div>
-
-  <!-- Actions -->
-  <section class="panel">
-    <div class="row">
-      <button class="btn full" id="btnSend">📤 إرسال الحالة للطبيب</button>
+    <div class="pills">
+      <a class="btn ghost" href="index.html">⬅️ رجوع</a>
+      <span class="pill" id="roleBadge">Role: student</span>
+      <span class="pill" id="permBadge">Local Demo</span>
     </div>
-  </section>
+  </div>
+</header>
 
-</main>
+<div class="container">
+  <div class="grid">
 
-<script>
-(function(){
-  SCAUTH.requireRole("student");
+    <div class="card">
+      <div class="cardHeader">
+        <h2 class="sectionTitle"><span class="emoji">📝</span> الشكوى</h2>
+        <span class="small">اكتب شكواك ثم ولّد/حدّث الحساسات</span>
+      </div>
+      <div class="cardBody">
+        <textarea id="complaint" class="field" placeholder="مثال: صداع + دوخة + ألم في البطن ..."></textarea>
 
-  let vitals = null;
-  let ai = null;
+        <hr>
 
-  const $ = (s)=>document.querySelector(s);
+        <div class="row">
+          <button class="btn" data-action="student_sim_normal">🟢 محاكاة طبيعية</button>
+          <button class="btn" data-action="student_sim_fever">🌡️ محاكاة حمّى</button>
+          <button class="btn" data-action="student_sim_asthma">💨 محاكاة ضيق تنفّس</button>
+          <button class="btn primary" data-action="student_sim_mixed">🎲 توليد قراءات</button>
+        </div>
 
-  // Sensor simulation
-  $("#btnSim").addEventListener("click", ()=>{
-    vitals = window.SCSIM.generate();
-    $("#vTemp").textContent = vitals.temp + "°C";
-    $("#vHR").textContent = vitals.hr;
-    $("#vSpO2").textContent = vitals.spo2 + "%";
-    $("#vBP").textContent = vitals.bp;
+        <div style="margin-top:12px" class="kpis">
+          <div class="kpi"><div class="label">HR</div><div class="value" id="v_hr">—</div><div class="hint">نبض</div></div>
+          <div class="kpi"><div class="label">SpO₂</div><div class="value" id="v_spo2">—</div><div class="hint">أكسجين</div></div>
+          <div class="kpi"><div class="label">Temp</div><div class="value" id="v_temp">—</div><div class="hint">حرارة</div></div>
+          <div class="kpi"><div class="label">BP</div><div class="value" id="v_bp">—</div><div class="hint">ضغط</div></div>
+        </div>
+      </div>
 
-    ai = window.SCAI.triage(vitals, $("#complaint").value || "");
-    $("#aiRisk").textContent = ai.risk + "/100";
-    $("#aiPriority").textContent = ai.priority;
-    $("#aiRec").textContent = ai.recommendation;
-  });
+      <div class="cardFooter">
+        <button class="btn good" data-action="student_create_case">✅ إنشاء الحالة + فرز AI</button>
+        <button class="btn primary" data-action="student_request_visit">🎥 طلب زيارة افتراضية للطبيب</button>
+        <a class="btn" href="report.html">📄 تقرير الحالة</a>
+      </div>
+    </div>
 
-  // Send request
-  $("#btnSend").addEventListener("click", ()=>{
-    const desc = $("#complaint").value.trim();
-    if(!desc) return alert("اكتب الشكوى أولاً");
-    if(!vitals || !ai) return alert("ولّد قراءات الحساسات أولاً");
+    <div class="card">
+      <div class="cardHeader">
+        <h2 class="sectionTitle"><span class="emoji">🧠</span> نتيجة الفرز الذكي (AI)</h2>
+      </div>
+      <div class="cardBody">
+        <div class="kpis">
+          <div class="kpi"><div class="label">Risk</div><div class="value" id="out_risk">—</div><div class="hint">0 - 100</div></div>
+          <div class="kpi"><div class="label">Priority</div><div class="value" id="out_priority">—</div><div class="hint">اعتيادي/عاجل/حرج</div></div>
+          <div class="kpi" style="grid-column: span 2"><div class="label">Decision</div><div class="value" id="out_decision">—</div><div class="hint">قرار مقترح</div></div>
+        </div>
+        <hr>
+        <div class="small">Recommendation</div>
+        <div class="card" style="padding:12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10)">
+          <div id="out_rec" class="muted">—</div>
+        </div>
+        <hr>
+        <div class="small">تلميح: زر “إنشاء الحالة” هو اللي يخلي كل شيء “فعلي” ويطلع للطبيب والإدارة.</div>
+      </div>
+    </div>
 
-    SCBUS.addRequest({
-      studentName: "طالب (Demo)",
-      desc,
-      vitals,
-      ai
-    });
+  </div>
+</div>
 
-    alert("تم إرسال الحالة للطبيب ✅");
-    $("#complaint").value = "";
-  });
-
-  // Student notification banner
-  window.SCSTUDENT && window.SCSTUDENT.mount();
-})();
-</script>
 </body>
 </html>
