@@ -1,160 +1,135 @@
-/* sensor-sim.js — Virtual Sensors Generator (Demo → Backend-ready)
-   Generates vitals with realistic ranges and scenarios.
-*/
+/* =========================================================
+   sensor-sim.js — Smart School Clinic OS
+   - Simulate vitals (BP / SpO2 / HR / Temp)
+   - Writes into #v_bp #v_spo2 #v_hr #v_temp if found
+   - Exposes window.Sensors for other modules
+   ========================================================= */
 
 (() => {
   "use strict";
 
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
-  const rnd = (a, b) => a + Math.random() * (b - a);
-  const rndi = (a, b) => Math.round(rnd(a, b));
+  const round1 = (n) => Math.round(n * 10) / 10;
 
-  function scenarioWeights(mode) {
-    // return probabilities for [normal, moderate, critical]
-    if (mode === "normal") return [0.86, 0.12, 0.02];
-    if (mode === "moderate") return [0.25, 0.65, 0.10];
-    if (mode === "critical") return [0.05, 0.25, 0.70];
-    if (mode === "confirm") return [0.60, 0.32, 0.08];
-    return [0.55, 0.35, 0.10]; // mixed
-  }
+  function byId(id) { return document.getElementById(id); }
+  function setText(id, v) { const el = byId(id); if (el) el.textContent = String(v); }
 
-  function chooseScenario(mode = "mixed") {
-    const w = scenarioWeights(mode);
-    const x = Math.random();
-    const a = w[0], b = w[0] + w[1];
-    if (x < a) return "normal";
-    if (x < b) return "moderate";
-    return "critical";
-  }
+  function rand(min, max) { return Math.random() * (max - min) + min; }
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-  function genForScenario(sc) {
-    // Base ranges (school age)
-    let hr, spo2, temp, bpSys, bpDia, rr;
+  function makeVitals(mode = "normal") {
+    // modes: normal | mild | urgent
+    let hr, spo2, temp, sys, dia;
 
-    if (sc === "normal") {
-      hr = rndi(70, 105);
-      spo2 = rndi(96, 100);
-      temp = +(rnd(36.2, 37.4).toFixed(1));
-      bpSys = rndi(98, 128);
-      bpDia = rndi(58, 82);
-      rr = rndi(14, 22);
-    } else if (sc === "moderate") {
-      const type = Math.random();
-      if (type < 0.33) {
-        // mild fever + tachy
-        hr = rndi(95, 125);
-        spo2 = rndi(94, 98);
-        temp = +(rnd(37.8, 38.7).toFixed(1));
-        bpSys = rndi(102, 138);
-        bpDia = rndi(60, 88);
-        rr = rndi(18, 28);
-      } else if (type < 0.66) {
-        // mild hypoxia
-        hr = rndi(90, 120);
-        spo2 = rndi(92, 95);
-        temp = +(rnd(36.8, 37.8).toFixed(1));
-        bpSys = rndi(100, 136);
-        bpDia = rndi(60, 86);
-        rr = rndi(20, 32);
-      } else {
-        // high BP / stress
-        hr = rndi(88, 118);
-        spo2 = rndi(95, 99);
-        temp = +(rnd(36.4, 37.6).toFixed(1));
-        bpSys = rndi(135, 155);
-        bpDia = rndi(80, 98);
-        rr = rndi(16, 26);
-      }
+    if (mode === "normal") {
+      hr = Math.round(rand(68, 96));
+      spo2 = Math.round(rand(96, 99));
+      temp = round1(rand(36.4, 37.4));
+      sys = Math.round(rand(108, 128));
+      dia = Math.round(rand(70, 84));
+    } else if (mode === "mild") {
+      hr = Math.round(rand(90, 120));
+      spo2 = Math.round(rand(93, 96));
+      temp = round1(rand(37.4, 38.4));
+      sys = Math.round(rand(125, 145));
+      dia = Math.round(rand(80, 92));
     } else {
-      const type = Math.random();
-      if (type < 0.5) {
-        // severe fever + tachy + dehydration
-        hr = rndi(120, 155);
-        spo2 = rndi(90, 94);
-        temp = +(rnd(39.0, 40.4).toFixed(1));
-        bpSys = rndi(88, 110);
-        bpDia = rndi(50, 70);
-        rr = rndi(26, 40);
-      } else {
-        // respiratory issue
-        hr = rndi(110, 150);
-        spo2 = rndi(86, 92);
-        temp = +(rnd(37.8, 39.6).toFixed(1));
-        bpSys = rndi(92, 120);
-        bpDia = rndi(52, 76);
-        rr = rndi(30, 44);
-      }
+      // urgent
+      hr = Math.round(rand(120, 160));
+      spo2 = Math.round(rand(85, 93));
+      temp = round1(rand(38.4, 40.2));
+      sys = Math.round(rand(85, 105));
+      dia = Math.round(rand(55, 70));
     }
 
-    // Slight noise + clamp
-    hr = clamp(hr + rndi(-3, 3), 45, 190);
-    spo2 = clamp(spo2 + rndi(-1, 1), 75, 100);
-    temp = +clamp(temp + rnd(-0.1, 0.1), 34, 41).toFixed(1);
-    bpSys = clamp(bpSys + rndi(-2, 2), 70, 200);
-    bpDia = clamp(bpDia + rndi(-2, 2), 40, 130);
-    rr = clamp(rr + rndi(-1, 1), 10, 55);
+    // clamp safety
+    hr = clamp(hr, 40, 220);
+    spo2 = clamp(spo2, 60, 100);
+    temp = clamp(temp, 34.0, 42.0);
+    sys = clamp(sys, 70, 200);
+    dia = clamp(dia, 40, 130);
 
-    return { hr, spo2, temp, bpSys, bpDia, rr };
-  }
-
-  function computeBPString(v) {
-    return `${v.bpSys}/${v.bpDia}`;
-  }
-
-  function scoreSeverity(v) {
-    let score = 0;
-
-    // Temp
-    if (v.temp >= 39.5) score += 28;
-    else if (v.temp >= 38.5) score += 20;
-    else if (v.temp >= 37.8) score += 12;
-    else score += 4;
-
-    // SpO2
-    if (v.spo2 <= 90) score += 32;
-    else if (v.spo2 <= 93) score += 24;
-    else if (v.spo2 <= 95) score += 12;
-    else score += 4;
-
-    // HR
-    if (v.hr >= 140) score += 18;
-    else if (v.hr >= 120) score += 12;
-    else if (v.hr >= 105) score += 7;
-    else score += 3;
-
-    // BP systolic
-    if (v.bpSys >= 155) score += 12;
-    else if (v.bpSys >= 140) score += 8;
-    else if (v.bpSys <= 92) score += 10;
-    else score += 2;
-
-    // RR
-    if (v.rr >= 36) score += 10;
-    else if (v.rr >= 28) score += 6;
-    else score += 2;
-
-    return clamp(score, 0, 100);
-  }
-
-  function generate(mode = "mixed") {
-    const sc = chooseScenario(mode);
-    const v = genForScenario(sc);
-    const severity = scoreSeverity(v);
-
-    const out = {
-      ...v,
-      bp: computeBPString(v),
-      scenario: sc,
-      severity,
-      at: new Date().toISOString()
+    return {
+      hr,
+      spo2,
+      temp,
+      bp: `${sys}/${dia}`,
+      sys,
+      dia,
+      at: new Date().toISOString(),
+      mode
     };
-
-    // notify
-    try { window.bus?.emit?.("sensors:update", out); } catch {}
-    return out;
   }
 
-  // expose
-  window.SensorSim = { generate };
+  function scoreRisk(v) {
+    // quick heuristic risk scoring
+    let score = 0;
+    if (v.spo2 < 92) score += 35;
+    else if (v.spo2 < 95) score += 15;
+
+    if (v.hr > 130) score += 25;
+    else if (v.hr > 110) score += 12;
+
+    if (v.temp >= 39.0) score += 25;
+    else if (v.temp >= 38.0) score += 12;
+
+    if (v.sys < 90 || v.dia < 60) score += 20;
+    else if (v.sys > 150 || v.dia > 95) score += 10;
+
+    score = clamp(score, 0, 100);
+
+    let level = "LOW";
+    if (score >= 70) level = "CRITICAL";
+    else if (score >= 40) level = "MEDIUM";
+
+    return { score, level };
+  }
+
+  function render(v) {
+    setText("v_bp", v.bp);
+    setText("v_spo2", v.spo2);
+    setText("v_hr", v.hr);
+    setText("v_temp", v.temp);
+  }
+
+  function simulate(mode) {
+    const v = makeVitals(mode || pick(["normal", "normal", "mild", "urgent"]));
+    const risk = scoreRisk(v);
+
+    const payload = { ...v, riskScore: risk.score, riskLevel: risk.level };
+    render(payload);
+
+    // store last reading
+    try {
+      localStorage.setItem("SSC_LAST_VITALS", JSON.stringify(payload));
+    } catch {}
+
+    // emit bus event if exists
+    if (window.bus?.emit) window.bus.emit("vitals:update", payload);
+
+    return payload;
+  }
+
+  // public api
+  window.Sensors = {
+    simulate,
+    makeVitals,
+    scoreRisk,
+    getLast() {
+      try { return JSON.parse(localStorage.getItem("SSC_LAST_VITALS") || "null"); }
+      catch { return null; }
+    }
+  };
+
+  // auto wire button if exists
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = byId("btnSimulate");
+    if (btn) btn.addEventListener("click", () => simulate());
+
+    // initial auto fill
+    if (byId("v_hr") || byId("v_spo2") || byId("v_temp") || byId("v_bp")) {
+      simulate("normal");
+    }
+  });
 
 })();
