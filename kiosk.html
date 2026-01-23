@@ -178,6 +178,10 @@
     }
     const res = window.SCSIM.createBusFlow(student, vitals, "قياسات كشك (محاكاة)");
     toast("تم الإرسال للطبيب ✅", `Case: ${res.case.id}`);
+    if(vitals.priority === "HIGH" || vitals.priority === "CRIT"){
+  const room = "C" + res.case.id.replace(/[^A-Z0-9]/gi,"").slice(-6);
+  window.open(`call-kiosk.html?room=${encodeURIComponent(room)}`, "_blank");
+}
   });
 
   // init
