@@ -1,810 +1,120 @@
 <!doctype html>
 <html lang="ar" dir="rtl" data-theme="dark">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Smart Clinic OS — بوابة ولي الأمر</title>
-  <link rel="stylesheet" href="shell.css">
-<script src="rbac.js"></script>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Smart Clinic OS — Parent</title>
+  <link rel="stylesheet" href="ar.css"/>
+  <link rel="stylesheet" href="shell.css"/>
+  <script src="bus.js"></script>
+  <script src="rbac.js"></script>
 </head>
-<script>window.SCRBAC && window.SCRBAC.mount();</script>
 <body>
 
-  <!-- Topbar -->
-  <header class="topbar">
-    <div class="brand">
-      <div class="logo">SC</div>
-      <div>
-        <div class="brand-title">Smart Clinic OS</div>
-        <div class="brand-sub">Parent Portal — بوابة ولي الأمر</div>
-      </div>
+<div class="sc-top">
+  <div class="left">
+    <span class="sc-chip">Parent</span>
+    <div class="sc-title">
+      <b>بوابة ولي الأمر</b>
+      <small>موافقات + تنبيهات + تقارير</small>
     </div>
-
-    <div class="top-actions">
-      <button class="btn ghost" id="btnTheme">🌓</button>
-      <button class="btn ghost" id="btnTheme" title="تبديل الوضع">🌓</button>
-      <button class="btn ghost" id="btnLinkChild">ربط الابن/الابنة (Demo)</button>
-      <button class="btn" id="btnExportAll">تصدير ملخص</button>
-    </div>
-  </header>
-
-  <div class="layout">
-
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="nav-title">القائمة</div>
-      <nav class="nav" id="parNav">
-        <button class="nav-item active" data-view="home"><span class="ico">🏠</span><span>الرئيسية</span></button>
-        <button class="nav-item" data-view="alerts"><span class="ico">🔔</span><span>التنبيهات</span></button>
-        <button class="nav-item" data-view="consent"><span class="ico">✅</span><span>الموافقات</span></button>
-        <button class="nav-item" data-view="report"><span class="ico">🧾</span><span>تقارير الابن</span></button>
-        <button class="nav-item" data-view="profile"><span class="ico">🧬</span><span>ملف صحي</span></button>
-        <button class="nav-item" data-view="history"><span class="ico">🗂️</span><span>السجل</span></button>
-      </nav>
-
-      <div class="sidebar-foot">
-        <div class="pill">
-          <span class="dot" id="dotLive"></span>
-          <div>
-            <div style="font-weight:1000;">System</div>
-            <div class="muted small" id="sysStatus">System: Ready</div>
-          </div>
-        </div>
-
-        <button class="btn ghost" id="btnRequestCall">طلب تواصل من العيادة</button>
-
-        <div class="divider"></div>
-        <div class="muted small">
-          * نسخة تجريبية للعرض. في النسخة الحقيقية: توثيق ولي الأمر وربط الطالب عبر نفاذ/أبشر.
-        </div>
-      </div>
-    </aside>
-
-    <!-- Main -->
-    <main class="main">
-
-      <!-- Hero -->
-      <section class="hero">
-        <div class="hero-left">
-          <div class="kicker">👨‍👩‍👧 Parent</div>
-          <h1>بوابة ولي الأمر</h1>
-          <p class="hero-desc">
-            تنبيهات فورية، موافقات، تقارير مختصرة، وتحديثات صحية مهمة للابن/الابنة.
-          </p>
-
-          <div class="hero-cta">
-            <button class="btn" id="btnOpenAlerts">فتح التنبيهات</button>
-            <button class="btn ghost" id="btnOpenConsent">فتح الموافقات</button>
-          </div>
-
-          <div class="hero-badges">
-            <span class="badge">RBAC: Parent</span>
-            <span class="badge ghost">Consent Workflow</span>
-            <span class="badge">Audit Enabled</span>
-          </div>
-        </div>
-
-        <div class="hero-right">
-          <div class="scorecard">
-            <div class="scorecard-head">
-              <div>
-                <div class="score-title">حالة الابن اليوم</div>
-                <div class="score-sub">Demo summary</div>
-              </div>
-              <div class="ring">
-                <div class="ring-inner">
-                  <div class="ring-num" id="kidState">OK</div>
-                  <div class="ring-lbl">✔</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="scorecard-grid">
-              <div class="mini">
-                <div class="mini-k">آخر تنبيه</div>
-                <div class="mini-v" id="lastAlert">—</div>
-              </div>
-              <div class="mini">
-                <div class="mini-k">موافقة مطلوبة</div>
-                <div class="mini-v" id="pendingConsent">1</div>
-              </div>
-              <div class="mini">
-                <div class="mini-k">آخر زيارة</div>
-                <div class="mini-v" id="lastVisit">اليوم</div>
-              </div>
-              <div class="mini">
-                <div class="mini-k">المتابعة</div>
-                <div class="mini-v" id="followUp">إن لزم</div>
-              </div>
-            </div>
-
-            <div class="scorecard-foot muted small">* بيانات تجريبية.</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Views -->
-      <section class="views">
-
-        <!-- HOME -->
-        <section class="view show" id="view-home">
-          <div class="section-head">
-            <div>
-              <h2>الرئيسية</h2>
-              <div class="muted">ملخص + إجراءات سريعة</div>
-            </div>
-            <div class="section-actions">
-              <button class="btn ghost" id="btnRefresh">تحديث</button>
-              <button class="btn" id="btnSimAlert">محاكاة تنبيه (Demo)</button>
-            </div>
-          </div>
-
-          <div class="grid-2">
-            <div class="card">
-              <div class="card-head">
-                <h3>إجراءات سريعة</h3>
-                <div class="muted small">Quick actions</div>
-              </div>
-
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <button class="btn ghost" id="qAck">✅ تأكيد استلام</button>
-                <button class="btn ghost" id="qConsent">🧾 موافقة سريعة</button>
-                <button class="btn ghost" id="qReport">🧾 فتح التقرير</button>
-                <button class="btn ghost" id="qProfile">🧬 تحديث الملف الصحي</button>
-              </div>
-
-              <div class="divider"></div>
-              <div class="muted small">
-                كل إجراء يتم تسجيله في Audit Log (Demo).
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-head">
-                <h3>رسالة العيادة</h3>
-                <div class="muted small">Clinic message</div>
-              </div>
-
-              <div class="tip" style="line-height:1.9;">
-                في حال وجود أعراض مستمرة أو مؤشرات خطورة، سيتم إشعارك وإعطاؤك خيارات الموافقة/التحويل.
-              </div>
-
-              <div class="card-actions">
-                <button class="btn" id="btnRequestCall2">طلب تواصل</button>
-                <button class="btn ghost" id="btnOpenAlerts2">عرض التنبيهات</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ALERTS -->
-        <section class="view" id="view-alerts">
-          <div class="section-head">
-            <div>
-              <h2>التنبيهات</h2>
-              <div class="muted">إشعارات العيادة/الإدارة (Demo)</div>
-            </div>
-            <div class="section-actions">
-              <button class="btn ghost" id="btnClearAlerts">مسح</button>
-              <button class="btn" id="btnAckAll">تأكيد الكل</button>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-head">
-              <h3>قائمة التنبيهات</h3>
-              <div class="muted small">Local demo</div>
-            </div>
-            <div class="alerts" id="alertsList">
-              <div class="empty">لا توجد تنبيهات بعد</div>
-            </div>
-          </div>
-        </section>
-
-        <!-- CONSENT -->
-        <section class="view" id="view-consent">
-          <div class="section-head">
-            <div>
-              <h2>الموافقات</h2>
-              <div class="muted">Consent workflow (Demo)</div>
-            </div>
-            <div class="section-actions">
-              <button class="btn ghost" id="btnGenConsent">إنشاء موافقة (Demo)</button>
-              <button class="btn" id="btnApprove">موافقة</button>
-              <button class="btn ghost" id="btnReject">رفض</button>
-            </div>
-          </div>
-
-          <div class="grid-2">
-            <div class="card">
-              <div class="card-head">
-                <h3>طلب موافقة</h3>
-                <div class="muted small" id="consentId">Consent: —</div>
-              </div>
-
-              <div class="form">
-                <label>نوع الموافقة</label>
-                <select id="consentType">
-                  <option value="clinic_visit">زيارة العيادة</option>
-                  <option value="med_admin">إعطاء دواء (حسب سياسة المدرسة)</option>
-                  <option value="referral">إحالة لمركز صحي/مستشفى</option>
-                  <option value="emergency">إجراء عاجل / طوارئ</option>
-                </select>
-
-                <label>ملخص</label>
-                <textarea id="consentSummary" rows="5" placeholder="ملخص الحالة + سبب الموافقة المطلوبة..."></textarea>
-
-                <label>ملاحظة ولي الأمر (اختياري)</label>
-                <input id="parentNote" placeholder="مثال: لديه حساسية من..." />
-              </div>
-
-              <div class="divider"></div>
-
-              <div class="kvrow"><span class="muted">الحالة:</span><b id="consentStatus">PENDING</b></div>
-              <div class="kvrow"><span class="muted">الوقت:</span><b id="consentTime">—</b></div>
-            </div>
-
-            <div class="card">
-              <div class="card-head">
-                <h3>إرشاد</h3>
-                <div class="muted small">Guidance</div>
-              </div>
-
-              <ul class="bullets">
-                <li>اقرأ الملخص ثم وافق/ارفض.</li>
-                <li>في الإحالة: سيتم تزويدك بخيارات تواصل (Demo).</li>
-                <li>كل خطوة تُسجل في Audit Log.</li>
-              </ul>
-
-              <div class="divider"></div>
-              <div class="tip">💡 تقدر تضيف “حساسية/مرض مزمن” في الملف الصحي لتظهر للعيادة لاحقًا.</div>
-            </div>
-          </div>
-        </section>
-
-        <!-- REPORT -->
-        <section class="view" id="view-report">
-          <div class="section-head">
-            <div>
-              <h2>تقارير الابن</h2>
-              <div class="muted">ملخص قابل للتصدير (Demo)</div>
-            </div>
-            <div class="section-actions">
-              <button class="btn" id="btnExportTxt">تصدير TXT</button>
-              <button class="btn ghost" id="btnExportJson">تصدير JSON</button>
-            </div>
-          </div>
-
-          <div class="card report">
-            <div class="report-title">Parent Summary Report — Demo</div>
-            <div class="report-meta">
-              <span id="repChild">Child: —</span> • <span id="repDate">Date: —</span>
-            </div>
-            <div class="report-body" id="repBody" style="line-height:1.95;"></div>
-            <div class="report-foot muted small">* تقرير تجريبي للعرض.</div>
-          </div>
-        </section>
-
-        <!-- PROFILE -->
-        <section class="view" id="view-profile">
-          <div class="section-head">
-            <div>
-              <h2>ملف صحي</h2>
-              <div class="muted">معلومات مهمة تظهر للعيادة (Demo)</div>
-            </div>
-            <div class="section-actions">
-              <button class="btn ghost" id="btnSaveProfile">حفظ</button>
-              <button class="btn" id="btnClearProfile">تفريغ</button>
-            </div>
-          </div>
-
-          <div class="grid-2">
-            <div class="card">
-              <div class="card-head">
-                <h3>بيانات صحية أساسية</h3>
-                <div class="muted small">Allergy / chronic</div>
-              </div>
-
-              <div class="form">
-                <label>حساسية</label>
-                <input id="allergy" placeholder="مثال: حساسية الفول السوداني" />
-
-                <label>مرض مزمن (إن وجد)</label>
-                <input id="chronic" placeholder="مثال: ربو" />
-
-                <label>أدوية دائمة (اختياري)</label>
-                <input id="longMeds" placeholder="مثال: بخاخ..." />
-
-                <label>ملاحظات مهمة</label>
-                <textarea id="healthNotes" rows="4" placeholder="أي شيء لازم العيادة تعرفه..."></textarea>
-              </div>
-
-              <div class="divider"></div>
-              <div class="muted small">* يتم حفظ المعلومات محليًا للعرض فقط.</div>
-            </div>
-
-            <div class="card">
-              <div class="card-head">
-                <h3>الطفل/الطفلة</h3>
-                <div class="muted small">Link child (demo)</div>
-              </div>
-
-              <div class="form">
-                <label>Child ID (Demo)</label>
-                <input id="childId" placeholder="STD-23" />
-                <label>الاسم</label>
-                <input id="childName" placeholder="طالب #23" />
-                <label>المدرسة</label>
-                <input id="schoolName" placeholder="مدرسة A" />
-              </div>
-
-              <div class="card-actions">
-                <button class="btn" id="btnAutoChild">تعبئة</button>
-                <button class="btn ghost" id="btnOpenReport">فتح التقرير</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- HISTORY -->
-        <section class="view" id="view-history">
-          <div class="section-head">
-            <div>
-              <h2>السجل</h2>
-              <div class="muted">Alerts + Consents + Actions (local)</div>
-            </div>
-            <div class="section-actions">
-              <button class="btn ghost" id="btnClearHistory">مسح</button>
-              <button class="btn" id="btnExportHistory">تصدير JSON</button>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-head">
-              <h3>آخر الأنشطة</h3>
-              <div class="muted small">Local history</div>
-            </div>
-            <div class="table" id="histTable"></div>
-          </div>
-        </section>
-
-      </section>
-    </main>
   </div>
+  <div class="sc-actions">
+    <span class="sc-status" id="st">🟢 Ready</span>
+    <a class="sc-primary" href="report.html#parent">🧾 تقرير</a>
+  </div>
+</div>
 
-  <!-- Scripts -->
-  <script src="bus.js"></script>
-<script src="engine.js"></script>
-<script src="rbac.js"></script>
-<script src="auth-demo.js"></script>
-<script src="audit-users.js"></script>
-<script src="role-switcher.js"></script>
+<div class="sc-shell">
+  <aside class="sc-side">
+    <div class="sc-chip">التنقّل</div>
+    <nav class="sc-nav">
+      <a class="sc-nav-item" href="index.html">🏠 البوابة</a>
+      <a class="sc-nav-item" href="#consent">✅ الموافقات</a>
+      <a class="sc-nav-item" href="#cases">🩺 الحالات</a>
+      <a class="sc-nav-item" href="report.html#parent">🧾 التقارير</a>
+    </nav>
+    <div style="margin-top:14px" class="sc-chip">Quick</div>
+    <div class="sc-quick">
+      <button class="sc-qa" id="btnRefresh">🔄 تحديث</button>
+    </div>
+  </aside>
 
-  <script>
-    (function(){
-      const ROLE_KEY = "sc_role";
-      const HKEY = "sc_parent_history";
-      const AKEY = "sc_parent_alerts";
-      const PKEY = "sc_parent_profile";
-      const CKEY = "sc_parent_consent";
+  <main class="sc-main">
+    <div style="padding:16px">
 
-      const $ = (s,r=document)=>r.querySelector(s);
-      const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
-      const pad2 = (n)=>String(n).padStart(2,"0");
-      const time = ()=>{
-        const d=new Date();
-        return pad2(d.getHours())+":"+pad2(d.getMinutes())+":"+pad2(d.getSeconds());
-      };
-      const today = new Date().toLocaleDateString("ar-SA");
+      <div class="panel" id="consent">
+        <div class="h"><h2>موافقات معلّقة</h2><div class="muted">اعتماد إجراء/زيارة/إحالة</div></div>
+        <div id="consentList"></div>
+      </div>
 
-      // Force role
-      try{
-        localStorage.setItem(ROLE_KEY, "parent");
-        window.SCRBAC?.applyRBAC?.();
-        window.SCAUDIT?.audit?.("PAGE_OPEN", { page:"parent.html" });
-      }catch(_){}
+      <div class="panel" id="cases" style="margin-top:16px">
+        <div class="h"><h2>حالات الابن (Demo)</h2><div class="muted">عرض مبسط</div></div>
+        <div id="caseList"></div>
+      </div>
 
-      // Theme
-      $("#btnTheme")?.addEventListener("click", ()=>{
-        const html = document.documentElement;
-        const next = html.dataset.theme === "light" ? "dark" : "light";
-        html.dataset.theme = next;
-        try{ window.SCAUDIT?.audit?.("THEME_TOGGLE", { to: next }); }catch(_){}
-      });
+    </div>
+  </main>
+</div>
 
-      // nav
-      function openView(view){
-        $$("#parNav .nav-item").forEach(b=>b.classList.remove("active"));
-        $(`#parNav .nav-item[data-view="${view}"]`)?.classList.add("active");
-        $$(".view").forEach(v=>v.classList.remove("show"));
-        $(`#view-${view}`)?.classList.add("show");
-        try{ window.SCAUDIT?.audit?.("NAV_OPEN", { view }); }catch(_){}
-      }
-      $$("#parNav .nav-item").forEach(btn=>{
-        btn.addEventListener("click", ()=> openView(btn.dataset.view));
-      });
+<script>
+localStorage.setItem("SC_ROLE","parent");
+const $=(s)=>document.querySelector(s);
 
-      $("#btnOpenAlerts")?.addEventListener("click", ()=> openView("alerts"));
-      $("#btnOpenAlerts2")?.addEventListener("click", ()=> openView("alerts"));
-      $("#btnOpenConsent")?.addEventListener("click", ()=> openView("consent"));
+function saveCase(caseId, patch){
+  const bus = window.SCBUS.load();
+  const idx = (bus.cases||[]).findIndex(c=>c.id===caseId);
+  if(idx<0) return;
+  bus.cases[idx] = Object.assign({}, bus.cases[idx], patch);
+  window.SCBUS.save(bus);
+}
 
-      // Local history
-      function loadHist(){
-        try{ return JSON.parse(localStorage.getItem(HKEY) || "[]"); }catch(_){ return []; }
-      }
-      function saveHist(rows){
-        localStorage.setItem(HKEY, JSON.stringify(rows.slice(0,200)));
-      }
-      function addHist(type, meta={}){
-        const rows = loadHist();
-        rows.unshift({ t: time(), type, meta });
-        saveHist(rows);
-        renderHist();
-        try{ window.SCAUDIT?.audit?.("PARENT_EVENT", { type, meta }); }catch(_){}
-      }
-      function renderHist(){
-        const box = $("#histTable");
-        if(!box) return;
-        const rows = loadHist().slice(0,60);
-        if(!rows.length){
-          box.innerHTML = `<div class="empty">لا يوجد سجل بعد</div>`;
-          return;
-        }
-        box.innerHTML = `
-          <div class="trow thead"><div>الوقت</div><div>النوع</div><div colspan="3">تفاصيل</div></div>
-          ${rows.map(r=>`
-            <div class="trow">
-              <div class="muted">${r.t}</div>
-              <div><b>${r.type}</b></div>
-              <div class="muted" style="grid-column:3 / -1;">${short(JSON.stringify(r.meta||{}))}</div>
-            </div>
-          `).join("")}
-        `;
-      }
-      function short(s){ return s.length>140 ? s.slice(0,140)+"…" : s; }
+function refresh(){
+  const bus = window.SCBUS?.load?.() || {cases:[]};
+  const cases = bus.cases || [];
 
-      // Alerts
-      function loadAlerts(){
-        try{ return JSON.parse(localStorage.getItem(AKEY) || "[]"); }catch(_){ return []; }
-      }
-      function saveAlerts(rows){
-        localStorage.setItem(AKEY, JSON.stringify(rows.slice(0,50)));
-      }
-      function renderAlerts(){
-        const box = $("#alertsList");
-        if(!box) return;
-        const rows = loadAlerts();
-        if(!rows.length){
-          box.innerHTML = `<div class="empty">لا توجد تنبيهات بعد</div>`;
-          $("#lastAlert").textContent = "—";
-          return;
-        }
-        $("#lastAlert").textContent = rows[0].level;
-        box.innerHTML = rows.map(a=>`
-          <div class="alert ${a.level==='CRIT'?'crit':a.level==='HIGH'?'high':''}">
-            <div class="a-top">
-              <div class="a-title">${a.title}</div>
-              <div class="muted">${a.t}</div>
-            </div>
-            <div class="a-body">${esc(a.body)}</div>
-            <div class="a-actions">
-              <button class="btn ghost ackBtn" data-id="${a.id}">تأكيد</button>
-            </div>
-          </div>
-        `).join("");
+  const pending = cases.filter(c=>c.status==="CONSENT_REQUIRED" || c.parentJoinRequested);
+  $("#consentList").innerHTML = pending.map(c=>{
+    return `<div class="sc-nav-item" style="display:block">
+      <div style="display:flex; justify-content:space-between; gap:10px">
+        <b>Case ${c.id}</b>
+        <span class="sc-chip">${c.status || (c.parentJoinRequested?"JOIN_REQ":"—")}</span>
+      </div>
+      <div class="muted small" style="margin-top:6px">${(c.plan||c.decision||"—")}</div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" data-yes="${c.id}">✅ موافقة</button>
+        <button class="btn ghost" data-no="${c.id}">⛔ رفض</button>
+      </div>
+    </div>`;
+  }).join("") || `<div class="muted">لا يوجد موافقات حالياً</div>`;
 
-        $$(".ackBtn").forEach(b=>{
-          b.addEventListener("click", ()=>{
-            addHist("ALERT_ACK", { id: b.dataset.id });
-            try{ window.SCAUDIT?.audit?.("PARENT_ACK", { id: b.dataset.id }); }catch(_){}
-            alert("تم التأكيد ✅ (Demo)");
-          });
-        });
-      }
+  $("#caseList").innerHTML = cases.slice(0,8).map(c=>{
+    return `<div class="sc-nav-item" style="justify-content:space-between">
+      <span>Case ${c.id} • ${c.priority||"—"}</span>
+      <span class="sc-chip">${c.status||"OPEN"}</span>
+    </div>`;
+  }).join("") || `<div class="muted">لا توجد بيانات بعد</div>`;
+}
 
-      function pushAlert(level="MED", title="تنبيه من العيادة", body="تم تسجيل حالة للطالب. يرجى المتابعة. (Demo)"){
-        const rows = loadAlerts();
-        const a = { id:"A-"+Math.random().toString(36).slice(2,7).toUpperCase(), t: time(), level, title, body };
-        rows.unshift(a);
-        saveAlerts(rows);
-        renderAlerts();
-        addHist("ALERT_NEW", { id:a.id, level });
-      }
+document.addEventListener("click",(e)=>{
+  const y = e.target.closest("[data-yes]");
+  const n = e.target.closest("[data-no]");
+  if(y){
+    const id = y.getAttribute("data-yes");
+    saveCase(id, { consent:"APPROVED", status:"APPROVED_BY_PARENT" });
+    alert("تمت الموافقة ✅");
+    return refresh();
+  }
+  if(n){
+    const id = n.getAttribute("data-no");
+    saveCase(id, { consent:"REJECTED", status:"REJECTED_BY_PARENT" });
+    alert("تم الرفض ⛔");
+    return refresh();
+  }
+});
 
-      // Consent
-      function loadConsent(){
-        try{ return JSON.parse(localStorage.getItem(CKEY) || "null"); }catch(_){ return null; }
-      }
-      function saveConsent(c){
-        localStorage.setItem(CKEY, JSON.stringify(c));
-      }
-      function renderConsent(){
-        const c = loadConsent();
-        if(!c){
-          $("#consentId").textContent = "Consent: —";
-          $("#consentStatus").textContent = "—";
-          $("#consentTime").textContent = "—";
-          $("#consentSummary").value = "";
-          $("#parentNote").value = "";
-          $("#pendingConsent").textContent = "0";
-          return;
-        }
-        $("#consentId").textContent = "Consent: " + c.id;
-        $("#consentType").value = c.type;
-        $("#consentSummary").value = c.summary;
-        $("#parentNote").value = c.note || "";
-        $("#consentStatus").textContent = c.status;
-        $("#consentTime").textContent = c.t;
-        $("#pendingConsent").textContent = c.status === "PENDING" ? "1" : "0";
-      }
-
-      function genConsent(){
-        const c = {
-          id: "C-" + Math.random().toString(36).slice(2,7).toUpperCase(),
-          t: time(),
-          type: $("#consentType").value || "clinic_visit",
-          summary: "طلب موافقة: متابعة حالة الطالب + إجراء مناسب حسب التقييم. (Demo)",
-          note: "",
-          status: "PENDING"
-        };
-        saveConsent(c);
-        renderConsent();
-        addHist("CONSENT_CREATED", { id:c.id, type:c.type });
-        try{ window.SCAUDIT?.audit?.("PARENT_CONSENT_REQUESTED", { id:c.id, type:c.type }); }catch(_){}
-      }
-
-      function approve(){
-        const c = loadConsent();
-        if(!c){ alert("لا يوجد طلب موافقة"); return; }
-        c.note = ($("#parentNote").value||"").trim();
-        c.status = "APPROVED";
-        c.t = time();
-        saveConsent(c);
-        renderConsent();
-        addHist("CONSENT_APPROVED", { id:c.id, note: c.note });
-        try{ window.SCAUDIT?.audit?.("CONSENT_APPROVED", { id:c.id }); }catch(_){}
-        alert("تمت الموافقة ✅ (Demo)");
-      }
-
-      function reject(){
-        const c = loadConsent();
-        if(!c){ alert("لا يوجد طلب موافقة"); return; }
-        c.note = ($("#parentNote").value||"").trim();
-        c.status = "REJECTED";
-        c.t = time();
-        saveConsent(c);
-        renderConsent();
-        addHist("CONSENT_REJECTED", { id:c.id, note: c.note });
-        try{ window.SCAUDIT?.audit?.("CONSENT_REJECTED", { id:c.id }); }catch(_){}
-        alert("تم الرفض ❌ (Demo)");
-      }
-
-      // Profile
-      function loadProfile(){
-        try{ return JSON.parse(localStorage.getItem(PKEY) || "null"); }catch(_){ return null; }
-      }
-      function saveProfile(p){
-        localStorage.setItem(PKEY, JSON.stringify(p));
-      }
-      function renderProfile(){
-        const p = loadProfile() || {};
-        $("#allergy").value = p.allergy || "";
-        $("#chronic").value = p.chronic || "";
-        $("#longMeds").value = p.longMeds || "";
-        $("#healthNotes").value = p.healthNotes || "";
-        $("#childId").value = p.childId || "STD-23";
-        $("#childName").value = p.childName || "طالب #23";
-        $("#schoolName").value = p.schoolName || "مدرسة A";
-        $("#repChild").textContent = "Child: " + ($("#childName").value || "—") + " (" + ($("#childId").value || "—") + ")";
-      }
-
-      function saveProfileFromUI(){
-        const p = {
-          allergy: ($("#allergy").value||"").trim(),
-          chronic: ($("#chronic").value||"").trim(),
-          longMeds: ($("#longMeds").value||"").trim(),
-          healthNotes: ($("#healthNotes").value||"").trim(),
-          childId: ($("#childId").value||"").trim(),
-          childName: ($("#childName").value||"").trim(),
-          schoolName: ($("#schoolName").value||"").trim()
-        };
-        saveProfile(p);
-        renderProfile();
-        addHist("PROFILE_SAVED", { childId: p.childId });
-        try{ window.SCAUDIT?.audit?.("PROFILE_SAVED", { childId: p.childId }); }catch(_){}
-        alert("تم حفظ الملف الصحي ✅ (Demo)");
-      }
-
-      function clearProfile(){
-        if(!confirm("تفريغ الملف الصحي؟")) return;
-        localStorage.removeItem(PKEY);
-        renderProfile();
-        addHist("PROFILE_CLEARED", {});
-      }
-
-      // Report (parent summary)
-      function buildReport(){
-        const p = loadProfile() || {};
-        const c = loadConsent();
-        const alerts = loadAlerts();
-        $("#repDate").textContent = "Date: " + today;
-        $("#repChild").textContent = "Child: " + (p.childName || "—") + " (" + (p.childId || "—") + ")";
-
-        const lines = [
-          `• المدرسة: ${p.schoolName || "—"}`,
-          `• الحساسية: ${p.allergy || "—"}`,
-          `• المرض المزمن: ${p.chronic || "—"}`,
-          `• الأدوية الدائمة: ${p.longMeds || "—"}`,
-          `• ملاحظات: ${p.healthNotes || "—"}`,
-          "",
-          `• آخر تنبيه: ${alerts[0] ? (alerts[0].level+" — "+alerts[0].title) : "—"}`,
-          `• عدد التنبيهات: ${alerts.length}`,
-          "",
-          `• الموافقات: ${c ? (c.status+" — "+c.type) : "لا يوجد"}`,
-          "",
-          `• توصية عامة (Demo): متابعة الطالب، وفي الحالات العالية سيتم طلب إحالة أو تواصل مباشر.`
-        ];
-
-        $("#repBody").innerHTML = lines.map(x => x ? `<div>${esc(x)}</div>` : `<div style="height:10px"></div>`).join("");
-      }
-
-      function exportTxt(){
-        buildReport();
-        const txt = document.getElementById("repBody").innerText || "—";
-        download("parent-report.txt", "Parent Summary Report (Demo)\n\n"+txt);
-        addHist("REPORT_EXPORTED_TXT", {});
-      }
-      function exportJson(){
-        const data = {
-          profile: loadProfile(),
-          alerts: loadAlerts(),
-          consent: loadConsent(),
-          history: loadHist()
-        };
-        download("parent-data.json", JSON.stringify(data, null, 2), "application/json");
-        addHist("REPORT_EXPORTED_JSON", {});
-      }
-
-      function download(name, text, type="text/plain"){
-        const blob = new Blob([text], {type:type+";charset=utf-8"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url; a.download = name;
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(()=>URL.revokeObjectURL(url), 800);
-      }
-
-      function esc(s){
-        return String(s).replace(/[&<>"']/g, m => ({
-          "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-        }[m]));
-      }
-
-      // Quick buttons
-      $("#qAck")?.addEventListener("click", ()=>{
-        addHist("ALERT_ACK_ALL", {});
-        try{ window.SCAUDIT?.audit?.("PARENT_ACK_ALL", {}); }catch(_){}
-        alert("تم تأكيد الاستلام ✅ (Demo)");
-      });
-      $("#qConsent")?.addEventListener("click", ()=> openView("consent"));
-      $("#qReport")?.addEventListener("click", ()=> { buildReport(); openView("report"); });
-      $("#qProfile")?.addEventListener("click", ()=> openView("profile"));
-
-      // Home actions
-      $("#btnRefresh")?.addEventListener("click", ()=>{
-        $("#dotLive")?.classList.add("pulse");
-        setTimeout(()=>$("#dotLive")?.classList.remove("pulse"), 900);
-        addHist("REFRESH", {});
-      });
-
-      $("#btnSimAlert")?.addEventListener("click", ()=>{
-        const lvl = ["LOW","MED","HIGH"][Math.floor(Math.random()*3)];
-        pushAlert(lvl, "تنبيه من العيادة", "تم تسجيل حالة للطالب. يرجى متابعة التعليمات. (Demo)");
-        $("#kidState").textContent = lvl==="HIGH" ? "ATTN" : "OK";
-      });
-
-      // Alerts actions
-      $("#btnClearAlerts")?.addEventListener("click", ()=>{
-        if(!confirm("مسح التنبيهات؟")) return;
-        localStorage.setItem(AKEY, "[]");
-        renderAlerts();
-        addHist("ALERTS_CLEARED", {});
-      });
-
-      $("#btnAckAll")?.addEventListener("click", ()=>{
-        addHist("ALERT_ACK_ALL", {});
-        try{ window.SCAUDIT?.audit?.("PARENT_ACK_ALL", {}); }catch(_){}
-        alert("تم تأكيد جميع التنبيهات ✅ (Demo)");
-      });
-
-      // Consent actions
-      $("#btnGenConsent")?.addEventListener("click", genConsent);
-      $("#btnApprove")?.addEventListener("click", approve);
-      $("#btnReject")?.addEventListener("click", reject);
-
-      // Profile actions
-      $("#btnSaveProfile")?.addEventListener("click", saveProfileFromUI);
-      $("#btnClearProfile")?.addEventListener("click", clearProfile);
-
-      $("#btnAutoChild")?.addEventListener("click", ()=>{
-        $("#childId").value = "STD-" + (Math.floor(Math.random()*90)+10);
-        $("#childName").value = "طالب #" + (Math.floor(Math.random()*90)+10);
-        $("#schoolName").value = "مدرسة A";
-        addHist("CHILD_AUTOFILL", {});
-        renderProfile();
-      });
-
-      $("#btnOpenReport")?.addEventListener("click", ()=>{ buildReport(); openView("report"); });
-
-      // Exports
-      $("#btnExportTxt")?.addEventListener("click", exportTxt);
-      $("#btnExportJson")?.addEventListener("click", exportJson);
-      $("#btnExportAll")?.addEventListener("click", ()=>{
-        exportJson();
-        try{ window.SCAUDIT?.audit?.("PARENT_EXPORT_ALL", {}); }catch(_){}
-      });
-
-      // History
-      $("#btnClearHistory")?.addEventListener("click", ()=>{
-        if(!confirm("مسح السجل؟")) return;
-        localStorage.setItem(HKEY, "[]");
-        addHist("HISTORY_CLEARED", {});
-        renderHist();
-      });
-      $("#btnExportHistory")?.addEventListener("click", ()=>{
-        download("parent-history.json", JSON.stringify(loadHist(), null, 2), "application/json");
-        addHist("HISTORY_EXPORTED", {});
-      });
-
-      // Link child
-      $("#btnLinkChild")?.addEventListener("click", ()=>{
-        openView("profile");
-        $("#btnAutoChild")?.click();
-        alert("تم ربط الابن/الابنة (Demo) ✅");
-        addHist("CHILD_LINKED", {});
-      });
-
-      // Request call
-      function requestCall(){
-        addHist("REQUEST_CALL", { note:"Parent requested contact" });
-        try{ window.SCAUDIT?.audit?.("PARENT_REQUEST_CALL", {}); }catch(_){}
-        alert("تم إرسال طلب تواصل للعيادة (Demo) ✅");
-      }
-      $("#btnRequestCall")?.addEventListener("click", requestCall);
-      $("#btnRequestCall2")?.addEventListener("click", requestCall);
-
-      // Init
-      renderAlerts();
-      renderConsent();
-
-      // Seed one pending consent (demo) if none exists
-      if(!loadConsent()){
-        localStorage.setItem(CKEY, JSON.stringify({
-          id:"C-DEMO-01", t: time(), type:"clinic_visit",
-          summary:"طلب موافقة: زيارة العيادة لمتابعة أعراض الطالب. (Demo)",
-          note:"", status:"PENDING"
-        }));
-      }
-      renderConsent();
-
-      renderProfile();
-      buildReport();
-      renderHist();
-
-      // Default last alert
-      if(loadAlerts().length === 0){
-        pushAlert("MED","تنبيه من العيادة","تم تسجيل زيارة اليوم. يرجى الاطلاع على التقرير. (Demo)");
-      }
-      renderAlerts();
-      buildReport();
-    })();
-  </script>
-
+$("#btnRefresh").addEventListener("click", refresh);
+refresh();
+</script>
 </body>
 </html>
-window.addEventListener("sc:bus:update", ()=>{
-  // هنا تنادي دوال التحديث عندك
-  // مثال:
-  // renderAlertsFromBus();
-  // renderCasesFromBus();
-});
