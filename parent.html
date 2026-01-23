@@ -34,8 +34,14 @@
           <small>مرحبًا</small>
           <b data-user-name>ولي أمر</b>
         </div>
-        <button class="btn ghost" id="btnTheme" data-action="common:theme-toggle">🌓</button>
-        <button class="btn bad" id="btnLogout" data-action="common:logout">خروج</button>
+        <input class="input" id="childCode" type="text" placeholder="كود الطالب (لربط ولي الأمر)">
+
+<button class="btn primary" id="btnLinkChild" data-action="btnLinkChild">🔗 ربط الطالب</button>
+<button class="btn" id="btnChildCases" data-action="btnChildCases">📋 حالات الابن</button>
+<button class="btn ghost" id="btnChildReport" data-action="btnChildReport">⬇️ تقرير الابن</button>
+<button class="btn" id="btnConsent" data-action="btnConsent">✅ الموافقة</button>
+<button class="btn ghost" id="btnHelp" data-action="btnHelp">🆘 مساعدة</button>
+<button class="btn danger" id="btnLogout" data-action="btnLogout">خروج</button>
       </div>
     </div>
   </header>
