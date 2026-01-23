@@ -1,0 +1,226 @@
+/* ==========================================================
+   Smart School Clinic UI — PRO Design System (RTL)
+   - Clean / Pro / Neo themes (data-ui="clean|pro|neo")
+   - Works on GitHub Pages
+   ========================================================== */
+
+:root{
+  --radius-1: 10px;
+  --radius-2: 14px;
+  --radius-3: 18px;
+  --radius-4: 22px;
+
+  --sp-1: 8px;
+  --sp-2: 12px;
+  --sp-3: 16px;
+  --sp-4: 20px;
+  --sp-5: 28px;
+
+  --shadow-1: 0 10px 30px rgba(0,0,0,.25);
+  --shadow-2: 0 18px 60px rgba(0,0,0,.35);
+
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --t: 180ms var(--ease);
+
+  --font: ui-sans-serif, system-ui, -apple-system, "SF Pro Display", "SF Pro Text",
+          "Cairo", "Tajawal", "Segoe UI", Arial;
+}
+
+/* ---------- Theme tokens (default PRO) ---------- */
+html{ font-family: var(--font); }
+html[data-ui="pro"]{
+  --bg0:#070B14; --bg1:#0B1222; --bg2:#0E1A32;
+  --tx0:#F2F6FF; --tx1:rgba(242,246,255,.78); --tx2:rgba(242,246,255,.55);
+  --bdr:rgba(255,255,255,.08);
+  --glass:rgba(255,255,255,.05);
+  --glass2:rgba(255,255,255,.08);
+  --pri:#6EE7FF;
+  --ok:#46E6A6; --warn:#FFD166; --bad:#FF5D73;
+}
+
+/* CLEAN = Apple-ish (هادئ ونظيف) */
+html[data-ui="clean"]{
+  --bg0:#0A0D12; --bg1:#0E141E; --bg2:#0F1722;
+  --tx0:#F6F7FB; --tx1:rgba(246,247,251,.76); --tx2:rgba(246,247,251,.52);
+  --bdr:rgba(255,255,255,.07);
+  --glass:rgba(255,255,255,.04);
+  --glass2:rgba(255,255,255,.07);
+  --pri:#93C5FD;
+  --ok:#34D399; --warn:#FBBF24; --bad:#FB7185;
+}
+
+/* NEO = Startup “WOW” لكن محترم */
+html[data-ui="neo"]{
+  --bg0:#050617; --bg1:#070A1F; --bg2:#0B1030;
+  --tx0:#F5F3FF; --tx1:rgba(245,243,255,.76); --tx2:rgba(245,243,255,.55);
+  --bdr:rgba(255,255,255,.09);
+  --glass:rgba(255,255,255,.06);
+  --glass2:rgba(255,255,255,.10);
+  --pri:#A78BFA;
+  --ok:#34D399; --warn:#F59E0B; --bad:#FB7185;
+}
+
+/* ---------- Base ---------- */
+body{
+  margin:0;
+  color:var(--tx0);
+  background:
+    radial-gradient(1200px 700px at 80% -20%, rgba(110,231,255,.18), transparent 60%),
+    radial-gradient(900px 600px at 0% 10%, rgba(167,139,250,.14), transparent 55%),
+    linear-gradient(180deg, var(--bg0), var(--bg1) 55%, var(--bg0));
+  min-height:100vh;
+}
+a{ color:inherit; text-decoration:none; }
+.muted{ color:var(--tx2); }
+.divider{ height:1px; background:var(--bdr); margin: var(--sp-3) 0; }
+
+/* ---------- Layout ---------- */
+.shell{ max-width: 1180px; margin: 0 auto; padding: 18px 14px 40px; }
+.shell--wide{ max-width: 1280px; }
+.grid{ display:grid; gap:14px; }
+.grid2{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+@media (max-width: 980px){ .grid2{ grid-template-columns: 1fr; } }
+
+/* ---------- Topbar ---------- */
+.topbar{
+  position: sticky; top:0; z-index:50;
+  display:flex; justify-content:space-between; align-items:center;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--bdr);
+  background: color-mix(in srgb, var(--bg0) 82%, transparent);
+  backdrop-filter: blur(10px);
+}
+.topbar__left, .topbar__right{ display:flex; align-items:center; gap: 10px; }
+.brand.mini{ display:flex; align-items:center; gap:10px; }
+.brand__logo{
+  width:36px; height:36px; border-radius: 12px;
+  display:grid; place-items:center;
+  background: linear-gradient(135deg, var(--glass2), var(--glass));
+  border:1px solid var(--bdr);
+  box-shadow: var(--shadow-1);
+}
+.brand__name{ font-weight: 800; letter-spacing:.2px; }
+.brand__sub{ font-size: 12.5px; color:var(--tx2); }
+
+/* ---------- Pills / dots ---------- */
+.pill{
+  display:inline-flex; align-items:center; gap:8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: var(--glass);
+  border: 1px solid var(--bdr);
+}
+.dot{ width:8px; height:8px; border-radius: 999px; background: var(--tx2); }
+.dot.ok{ background: var(--ok); }
+.dot.warn{ background: var(--warn); }
+.dot.bad{ background: var(--bad); }
+
+/* ---------- Cards (pro, no “بلاستيك”) ---------- */
+.card{
+  background: linear-gradient(180deg, var(--glass2), var(--glass));
+  border:1px solid var(--bdr);
+  border-radius: var(--radius-4);
+  box-shadow: var(--shadow-1);
+  overflow:hidden;
+}
+.card__head{
+  padding: 14px 14px 10px;
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+}
+.card__title{ margin:0; font-size: 16px; font-weight: 900; }
+.card__tools{ display:flex; gap:8px; align-items:center; }
+.card__body{ padding: 0 14px 14px; }
+
+/* ---------- Buttons ---------- */
+.btn{
+  border:1px solid var(--bdr);
+  background: var(--glass);
+  color: var(--tx0);
+  padding: 10px 12px;
+  border-radius: var(--radius-2);
+  cursor:pointer;
+  transition: transform var(--t), background var(--t), border-color var(--t), opacity var(--t);
+}
+.btn:hover{ transform: translateY(-1px); border-color: color-mix(in srgb, var(--pri) 35%, var(--bdr)); }
+.btn:active{ transform: translateY(0px); opacity:.92; }
+.btn.primary{
+  background: linear-gradient(135deg, color-mix(in srgb, var(--pri) 22%, transparent), var(--glass2));
+  border-color: color-mix(in srgb, var(--pri) 55%, var(--bdr));
+}
+.btn.danger{
+  border-color: color-mix(in srgb, var(--bad) 45%, var(--bdr));
+  background: color-mix(in srgb, var(--bad) 10%, var(--glass));
+}
+.btn.ghost{ background: transparent; }
+.btn.sm{ padding: 8px 10px; border-radius: 12px; font-size: 13px; }
+.btn.lg{ padding: 12px 14px; border-radius: 16px; font-weight: 800; }
+
+/* ---------- Inputs ---------- */
+.input{
+  width:100%;
+  border:1px solid var(--bdr);
+  background: color-mix(in srgb, var(--bg1) 55%, transparent);
+  color: var(--tx0);
+  padding: 12px 12px;
+  border-radius: var(--radius-2);
+  outline: none;
+  transition: border-color var(--t), box-shadow var(--t);
+}
+.input:focus{
+  border-color: color-mix(in srgb, var(--pri) 55%, var(--bdr));
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--pri) 16%, transparent);
+}
+.field__label{ margin: 0 0 8px; color: var(--tx1); font-weight: 700; }
+
+/* ---------- Tables ---------- */
+.tableWrap{ overflow:auto; border-radius: var(--radius-3); border:1px solid var(--bdr); }
+.table{ width:100%; border-collapse: collapse; min-width: 740px; background: rgba(0,0,0,.08); }
+.table th, .table td{ padding: 12px 12px; border-bottom: 1px solid var(--bdr); text-align:right; }
+.table thead th{ color: var(--tx1); font-size: 13px; font-weight: 900; background: rgba(255,255,255,.03); }
+.table tbody tr:hover{ background: rgba(255,255,255,.04); }
+.table .is-active{ outline: 2px solid color-mix(in srgb, var(--pri) 45%, transparent); outline-offset:-2px; }
+
+/* ---------- Lists ---------- */
+.list{ display:grid; gap:10px; }
+.rowCard{
+  padding: 12px 12px;
+  border-radius: var(--radius-3);
+  border:1px solid var(--bdr);
+  background: rgba(255,255,255,.03);
+  transition: transform var(--t), border-color var(--t), background var(--t);
+  cursor:pointer;
+}
+.rowCard:hover{ transform: translateY(-1px); border-color: color-mix(in srgb, var(--pri) 35%, var(--bdr)); }
+.rowCard.is-active{ background: rgba(255,255,255,.06); border-color: color-mix(in srgb, var(--pri) 55%, var(--bdr)); }
+.rowTitle{ font-weight: 900; }
+.rowMeta{ color: var(--tx2); margin-top: 4px; font-size: 13px; }
+
+.empty{ padding: 10px; }
+
+/* ---------- Hero ---------- */
+.hero{
+  display:flex; gap: 14px; align-items: stretch; flex-wrap: wrap;
+  padding: 14px 0 6px;
+}
+.hero__left{ flex: 1 1 540px; }
+.hero__right{ flex: 1 1 360px; }
+.hero__title{ margin: 0 0 6px; font-size: 26px; font-weight: 950; letter-spacing: .2px; }
+.hero__lead{ margin: 0; color: var(--tx1); line-height: 1.7; }
+.hero__actions{ margin-top: 12px; display:flex; gap:10px; flex-wrap: wrap; }
+
+/* ---------- Badges ---------- */
+.badge{
+  display:inline-flex; align-items:center; gap:8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border:1px solid var(--bdr);
+  background: rgba(255,255,255,.03);
+  font-size: 13px;
+}
+.badge.ok{ border-color: color-mix(in srgb, var(--ok) 35%, var(--bdr)); }
+.badge.warn{ border-color: color-mix(in srgb, var(--warn) 35%, var(--bdr)); }
+.badge.bad{ border-color: color-mix(in srgb, var(--bad) 35%, var(--bdr)); }
+
+/* ---------- Small helpers ---------- */
+.stack{ display:grid; gap:10px; }
+.row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
