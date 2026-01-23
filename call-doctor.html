@@ -1,78 +1,0 @@
-<!doctype html>
-<html lang="ar" dir="rtl" data-theme="dark">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Smart Clinic OS — Doctor Call</title>
-  <link rel="stylesheet" href="ar.css" />
-</head>
-<body>
-<header class="topbar">
-  <div class="brand">
-    <div class="logo">👨‍⚕️</div>
-    <div>
-      <b>الطبيب — اتصال الكشك</b>
-      <small>WebRTC (مجاني بدون سيرفر: نفس الجهاز/تبويبين)</small>
-    </div>
-  </div>
-  <div class="actions">
-    <a class="btn ghost" href="doctor.html">👨‍⚕️ رجوع للطبيب</a>
-    <button class="btn" id="btnJoin">دخول الغرفة</button>
-  </div>
-</header>
-
-<div class="wrap">
-  <div class="panel">
-    <div class="h">
-      <h2>Room</h2>
-      <div class="muted" id="st">Idle</div>
-    </div>
-
-    <div class="row">
-      <span class="badge">Room ID: <b id="roomTxt">—</b></span>
-    </div>
-
-    <div class="sep"></div>
-
-    <div class="grid" style="grid-template-columns:1fr 1fr;">
-      <div class="panel">
-        <div class="h"><h2>الطبيب (أنت)</h2><div class="muted">Local</div></div>
-        <video id="vLocal" autoplay playsinline muted style="width:100%; border-radius:18px; border:1px solid var(--stroke);"></video>
-      </div>
-      <div class="panel">
-        <div class="h"><h2>الكشك</h2><div class="muted">Remote</div></div>
-        <video id="vRemote" autoplay playsinline style="width:100%; border-radius:18px; border:1px solid var(--stroke);"></video>
-      </div>
-    </div>
-
-    <div class="sep"></div>
-    <div class="small">
-      افتح صفحة الكشك أولاً وابدأ الاتصال هناك، ثم اضغط “دخول الغرفة” هنا.
-    </div>
-  </div>
-</div>
-
-<script src="webrtc-local.js"></script>
-<script>
-(function(){
-  const $ = (s)=>document.querySelector(s);
-  const room = new URLSearchParams(location.search).get("room") || "UNKNOWN";
-  $("#roomTxt").textContent = room;
-
-  $("#btnJoin").addEventListener("click", async ()=>{
-    $("#st").textContent = "Joining…";
-    try{
-      await window.SCWEBRTC.initDoctor(room, {
-        localVideo: $("#vLocal"),
-        remoteVideo: $("#vRemote"),
-        status: $("#st")
-      });
-    }catch(e){
-      console.error(e);
-      alert("فشل الانضمام. تأكد من السماح بالكاميرا/المايك وأن صفحة الكشك فتحت الاتصال.");
-    }
-  });
-})();
-</script>
-</body>
-</html>
