@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Clinic OS — Kiosk</title>
+  <link rel="stylesheet" href="ar.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">KS</div>
+    <div>
+      <b>الكشك الطبي — محاكاة حساسات</b>
+      <small>Vitals + Risk + إرسال للطبيب</small>
+    </div>
+  </div>
+  <div class="actions">
+    <a class="btn ghost" href="index.html">🏠 البوابة</a>
+    <a class="btn ghost" href="doctor.html">👨‍⚕️ الطبيب</a>
+    <a class="btn ghost" href="report.html">🧾 التقارير</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+    <!-- left: simulator -->
+    <div class="panel">
+      <div class="h">
+        <h2>محاكاة الحساسات</h2>
+        <div class="muted">Virtual Sensors</div>
+      </div>
+
+      <div class="row">
+        <span class="badge">👤 الطالب: <b id="sName">—</b></span>
+        <span class="badge">🆔 <b id="sId">—</b></span>
+        <span class="badge">🎒 <b id="sClass">—</b></span>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="kpis">
+        <div class="kpi"><b>Temp</b><span id="kTemp">—</span></div>
+        <div class="kpi"><b>HR</b><span id="kHr">—</span></div>
+        <div class="kpi"><b>SpO₂</b><span id="kSp">—</span></div>
+        <div class="kpi"><b>BP</b><span id="kBp">—</span></div>
+
+        <div class="kpi"><b>Risk</b><span id="kRisk">—</span></div>
+        <div class="kpi"><b>Priority</b><span id="kPri">—</span></div>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="row">
+        <button class="btn" id="btnNewStudent">👤 طالب جديد</button>
+        <button class="btn ghost" id="btnScanNormal">✅ قياس طبيعي</button>
+        <button class="btn ghost" id="btnScanMild">🟡 قياس متوسط</button>
+        <button class="btn ghost" id="btnScanSick">🟠 قياس عالي</button>
+        <button class="btn ghost" id="btnScanCrit">🔴 قياس حرج</button>
+      </div>
+
+      <div class="row">
+        <button class="btn" id="btnAutoPick">🎲 توليد ذكي (حسب الاحتمال)</button>
+        <button class="btn" id="btnSubmit">📨 إرسال للطبيب</button>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="small" id="hint">
+        اضغط “طالب جديد” ثم اختر نوع القياس. عند “إرسال للطبيب” سيتم إنشاء Request + Case عبر BUS.
+      </div>
+    </div>
+
+    <!-- right: status -->
+    <div class="panel">
+      <div class="h">
+        <h2>الحالة</h2>
+        <div class="muted">System</div>
+      </div>
+
+      <div class="row">
+        <span class="badge">🕒 <b id="tNow">—</b></span>
+        <span class="badge">BUS: <b id="busOk">—</b></span>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="small">
+        ✅ إذا الحالة <b>HIGH/CRIT</b> النظام ينبه ولي الأمر + الإدارة تلقائيًا.<br>
+        ✅ الطبيب يفتح <b>doctor.html</b> ويشوف الحالة الجديدة.<br>
+        ✅ التقرير يظهر في <b>report.html</b>.
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="row">
+        <a class="btn ghost" href="demo-hub.html">🎬 (اختياري) Demo Hub</a>
+        <a class="btn ghost" href="ar-doctor.html">📷 AR Doctor</a>
+        <a class="btn ghost" href="ar-student.html">📷 AR Student</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><b>—</b><small>—</small></div>
+
+<script src="bus.js"></script>
+<script src="sensor-sim.js"></script>
+<script>
+(function(){
+  const $ = (s)=>document.querySelector(s);
+  const toast = (t,b)=>window.SCARKIT?.toast ? window.SCARKIT.toast(t,b) : alert(t + "\\n" + (b||""));
+
+  const setText = (id, v)=> { const el=$(id); if(el) el.textContent = v; };
+
+  // time
+  setInterval(()=> setText("#tNow", new Date().toLocaleTimeString("ar-SA")), 500);
+
+  // student + vitals state
+  let student = window.SCSIM.genStudent();
+  let vitals = window.SCSIM.genVitals("normal");
+
+  function renderStudent(){
+    setText("#sName", student.studentName);
+    setText("#sId", student.studentId);
+    setText("#sClass", student.classRoom);
+  }
+
+  function renderVitals(){
+    setText("#kTemp", vitals.temp + "°C");
+    setText("#kHr", vitals.hr + " bpm");
+    setText("#kSp", vitals.spo2 + "%");
+    setText("#kBp", vitals.bp);
+    setText("#kRisk", vitals.risk + "/100");
+    setText("#kPri", vitals.priority);
+  }
+
+  function busStatus(){
+    setText("#busOk", window.SCBUS ? "✅ جاهز" : "❌ غير موجود");
+  }
+
+  function scan(profile){
+    vitals = window.SCSIM.genVitals(profile);
+    renderVitals();
+    const msg =
+      vitals.priority==="CRIT" ? "حالة حرجة — راح تُرسل فورًا" :
+      vitals.priority==="HIGH" ? "حالة عالية — تواصل طبيب" :
+      vitals.priority==="MED" ? "حالة متوسطة — مراجعة عيادة" :
+      "طبيعي — نصائح فقط";
+
+    $("#hint").textContent = msg + " (محاكاة)";
+    toast("تمت القراءة", `Priority=${vitals.priority} • Risk=${vitals.risk}`);
+  }
+
+  $("#btnNewStudent").addEventListener("click", ()=>{
+    student = window.SCSIM.genStudent();
+    renderStudent();
+    toast("طالب جديد", student.studentName);
+  });
+
+  $("#btnScanNormal").addEventListener("click", ()=>scan("normal"));
+  $("#btnScanMild").addEventListener("click", ()=>scan("mild"));
+  $("#btnScanSick").addEventListener("click", ()=>scan("sick"));
+  $("#btnScanCrit").addEventListener("click", ()=>scan("critical"));
+
+  $("#btnAutoPick").addEventListener("click", ()=>{
+    // weighted random
+    const p = Math.random();
+    const profile = p < 0.62 ? "normal" : p < 0.82 ? "mild" : p < 0.95 ? "sick" : "critical";
+    scan(profile);
+  });
+
+  $("#btnSubmit").addEventListener("click", ()=>{
+    if(!window.SCBUS){
+      toast("BUS غير جاهز", "تأكد من وجود bus.js");
+      return;
+    }
+    const res = window.SCSIM.createBusFlow(student, vitals, "قياسات كشك (محاكاة)");
+    toast("تم الإرسال للطبيب ✅", `Case: ${res.case.id}`);
+  });
+
+  // init
+  renderStudent(); renderVitals(); busStatus();
+})();
+</script>
+</body>
+</html>
