@@ -8,245 +8,100 @@
 
   <link rel="stylesheet" href="app.css">
 
-<script src="bus.js"></script>
-<script src="auth.js"></script>
-<script src="triage-ai.js"></script>
-<script src="sensor-sim.js"></script>
-<script src="visit-session.js"></script>
-<script src="doctor-copilot.js"></script>
-<script src="protocols.js"></script>
-<script src="audit-log.js"></script>
-<script src="admin-heatmap.js"></script>
-<script src="admin-slips.js"></script>
-<script src="parent-summary.js"></script>
-<script src="actions.js"></script>
-<script src="app-init.js"></script>
-</head>
+  <script src="bus.js"></script>
+  <script src="auth.js"></script>
+  <script src="triage-ai.js"></script>
+  <script src="sensor-sim.js"></script>
+  <script src="visit-session.js"></script>
+  <script src="doctor-copilot.js"></script>
+  <script src="protocols.js"></script>
+  <script src="audit-log.js"></script>
+  <script src="admin-heatmap.js"></script>
+  <script src="admin-slips.js"></script>
+  <script src="parent-summary.js"></script>
 
+  <!-- app-init.js موجود عندك (لا أرسله) -->
+  <script src="actions.js"></script>
+</head>
 <body>
-  <!-- Top Bar -->
-  <header class="topbar">
+
+<header class="topbar">
+  <div class="inner">
     <div class="brand">
       <div class="logo">SC</div>
       <div class="brandText">
         <div class="name">Smart School Clinic OS</div>
-        <div class="tagline">بوابة الأدوار • فرز ذكي • زيارة افتراضية • تقارير</div>
+        <div class="tagline">نظام عيادة مدرسية ذكية — Demo محلي (بدون سيرفر)</div>
+      </div>
+    </div>
+    <div class="pills">
+      <span class="pill" id="roleBadge">Role: guest</span>
+      <span class="pill" id="permBadge">Local Demo</span>
+      <a class="btn ghost" href="report-view.html">📄 التقارير</a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="grid">
+    <div class="card">
+      <div class="cardHeader">
+        <h2 class="sectionTitle"><span class="emoji">🧠</span> اختر بوابتك</h2>
+        <span class="small">سيفتح النظام الواجهة المناسبة ويحمّل صلاحياتها</span>
+      </div>
+      <div class="cardBody">
+        <div class="row">
+          <button class="btn primary" onclick="SSC_AUTH.setRole('student','طالب')">🎓 بوابة الطالب</button>
+          <button class="btn primary" onclick="SSC_AUTH.setRole('doctor','طبيب')">🩺 بوابة الطبيب</button>
+          <button class="btn primary" onclick="SSC_AUTH.setRole('admin','إدارة')">🏛️ بوابة الإدارة</button>
+          <button class="btn primary" onclick="SSC_AUTH.setRole('parent','ولي أمر')">👨‍👩‍👧 بوابة ولي الأمر</button>
+        </div>
+
+        <hr>
+
+        <div class="kpis">
+          <div class="kpi">
+            <div class="label">AI Triage</div>
+            <div class="value">Risk / Priority</div>
+            <div class="hint">قرار مقترح + توصية</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Sensors Simulator</div>
+            <div class="value">HR / SpO₂ / Temp</div>
+            <div class="hint">محاكاة حالات واقعية</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Virtual Visit</div>
+            <div class="value">Student ↔ Doctor</div>
+            <div class="hint">قبول/رفض/دعوة ولي الأمر</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Admin Dashboard</div>
+            <div class="value">Cases & Slips</div>
+            <div class="hint">Heatmap + سجل الإجراءات</div>
+          </div>
+        </div>
+      </div>
+      <div class="cardFooter">
+        <button class="btn warn" onclick="localStorage.removeItem(SSC.DB_KEY); location.reload()">🧹 تصفير بيانات العرض</button>
+        <a class="btn" href="report-view.html">📑 عرض التقرير (Demo)</a>
       </div>
     </div>
 
-    <div class="topActions">
-      <span class="pill" id="envPill">Static • GitHub Pages</span>
-      <button class="btn ghost" id="btnReset">🧹 تصفير بيانات الديمو</button>
+    <div class="card">
+      <div class="cardHeader">
+        <h2 class="sectionTitle"><span class="emoji">📌</span> حالة النظام</h2>
+      </div>
+      <div class="cardBody">
+        <div class="small">آخر نشاط سيتم تسجيله في Audit Log.</div>
+        <hr>
+        <div class="small">ملاحظة: هذه نسخة عرض على GitHub Pages — كل شيء محفوظ محليًا في المتصفح.</div>
+      </div>
     </div>
-  </header>
+  </div>
 
-  <!-- Hero -->
-  <main class="container">
-    <section class="hero">
-      <div class="heroText">
-        <h1>اختر بوابتك</h1>
-        <p class="muted">
-          نظام عيادة مدرسية ذكية (نسخة عرض) — بدون سيرفر، كل البيانات محفوظة محليًا.
-          اختر الدور وسيتم فتح الواجهة المناسبة مع صلاحياتها.
-        </p>
+</div>
 
-        <div class="heroBadges">
-          <span class="chip">AI Triage</span>
-          <span class="chip">Sensors Simulator</span>
-          <span class="chip">Virtual Visit</span>
-          <span class="chip">Consent & Slips</span>
-          <span class="chip">Admin Dashboard</span>
-        </div>
-
-        <div class="quickRow">
-          <button class="btn" id="btnSeed">⚡ تجهيز بيانات عرض جاهزة</button>
-          <button class="btn ghost" id="btnGoLast">↩️ الرجوع لآخر دور</button>
-        </div>
-      </div>
-
-      <div class="heroCard">
-        <div class="cardTitle">حالة النظام</div>
-        <div class="kpiGrid">
-          <div class="kpi">
-            <div class="k">Requests</div>
-            <div class="v" id="kRequests">—</div>
-          </div>
-          <div class="kpi">
-            <div class="k">Cases</div>
-            <div class="v" id="kCases">—</div>
-          </div>
-          <div class="kpi">
-            <div class="k">Slips</div>
-            <div class="v" id="kSlips">—</div>
-          </div>
-          <div class="kpi">
-            <div class="k">Audit</div>
-            <div class="v" id="kAudit">—</div>
-          </div>
-        </div>
-
-        <div class="sep"></div>
-
-        <div class="muted small">
-          آخر دور:
-          <b id="lastRole">—</b>
-        </div>
-      </div>
-    </section>
-
-    <!-- Role Cards -->
-    <section class="grid4">
-      <article class="roleCard" data-role="student">
-        <div class="roleTop">
-          <div class="roleIcon">🎓</div>
-          <div>
-            <h2>بوابة الطالب</h2>
-            <p class="muted">شكوى + محاكاة حساسات + فرز AI + طلب زيارة افتراضية</p>
-          </div>
-        </div>
-        <ul class="roleList">
-          <li>مولد قراءات واقعي</li>
-          <li>Risk / Priority / Recommendation</li>
-          <li>إرسال الحالة للطبيب</li>
-        </ul>
-        <button class="btn" onclick="SCBUS.seedDemo()">
-🚀 تفعيل بيانات تجريبية
-</button>
-        <button class="btn full">دخول الطالب</button>
-      </article>
-
-      <article class="roleCard" data-role="doctor">
-        <div class="roleTop">
-          <div class="roleIcon">👨‍⚕️</div>
-          <div>
-            <h2>بوابة الطبيب</h2>
-            <p class="muted">قراءات + Copilot + قرار تلقائي + زيارة + تقرير</p>
-          </div>
-        </div>
-        <ul class="roleList">
-          <li>قراءة ثانية (تأكيد)</li>
-          <li>DX + PLAN + قرارات</li>
-          <li>تقرير للطباعة</li>
-        </ul>
-        <button class="btn full">دخول الطبيب</button>
-      </article>
-
-      <article class="roleCard" data-role="admin">
-        <div class="roleTop">
-          <div class="roleIcon">🏫</div>
-          <div>
-            <h2>بوابة الإدارة</h2>
-            <p class="muted">لوحة مؤشرات + Heatmap + سندات + سجل إجراءات</p>
-          </div>
-        </div>
-        <ul class="roleList">
-          <li>حالات اليوم / توزيع الشدة</li>
-          <li>سندات الموافقة</li>
-          <li>Audit Log</li>
-        </ul>
-        <button class="btn full">دخول الإدارة</button>
-      </article>
-
-      <article class="roleCard" data-role="parent">
-        <div class="roleTop">
-          <div class="roleIcon">👨‍👩‍👧</div>
-          <div>
-            <h2>بوابة ولي الأمر</h2>
-            <p class="muted">ملخص مبسط + تقرير رسمي + موافقة/رفض</p>
-          </div>
-        </div>
-        <ul class="roleList">
-          <li>ملخص مفهوم</li>
-          <li>تقرير رسمي للطباعة</li>
-          <li>موافقة تولّد سند</li>
-        </ul>
-        <button class="btn full">دخول ولي الأمر</button>
-      </article>
-    </section>
-
-    <footer class="footer">
-      <div class="muted small">
-        © Demo • Smart School Clinic OS • يعمل على GitHub Pages
-      </div>
-      <a class="link" href="report-view.html" style="opacity:.75">فتح report-view (اختبار)</a>
-    </footer>
-  </main>
-
-  <script>
-    (function(){
-      const $ = (s)=>document.querySelector(s);
-
-      function updateKPIs(){
-        try{
-          const bus = window.SCBUS?.load?.() || {requests:[], cases:[], slips:[], audit:[]};
-          $("#kRequests").textContent = (bus.requests||[]).length;
-          $("#kCases").textContent    = (bus.cases||[]).length;
-          $("#kSlips").textContent    = (bus.slips||[]).length;
-          $("#kAudit").textContent    = (bus.audit||[]).length;
-          $("#lastRole").textContent  = localStorage.getItem("SC_LAST_ROLE") || "—";
-        }catch(e){
-          $("#kRequests").textContent = "—";
-          $("#kCases").textContent    = "—";
-          $("#kSlips").textContent    = "—";
-          $("#kAudit").textContent    = "—";
-        }
-      }
-
-      function goRole(role){
-        if(!role) return;
-        window.SCAUTH?.setRole(role);
-        const map = {
-          student: "student.html",
-          doctor:  "doctor.html",
-          admin:   "admin.html",
-          parent:  "parent.html"
-        };
-        const href = map[role] || "index.html";
-        location.href = href;
-      }
-
-      // Role card click
-      document.querySelectorAll(".roleCard").forEach(card=>{
-        card.addEventListener("click", (e)=>{
-          const role = card.getAttribute("data-role");
-          goRole(role);
-        });
-      });
-
-      // Seed demo data (creates one full flow minimal)
-      $("#btnSeed").addEventListener("click", ()=>{
-        try{
-          window.SCBUS?.seedDemo?.();
-          alert("تم تجهيز بيانات العرض ✅");
-          updateKPIs();
-        }catch(e){
-          alert("ملاحظة: seedDemo سيعمل بعد ملف bus.js النهائي.");
-        }
-      });
-
-      $("#btnGoLast").addEventListener("click", ()=>{
-        const last = localStorage.getItem("SC_LAST_ROLE");
-        if(!last) return alert("لا يوجد آخر دور محفوظ.");
-        goRole(last);
-      });
-
-      $("#btnReset").addEventListener("click", ()=>{
-        const ok = confirm("تأكيد تصفير بيانات الديمو؟");
-        if(!ok) return;
-        try{
-          window.SCBUS?.reset?.();
-          alert("تم التصفير ✅");
-          updateKPIs();
-        }catch(e){
-          localStorage.clear();
-          alert("تم التصفير ✅");
-          updateKPIs();
-        }
-      });
-
-      updateKPIs();
-      setInterval(updateKPIs, 1500);
-    })();
-  </script>
 </body>
 </html>
