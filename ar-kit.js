@@ -76,6 +76,15 @@
     ctx.font = "900 14px system-ui";
     ctx.fillText("Smart Clinic AR — Doctor HUD", 30, 46);
 
+// Case header (from BUS)
+if(data.caseId){
+  ctx.fillStyle = "rgba(0,0,0,.35)";
+  ctx.fillRect(18, 64, 420, 34);
+  ctx.fillStyle = "#fff";
+  ctx.font = "800 12px system-ui";
+  ctx.fillText(`Case: ${data.caseId} • Student: ${data.studentName || "—"}`, 30, 86);
+}
+
     // vitals chip
     const x0 = 18, y0 = 72;
     ctx.fillStyle = "rgba(0,0,0,.35)";
