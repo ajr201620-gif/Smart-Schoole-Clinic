@@ -3,282 +3,229 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>بوابة الطبيب — العيادة المدرسية الذكية</title>
+  <title>لوحة الطبيب — العيادة المدرسية الذكية</title>
   <link rel="stylesheet" href="app.css" />
 </head>
 
 <body data-page="doctor">
-
   <!-- Topbar -->
-  <header class="topbar">
-    <div class="inner">
-      <div class="topbar_left">
-        <a class="btn ghost" href="index.html">↩︎ الرئيسية</a>
-
-        <div class="brand">
-          <div class="brand__logo"></div>
-          <div class="brand__txt">
-            <div class="brand__name">العيادة المدرسية الذكية</div>
-            <div class="brand__sub">بوابة الطبيب • Queue • قرارات • متابعة</div>
-          </div>
-        </div>
-
-        <div class="pill">
-          <small>الدور</small>
-          <b data-user-role>doctor</b>
+  <header class="topbar topbar--slim">
+    <div class="topbar__left">
+      <a class="btn ghost sm" href="index.html">↩︎ الرئيسية</a>
+      <div class="brand mini">
+        <div class="brand__logo">🩺</div>
+        <div class="brand__txt">
+          <div class="brand__name">العيادة المدرسية الذكية</div>
+          <div class="brand__sub">لوحة الطبيب • حالات • قرارات</div>
         </div>
       </div>
-
-      <div class="topbar_right">
-        <div class="pill">
-          <small>مرحبًا</small>
-          <b data-user-name>طبيب</b>
-        </div>
-        <input class="input" id="caseId" type="text" placeholder="Case ID (اختياري)">
-
-<button class="btn" id="btnCases" data-action="btnCases">📋 كل الحالات</button>
-<button class="btn primary" id="btnOpenCase" data-action="btnOpenCase">📂 فتح حالة</button>
-<button class="btn" id="btnUpdateCase" data-action="btnUpdateCase">💾 تحديث / إضافة ملاحظة</button>
-<button class="btn warn" id="btnDecision" data-action="btnDecision">✅ قرار الطبيب</button>
-<button class="btn" id="btnFollowup" data-action="btnFollowup">🔁 متابعة</button>
-<button class="btn ghost" id="btnHelp" data-action="btnHelp">🆘 مساعدة</button>
-<button class="btn danger" id="btnLogout" data-action="btnLogout">خروج</button>
+    </div>
+    <div class="topbar__right">
+      <div class="pill pill--soft">
+        <span class="dot ok"></span>
+        <span>مرحبًا، <b data-user-name>طبيب</b></span>
+      </div>
+      <button class="btn ghost sm" id="btnTheme">🌓</button>
+      <button class="btn danger sm" id="btnLogoutTop" data-action="common:logout">خروج</button>
     </div>
   </header>
 
-  <main class="container">
-
+  <main class="shell shell--wide">
     <!-- Hero -->
-    <section class="panel hero">
-      <div class="heroRow">
-        <div>
-          <div class="heroTitle">🩺 لوحة الطبيب — القرار عندك</div>
-          <div class="heroDesc">
-            راجع الحالات الواردة، اطلب قراءة ثانية للحساسات، استخدم المساعد الطبي (تجريبي)،
-            ثم اتخذ القرار: متابعة، زيارة، أو إغلاق.
-          </div>
+    <section class="hero hero--compact">
+      <div class="hero__left">
+        <h1 class="hero__title">إدارة الحالات بسرعة ووضوح</h1>
+        <p class="hero__lead">اطّلع على الحالات الواردة، راجع القياسات، وأصدر القرار الطبي.</p>
 
-          <div class="heroActions mt12">
-            <button class="btn" id="btnDoctorQueue" data-action="doctor:view-queue">📋 عرض قائمة الانتظار</button>
-            <button class="btn primary" id="btnOpenCase" data-action="doctor:open-case">📂 فتح الحالة المحددة</button>
-            <a class="btn ghost" href="visit.html">🎥 فتح غرفة الزيارة</a>
-          </div>
+        <div class="hero__cta">
+          <span class="chip"><span class="dot ok"></span> Firestore: <b id="fbState">—</b></span>
+          <span class="chip">الدور: <b data-user-role>doctor</b></span>
         </div>
+      </div>
 
-        <div class="kpiRow" style="min-width:320px;">
-          <div class="kpi">
-            <div class="kLabel">الحالات الواردة</div>
-            <div class="kVal" id="d_k_in">0</div>
-            <div class="kMeta">Assigned / New</div>
-          </div>
-          <div class="kpi warn">
-            <div class="kLabel">تحتاج متابعة</div>
-            <div class="kVal" id="d_k_follow">0</div>
-            <div class="kMeta">Followup</div>
-          </div>
-          <div class="kpi bad">
-            <div class="kLabel">حرجة</div>
-            <div class="kVal" id="d_k_critical">0</div>
-            <div class="kMeta">Critical</div>
+      <div class="hero__right">
+        <div class="glassCard glassCard--tight">
+          <div class="glassCard__title">ملخص اليوم</div>
+          <div class="glassCard__body">
+            <div class="row"><span class="muted">حالات جديدة:</span> <b id="kNew">—</b></div>
+            <div class="row"><span class="muted">قيد المتابعة:</span> <b id="kFollow">—</b></div>
+            <div class="row"><span class="muted">محالة:</span> <b id="kRefer">—</b></div>
           </div>
         </div>
       </div>
     </section>
 
-    <div class="grid mt16">
-
-      <!-- Queue -->
-      <section class="panel card col-6">
-        <div class="cardHeader">
-          <div class="cardTitle"><span class="ico">📋</span> قائمة الانتظار</div>
-          <span class="chip">Queue</span>
-        </div>
-
-        <div class="cardBody">
-          <div id="d_queue">
-            <div class="subtle">لا توجد حالات حالياً.</div>
+    <!-- 3 columns -->
+    <section class="triLayout">
+      <!-- Left: Case list -->
+      <aside class="card card--soft">
+        <header class="card__head">
+          <h2 class="card__title">📋 الحالات</h2>
+          <div class="card__tools">
+            <button class="btn ghost sm" id="btnRefresh">تحديث</button>
+          </div>
+        </header>
+        <div class="card__body">
+          <div id="caseList" class="list">
+            <div class="empty muted">لا توجد حالات.</div>
           </div>
         </div>
-      </section>
+      </aside>
 
-      <!-- Case Details -->
-      <section class="panel card col-6">
-        <div class="cardHeader">
-          <div class="cardTitle"><span class="ico">📂</span> تفاصيل الحالة</div>
-          <span class="chip warn">Live</span>
-        </div>
-
-        <div class="cardBody">
-          <div class="rowCard">
-            <div class="rowTitle">الطالب</div>
-            <div class="rowMeta" id="d_owner">—</div>
-          </div>
-
-          <div class="rowCard">
-            <div class="rowTitle">الشكوى</div>
-            <div class="rowMeta" id="d_symptoms">—</div>
-          </div>
-
-          <div class="rowCard">
-            <div class="rowTitle">القرار الحالي</div>
-            <div class="rowMeta" id="d_decision">—</div>
-          </div>
-
-          <div class="flex mt12">
-            <button class="btn small" id="btnRunSensors2" data-action="student:run-sensors">📟 طلب قراءة ثانية</button>
-            <button class="btn small ghost" data-action="common:download-report">⬇️ تقرير</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- Vitals -->
-      <section class="panel card col-6">
-        <div class="cardHeader">
-          <div class="cardTitle"><span class="ico">📊</span> القياسات</div>
-          <span class="chip warn">Demo</span>
-        </div>
-
-        <div class="cardBody">
-          <div class="vitals">
-            <div class="vital">
-              <div class="vLabel">نبض القلب</div>
-              <div class="vVal" id="d_hr">—</div>
+      <!-- Center: Case details -->
+      <section class="card card--focus">
+        <header class="card__head">
+          <h2 class="card__title">🧾 تفاصيل الحالة</h2>
+        </header>
+        <div class="card__body">
+          <div class="grid2">
+            <div>
+              <div class="label">الطالب</div>
+              <div class="value" id="dStudent">—</div>
             </div>
-            <div class="vital">
-              <div class="vLabel">الأكسجين</div>
-              <div class="vVal" id="d_spo2">—</div>
-            </div>
-            <div class="vital">
-              <div class="vLabel">الحرارة</div>
-              <div class="vVal" id="d_temp">—</div>
-            </div>
-            <div class="vital">
-              <div class="vLabel">الضغط</div>
-              <div class="vVal" id="d_bp">—</div>
+            <div>
+              <div class="label">الحالة</div>
+              <div class="value" id="dStatus">—</div>
             </div>
           </div>
-        </div>
-      </section>
 
-      <!-- AI Assistant + Decision -->
-      <section class="panel card col-6">
-        <div class="cardHeader">
-          <div class="cardTitle"><span class="ico">🤖</span> مساعد الطبيب (AI)</div>
-          <span class="chip">Assist</span>
-        </div>
+          <div class="divider"></div>
 
-        <div class="cardBody">
-          <div class="field">
-            <label>مقترح تشخيص/خطة (تجريبي)</label>
-            <textarea id="ai_suggest" class="input" rows="4" placeholder="مثال: أعراض عدوى تنفسية خفيفة — راحة وسوائل ومتابعة بعد 24 ساعة."></textarea>
+          <div class="label">الأعراض</div>
+          <div class="value" id="dSymptoms">—</div>
+
+          <div class="divider"></div>
+
+          <div class="vitals vitals--mini">
+            <div class="vital"><div class="vital__label">نبض</div><div class="vital__value" id="d_hr">—</div></div>
+            <div class="vital"><div class="vital__label">O₂</div><div class="vital__value" id="d_spo2">—</div></div>
+            <div class="vital"><div class="vital__label">حرارة</div><div class="vital__value" id="d_temp">—</div></div>
+            <div class="vital"><div class="vital__label">ضغط</div><div class="vital__value" id="d_bp">—</div></div>
           </div>
 
-          <div class="field">
-            <label>قرار الطبيب النهائي</label>
-            <textarea id="txtDecision" class="input" rows="3" placeholder="اكتب قرارك هنا…"></textarea>
-          </div>
+          <div class="divider"></div>
 
-          <div class="flex mt12">
-            <button class="btn primary" id="btnUpdateDecision" data-action="doctor:update-decision">💾 حفظ القرار</button>
-            <button class="btn warn" id="btnFollowup" data-action="doctor:request-followup">🔁 طلب متابعة</button>
-            <button class="btn bad" id="btnCloseCase" data-action="doctor:close-case">🔒 إغلاق الحالة</button>
-          </div>
-        </div>
-      </section>
+          <label class="field">
+            <div class="field__label">قرار الطبيب</div>
+            <textarea id="dDecision" class="input" rows="4" placeholder="اكتب القرار أو التوصية…"></textarea>
+          </label>
 
-      <!-- Parent / Visit -->
-      <section class="panel card col-12">
-        <div class="cardHeader">
-          <div class="cardTitle"><span class="ico">👨‍👩‍👧‍👦</span> ولي الأمر والزيارة</div>
-          <span class="chip ok">Actions</span>
-        </div>
-
-        <div class="cardBody">
-          <div class="flex">
-            <button class="btn" data-action="parent:approve-consent">📨 طلب موافقة ولي الأمر</button>
-            <a class="btn ghost" href="parent.html">فتح بوابة ولي الأمر</a>
-            <a class="btn primary" href="visit.html">🎥 بدء/الانضمام لزيارة</a>
-          </div>
-          <div class="subtle mt8">
-            *طلب موافقة ولي الأمر يُرسل تنبيه (تجريبي) ويمكنه الموافقة من صفحته.*
+          <div class="rowActions rowActions--split">
+            <button class="btn primary" id="btnApprove">✅ اعتماد</button>
+            <button class="btn warn" id="btnFollow">🔁 متابعة</button>
+            <button class="btn" id="btnRefer">↪️ إحالة</button>
           </div>
         </div>
       </section>
 
-    </div>
+      <!-- Right: Activity -->
+      <aside class="card card--soft">
+        <header class="card__head">
+          <h2 class="card__title">🔔 النشاط</h2>
+        </header>
+        <div class="card__body">
+          <div id="activity" class="list">
+            <div class="empty muted">لا يوجد نشاط.</div>
+          </div>
+          <div class="divider"></div>
+          <button class="btn danger" id="btnLogoutBottom" data-action="common:logout">خروج</button>
+        </div>
+      </aside>
+    </section>
   </main>
 
-  <!-- Scripts -->
+  <!-- Scripts (order matters) -->
   <script src="./bus.js"></script>
   <script src="./auth.js"></script>
-  <script src="./sensor-sim.js"></script>
 
-  <!-- Firebase init (module) -->
+  <!-- Firebase (ONE TIME) -->
   <script type="module" src="./firebase-init.js"></script>
 
   <!-- Actions -->
   <script src="./actions.js"></script>
 
-  <!-- Doctor binder -->
+  <!-- Page glue -->
   <script>
     (function(){
-      "use strict";
-      const $ = (s,r=document)=>r.querySelector(s);
-      const esc = (s)=>String(s??"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+      const $=(s,r=document)=>r.querySelector(s);
+      let selectedId=null;
 
-      function stats(){
-        const DB = window.SSC?.db;
-        if(!DB) return;
-        const cases = DB.cases||[];
-        $("#d_k_in").textContent = cases.length;
-        $("#d_k_follow").textContent = cases.filter(c=>c.status==="followup_required").length;
-        $("#d_k_critical").textContent = cases.filter(c=>c.priority==="critical"||c.risk==="high").length;
+      async function showFB(){
+        const el=$("#fbState");
+        let tries=0; while(!window.FB && tries++<40) await new Promise(r=>setTimeout(r,50));
+        el.textContent = window.FB ? "متصل" : "غير جاهز";
       }
 
-      function renderQueue(){
-        const DB = window.SSC?.db;
-        const box = $("#d_queue");
-        if(!DB || !box) return;
-        const cases = DB.cases||[];
-        box.innerHTML = cases.length
-          ? cases.slice(0,8).map(c=>`
-            <div class="rowCard">
-              <div class="rowTitle">${esc(c.owner?.name||"طالب")} • <span class="subtle">#${esc(c.id)}</span></div>
-              <div class="rowMeta">الحالة: <b>${esc(c.status||"—")}</b> • الأولوية: <b>${esc(c.priority||"—")}</b></div>
-              <div class="rowMeta">${esc((c.symptoms||"—").slice(0,80))}</div>
-            </div>
-          `).join("")
-          : `<div class="subtle">لا توجد حالات حالياً.</div>`;
+      function renderList(cases){
+        const box=$("#caseList");
+        if(!cases?.length){ box.innerHTML='<div class="empty muted">لا توجد حالات.</div>'; return; }
+        box.innerHTML = cases.map(c=>`
+          <div class="rowCard ${c.id===selectedId?'is-active':''}" data-id="${c.id}">
+            <div class="rowTitle">${c.id}</div>
+            <div class="rowMeta">${c.status} • ${c.priority||'—'}</div>
+          </div>
+        `).join("");
+        box.querySelectorAll(".rowCard").forEach(el=>{
+          el.onclick=()=>select(el.dataset.id, cases);
+        });
       }
 
-      function renderCase(){
-        const DB = window.SSC?.db;
-        if(!DB) return;
-        const c = DB.cases?.[0];
-        if(!c){
-          $("#d_owner").textContent = "—";
-          $("#d_symptoms").textContent = "—";
-          $("#d_decision").textContent = "—";
-          return;
-        }
-        $("#d_owner").textContent = c.owner?.name || "—";
-        $("#d_symptoms").textContent = c.symptoms || "—";
-        $("#d_decision").textContent = c.decision || "—";
-
+      function select(id, cases){
+        selectedId=id;
+        const c=cases.find(x=>x.id===id);
+        if(!c) return;
+        $("#dStudent").textContent = c.ownerId || "—";
+        $("#dStatus").textContent = c.status || "—";
+        $("#dSymptoms").textContent = c.symptoms || "—";
         $("#d_hr").textContent = c.vitals?.hr ?? "—";
         $("#d_spo2").textContent = c.vitals?.spo2 ?? "—";
         $("#d_temp").textContent = c.vitals?.temp ?? "—";
         $("#d_bp").textContent = c.vitals?.bp ?? "—";
+        $("#dDecision").value = c.decision || "";
+        renderList(cases);
       }
 
-      document.addEventListener("DOMContentLoaded", ()=>{
-        stats(); renderQueue(); renderCase();
-        window.bus?.on?.("case:update", ()=>{ stats(); renderQueue(); renderCase(); });
+      async function loadCases(){
+        const { db, collection, getDocs } = window.FB;
+        const snap = await getDocs(collection(db,"cases"));
+        const cases = [];
+        snap.forEach(d=>cases.push({id:d.id, ...d.data()}));
+        // KPIs
+        $("#kNew").textContent = cases.filter(c=>c.status==="new").length;
+        $("#kFollow").textContent = cases.filter(c=>c.status==="follow").length;
+        $("#kRefer").textContent = cases.filter(c=>c.status==="refer").length;
+        renderList(cases);
+        if(cases[0]) select(cases[0].id, cases);
+        window.__cases = cases;
+      }
+
+      $("#btnRefresh")?.addEventListener("click", loadCases);
+      $("#btnApprove")?.addEventListener("click", async()=>{
+        if(!selectedId) return alert("اختر حالة");
+        const { db, doc, updateDoc } = window.FB;
+        await updateDoc(doc(db,"cases",selectedId), { status:"approved", decision:$("#dDecision").value });
+        loadCases();
+      });
+      $("#btnFollow")?.addEventListener("click", async()=>{
+        if(!selectedId) return alert("اختر حالة");
+        const { db, doc, updateDoc } = window.FB;
+        await updateDoc(doc(db,"cases",selectedId), { status:"follow", decision:$("#dDecision").value });
+        loadCases();
+      });
+      $("#btnRefer")?.addEventListener("click", async()=>{
+        if(!selectedId) return alert("اختر حالة");
+        const { db, doc, updateDoc } = window.FB;
+        await updateDoc(doc(db,"cases",selectedId), { status:"refer", decision:$("#dDecision").value });
+        loadCases();
+      });
+
+      document.addEventListener("DOMContentLoaded", async()=>{
+        await showFB();
+        await loadCases();
+        const name = localStorage.getItem("USER_NAME") || "طبيب";
+        document.querySelectorAll("[data-user-name]").forEach(el=>el.textContent=name);
       });
     })();
   </script>
-<script type="module" src="./firebase-init.js"></script>
-<script src="./rbac.js"></script>
-<script src="./actions.js"></script>
 </body>
 </html>
