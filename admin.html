@@ -1,192 +1,174 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="dark">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>بوابة الإدارة — Smart School Clinic OS</title>
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>لوحة الإدارة — العيادة المدرسية الذكية</title>
   <link rel="stylesheet" href="app.css" />
-
-<script src="bus.js"></script>
-<script src="auth.js"></script>
-<script src="protocols.js"></script>
-<script src="audit-log.js"></script>
-<script src="admin-heatmap.js"></script>
-
-<script src="actions.js"></script>
-<script src="app-init.js"></script>
 </head>
 
-<body>
-<header class="topbar">
-  <div class="brand">
-    <div class="logo">🏫</div>
-    <div class="brandText">
-      <div class="name">بوابة الإدارة</div>
-      <div class="tagline">مؤشرات • متابعة • سندات • سجل إجراءات</div>
-    </div>
-  </div>
-  <div class="topActions">
-    <button class="btn ghost" onclick="location.href='index.html'">⬅️ رجوع</button>
-  </div>
-</header>
-  <main class="page admin-page">
-
-  <section class="card">
-    <div class="row between">
-      <h3>🏫 لوحة الإدارة</h3>
-      <div class="row" style="gap:10px; flex-wrap:wrap;">
-        <button class="btn ghost" data-action="admin.refresh">🔄 تحديث</button>
-        <button class="btn ghost" data-action="admin.exportAudit">🧾 تصدير سجل</button>
-      </div>
-    </div>
-
-    <div class="grid-4" style="margin-top:10px;">
-      <div class="kpi"><div class="label">Requests</div><div class="value" id="aRequests">—</div></div>
-      <div class="kpi"><div class="label">Cases</div><div class="value" id="aCases">—</div></div>
-      <div class="kpi"><div class="label">Critical</div><div class="value" id="aCritical">—</div></div>
-      <div class="kpi"><div class="label">Follow-up</div><div class="value" id="aFollowup">—</div></div>
-    </div>
-  </section>
-
-  <section class="card">
-    <div class="row between">
-      <h3>🔥 Heatmap (مراجعة سريعة)</h3>
-      <button class="btn ghost" data-action="admin.buildHeatmap">🧩 إعادة بناء</button>
-    </div>
-    <div id="aHeatmap" class="heatmap muted">—</div>
-  </section>
-
-  <section class="card">
-    <div class="row between">
-      <h3>📚 آخر الحالات</h3>
-      <button class="btn ghost" data-action="admin.seedDemo">✨ توليد بيانات تجريبية</button>
-    </div>
-
-    <div id="aCaseList" class="list">
-      <div class="muted">لا توجد حالات بعد.</div>
-    </div>
-  </section>
-
-  <section class="card">
-    <h3>🧷 تفاصيل الحالة المختارة</h3>
-
-    <div class="grid-3">
-      <div><div class="label">الطالب</div><div class="value" id="aStudent">—</div></div>
-      <div><div class="label">الحالة</div><div class="value" id="aStatus">—</div></div>
-      <div><div class="label">القرار</div><div class="value" id="aDecision">—</div></div>
-    </div>
-
-    <div class="label" style="margin-top:10px;">ملخص</div>
-    <div class="box" id="aSummary">—</div>
-
-    <div class="row" style="margin-top:12px; gap:10px; flex-wrap:wrap;">
-      <button class="btn warn" data-action="admin.notifyParent">👨‍👩‍👦 إشعار ولي الأمر</button>
-      <button class="btn ghost" data-action="admin.notifyDoctor">👨‍⚕️ إشعار الطبيب</button>
-      <button class="btn primary" data-action="admin.markFollowup">📌 وضع متابعة</button>
-      <button class="btn danger" data-action="admin.markCritical">🚨 تصعيد Critical</button>
-    </div>
-
-    <div class="muted" id="aResult" style="margin-top:10px;"></div>
-  </section>
-
-</main>
-
-<main class="container">
-
-  <!-- KPIs -->
-  <section class="panel">
-    <div class="h">
-      <h2>📊 المؤشرات العامة</h2>
-      <div class="muted">نظرة سريعة على الوضع الصحي</div>
-    </div>
-
-    <div class="kpiGrid">
-      <div class="kpi"><div class="k">Requests</div><div class="v" id="kReq">—</div></div>
-      <div class="kpi"><div class="k">Cases</div><div class="v" id="kCases">—</div></div>
-      <div class="kpi"><div class="k">Critical</div><div class="v" id="kCrit">—</div></div>
-      <div class="kpi"><div class="k">Follow-up</div><div class="v" id="kFollow">—</div></div>
-    </div>
-  </section>
-
-  <div class="sep"></div>
-
-  <!-- Heatmap -->
-  <section class="panel">
-    <div class="h">
-      <h2>🔥 لوحة المتابعة (Heatmap)</h2>
-      <div class="muted">توزيع الحالات حسب الشدة والحالة</div>
-    </div>
-    <div id="heatmapBox"></div>
-  </section>
-
-  <div class="sep"></div>
-
-  <!-- Latest Cases -->
-  <section class="panel">
-    <div class="h">
-      <h2>🗂️ آخر الحالات</h2>
-      <div class="muted">للمراجعة السريعة</div>
-    </div>
-    <div id="casesList"></div>
-  </section>
-
-  <div class="sep"></div>
-
-  <!-- Audit Log -->
-  <section class="panel">
-    <div class="h">
-      <h2>📜 سجل الإجراءات</h2>
-      <div class="muted">توثيق كل إجراء إداري</div>
-    </div>
-    <div id="auditList"></div>
-  </section>
-
-</main>
-
-<script>
-(function(){
-  SCAUTH.requireRole("admin");
-  const $ = (s)=>document.querySelector(s);
-
-  function refresh(){
-    const bus = SCBUS.load();
-    const cases = bus.cases || [];
-    const reqs  = bus.requests || [];
-
-    $("#kReq").textContent = reqs.length;
-    $("#kCases").textContent = cases.length;
-    $("#kCrit").textContent = cases.filter(c=>c.priority==="CRIT").length;
-    $("#kFollow").textContent = cases.filter(c=>c.status==="FOLLOW_UP").length;
-
-    $("#casesList").innerHTML = cases.slice(0,6).map(c=>`
-      <div class="sc-nav-item">
-        <b>${c.studentName}</b>
-        <div class="muted small">
-          Case ${c.id} • ${c.priority} • ${c.status}
+<body data-page="admin">
+  <header class="topbar">
+    <div class="topbar__left">
+      <a class="btn ghost" href="index.html">⟵ الرئيسية</a>
+      <div class="brand mini">
+        <div class="brand__logo">🏫</div>
+        <div class="brand__txt">
+          <div class="brand__name">لوحة الإدارة</div>
+          <div class="brand__sub">مؤشرات • متابعة الحالات • تقارير وتصدير</div>
         </div>
       </div>
-    `).join("") || `<div class="muted">لا توجد حالات</div>`;
+    </div>
 
-    // Heatmap
-    window.SCHEAT && window.SCHEAT.render("heatmapBox");
+    <div class="topbar__right">
+      <div class="pill">مرحبًا: <b data-user-name>الإدارة</b></div>
+      <button class="btn ghost" id="btnTheme">🌓</button>
+    </div>
+  </header>
 
-    // Audit
-    const rows = window.SCAUDIT?.list(10) || [];
-    $("#auditList").innerHTML = rows.map(a=>`
-      <div class="sc-nav-item">
-        <b>${a.action}</b>
-        <div class="muted small">
-          ${new Date(a.at).toLocaleString("ar-SA")}
-          • ${a.actor || "system"}
+  <main class="shell">
+    <!-- KPIs -->
+    <section class="card pad">
+      <div class="card__title">📊 مؤشرات المدرسة</div>
+      <div class="muted">هذه أرقام الديمو من localStorage (جاهزة للربط لاحقًا مع قاعدة بيانات).</div>
+
+      <div class="kpis">
+        <div class="kpi">
+          <div class="kpi__label">طلبات زيارة</div>
+          <div class="kpi__val" id="kpiRequests">0</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">إجمالي الحالات</div>
+          <div class="kpi__val" id="kpiCases">0</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">حالات حرجة</div>
+          <div class="kpi__val" id="kpiCritical">0</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">تحتاج متابعة</div>
+          <div class="kpi__val" id="kpiFollowup">0</div>
         </div>
       </div>
-    `).join("") || `<div class="muted">لا يوجد سجل بعد</div>`;
-  }
 
-  refresh();
-  setInterval(refresh, 2000);
-})();
-</script>
+      <div class="row actions">
+        <button class="btn solid" id="btnExportReport" data-action="admin:exportReport">⬇️ تصدير JSON</button>
+        <button class="btn ghost" id="btnResetDemo" data-action="admin:resetDemo">🧹 تصفير الديمو</button>
+        <a class="btn ghost" href="doctor.html">🩺 بوابة الطبيب</a>
+        <a class="btn ghost" href="student.html">🎒 بوابة الطالب</a>
+      </div>
+    </section>
+
+    <!-- Recent Cases -->
+    <section class="grid2" style="margin-top:14px;">
+      <div class="card pad">
+        <div class="card__title">🧾 آخر الحالات</div>
+        <div class="muted">عرض سريع للحالات — (إن ما ظهر شيء: روح للطالب وأنشئ حالة).</div>
+
+        <div id="adminCases" class="list"></div>
+      </div>
+
+      <div class="card pad">
+        <div class="card__title">🛰️ إشعارات وتنبيهات</div>
+        <div class="muted">قائمة مختصرة تحاكي نظام تنبيه المدرسة.</div>
+
+        <div id="adminAlerts" class="list"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Scripts -->
+  <script src="bus.js"></script>
+  <script src="auth.js"></script>
+  <script src="app-init.js"></script>
+  <script src="sensor-sim.js"></script>
+  <script src="triage-ai.js"></script>
+  <script src="doctor-copilot.js"></script>
+  <script src="visit-session.js"></script>
+  <script src="app.js"></script>
+  <script src="actions.js"></script>
+
+  <script>
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;").replaceAll("<","&lt;")
+        .replaceAll(">","&gt;").replaceAll('"',"&quot;")
+        .replaceAll("'","&#39;");
+    }
+
+    function renderAdminLists(){
+      const app = window.app;
+      if(!app) return;
+
+      const cases = app.getCases?.() || [];
+      const visits = app.getVisits?.() || [];
+
+      // KPIs
+      const stats = app.getAdminStats?.();
+      if (stats && window.bus?.applyStats) window.bus.applyStats(stats);
+
+      const list = document.getElementById("adminCases");
+      if(list){
+        if(!cases.length){
+          list.innerHTML = `<div class="muted">لا توجد حالات بعد.</div>`;
+        } else {
+          const last = cases.slice(-8).reverse();
+          list.innerHTML = last.map(c => `
+            <div class="rowCard">
+              <div class="rowTitle">${escapeHtml(c.id)} — ${escapeHtml(c.patient?.name || "طالب")}</div>
+              <div class="rowMeta">
+                ${escapeHtml(c.triage?.priority || "—")} / ${escapeHtml(c.triage?.risk || "—")}
+                • ${new Date(c.createdAt).toLocaleString("ar-SA")}
+                • الحالة: ${escapeHtml(c.status)}
+              </div>
+              <div class="rowBtns">
+                <a class="btn tiny ghost" href="doctor.html">فتح عند الطبيب</a>
+                <a class="btn tiny ghost" href="parent.html">ولي الأمر</a>
+              </div>
+            </div>
+          `).join("");
+        }
+      }
+
+      const alerts = document.getElementById("adminAlerts");
+      if(alerts){
+        const critical = cases.filter(c => c.triage?.priority === "P1").slice(-4).reverse();
+        const pendingVisits = visits.filter(v => v.status === "pending").slice(-4).reverse();
+
+        const blocks = [];
+        critical.forEach(c => blocks.push({
+          t: "🚨 حالة حرجة",
+          m: `${c.id} • ${c.patient?.name || "طالب"} • ${c.triage?.risk || "—"}`,
+        }));
+        pendingVisits.forEach(v => blocks.push({
+          t: "🎥 طلب زيارة",
+          m: `${v.id} • للحالة ${v.caseId} • كود ${v.joinCode}`,
+        }));
+
+        if(!blocks.length){
+          alerts.innerHTML = `<div class="muted">لا توجد تنبيهات حالياً.</div>`;
+        } else {
+          alerts.innerHTML = blocks.map(x => `
+            <div class="rowCard">
+              <div class="rowTitle">${escapeHtml(x.t)}</div>
+              <div class="rowMeta">${escapeHtml(x.m)}</div>
+            </div>
+          `).join("");
+        }
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("btnTheme")?.addEventListener("click", () => {
+        const html = document.documentElement;
+        const isDark = html.getAttribute("data-theme") !== "light";
+        html.setAttribute("data-theme", isDark ? "light" : "dark");
+      });
+
+      renderAdminLists();
+      window.bus?.on?.("case:update", renderAdminLists);
+      window.bus?.on?.("visit:update", renderAdminLists);
+    });
+  </script>
 </body>
 </html>
