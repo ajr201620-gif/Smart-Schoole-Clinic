@@ -20,7 +20,7 @@
     </div>
 
     <div class="top-actions">
-     <a class="btn ghost" href="visit.html?role=doctor">🎥 زيارة افتراضية</a>
+     <button class="btn ghost" id="btnOneClickVisitDoctor">🎥 زيارة افتراضية (نقرة واحدة)</button>
   <a class="btn" id="btnGoReport" href="report.html">🧾 فتح تقرير الحالة</a>
     <a class="btn ghost" href="ar-doctor.html">📷 AR HUD</a>
   <button class="btn ghost" id="btnTheme">🌓</button>
@@ -983,7 +983,21 @@ Notify: ${caseObj.notify.to} level=${caseObj.notify.level}
       window.addEventListener("beforeunload", ()=>{ try{ stopMedia(); }catch(_){ }});
     })();
   </script>
+<script>
+(function(){
+  const btn = document.getElementById("btnOneClickVisitDoctor");
+  if(!btn) return;
 
+  btn.addEventListener("click", ()=>{
+    const bus = window.SCBUS?.load?.();
+    const latestCase = bus?.cases?.[0];
+    const room = latestCase?.id ? ("ROOM-" + latestCase.id) : ("ROOM-" + Date.now());
+
+    window.open(`visit.html?role=student&room=${encodeURIComponent(room)}&autojoin=1`, "_blank");
+    location.href = `visit.html?role=doctor&room=${encodeURIComponent(room)}&autojoin=1`;
+  });
+})();
+</script>
 </body>
 </html>
 window.addEventListener("sc:bus:update", ()=>{
