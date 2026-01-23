@@ -1,205 +1,190 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="dark">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>الزيارة الافتراضية — Smart School Clinic OS</title>
-
-  <link rel="stylesheet" href="assets/css/app.css"/>
-
-  <script src="js/bus.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/visit-session.js"></script>
-
-  <style>
-    .vidGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    video{width:100%;border-radius:16px;border:1px solid rgba(255,255,255,.12);background:#000}
-    .bar{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>غرفة الزيارة الافتراضية</title>
+  <link rel="stylesheet" href="app.css" />
 </head>
 
-<body>
-<header class="topbar">
-  <div class="brand">
-    <div class="logo">🎥</div>
-    <div class="brandText">
-      <div class="name">الزيارة الافتراضية</div>
-      <div class="tagline">Room • Doctor/Student/Parent Guest</div>
-    </div>
-  </div>
-  <div class="topActions">
-    <span class="pill" id="roleBadge">—</span>
-    <button class="btn ghost" id="btnBack">⬅️ رجوع</button>
-  </div>
-</header>
-
-<main class="container">
-
-  <section class="panel">
-    <div class="bar">
-      <div>
-        <b>Room:</b> <span id="roomTxt">—</span>
-        <div class="muted small" id="hint">—</div>
-      </div>
-
-      <div class="row">
-        <button class="btn ghost" id="btnInviteParent">👨‍👩‍👧 دعوة ولي الأمر</button>
-        <button class="btn ghost" id="btnToggleCam">📷 كاميرا</button>
-        <button class="btn ghost" id="btnToggleMic">🎙️ مايك</button>
+<body data-page="visit">
+  <header class="topbar">
+    <div class="topbar__left">
+      <a class="btn ghost" href="index.html">⟵ الرئيسية</a>
+      <div class="brand mini">
+        <div class="brand__logo">🎥</div>
+        <div class="brand__txt">
+          <div class="brand__name">غرفة الزيارة الافتراضية</div>
+          <div class="brand__sub">طالب • طبيب • ولي أمر</div>
+        </div>
       </div>
     </div>
 
-    <div class="sep"></div>
-
-    <div class="vidGrid">
-      <div>
-        <div class="muted small">📹 أنت</div>
-        <video id="localVid" autoplay playsinline muted></video>
+    <div class="topbar__right">
+      <div class="pill">
+        الدور: <b data-user-role>—</b>
       </div>
-      <div>
-        <div class="muted small">🧑‍⚕️ الطرف الآخر (Demo)</div>
-        <video id="remoteVid" autoplay playsinline></video>
+      <button class="btn ghost" id="btnTheme">🌓</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="grid2">
+      <!-- Session -->
+      <div class="card pad">
+        <div class="card__title">🧾 حالة الجلسة</div>
+
+        <div class="kpis">
+          <div class="kpi">
+            <div class="kpi__label">الحالة</div>
+            <div class="kpi__val" id="visitState">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">الكود</div>
+            <div class="kpi__val" id="visitCode">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">المشاركون</div>
+            <div class="kpi__val" id="visitMembers">—</div>
+          </div>
+        </div>
+
+        <div class="row actions">
+          <button class="btn solid" id="btnJoinSession">🚪 دخول الجلسة</button>
+          <button class="btn ghost" id="btnEndSession">🛑 إنهاء الجلسة</button>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="card__title">📜 السجل الزمني</div>
+        <div id="visitTimeline" class="list"></div>
       </div>
-    </div>
 
-    <div class="sep"></div>
+      <!-- Chat -->
+      <div class="card pad">
+        <div class="card__title">💬 المحادثة</div>
 
-    <div class="muted small">
-      هذه نسخة Demo بدون سيرفر WebRTC كامل (لا يوجد اتصال حقيقي بين جهازين).
-      الهدف: عرض تجربة الزيارة وتوثيقها داخل النظام.
-    </div>
-  </section>
+        <div id="visitChat" class="chat"></div>
 
-  <div class="sep"></div>
+        <div class="row actions">
+          <input id="chatInput" class="input" placeholder="اكتب رسالة…" />
+          <button class="btn solid" id="btnSendChat">إرسال</button>
+        </div>
 
-  <!-- Session Panel injected by visit-session.js -->
-  <section class="panel">
-    <div class="h">
-      <h2>جلسة الزيارة</h2>
-      <div class="muted" id="vsStatus">—</div>
-    </div>
+        <div class="hr"></div>
 
-    <div class="row">
-      <span class="badge">⏱️ Timer: <b id="vsTimer">00:00</b></span>
-      <button class="btn ghost" id="btnExportJSON">💾 تصدير JSON</button>
-      <button class="btn ghost" id="btnSaveNotes">💾 حفظ الملاحظات</button>
-      <button class="btn" id="btnEndVisit">✅ إنهاء الزيارة + تقرير</button>
-    </div>
+        <div class="row actions">
+          <a class="btn ghost" href="doctor.html">🩺 الطبيب</a>
+          <a class="btn ghost" href="student.html">🎒 الطالب</a>
+          <a class="btn ghost" href="parent.html">👨‍👩‍👧 ولي الأمر</a>
+        </div>
+      </div>
+    </section>
+  </main>
 
-    <div class="sep"></div>
+  <!-- Scripts -->
+  <script src="bus.js"></script>
+  <script src="auth.js"></script>
+  <script src="app-init.js"></script>
+  <script src="visit-session.js"></script>
+  <script src="app.js"></script>
+  <script src="actions.js"></script>
 
-    <div class="h">
-      <h2>ملاحظات الطبيب</h2>
-      <div class="muted">تُحفظ داخل الحالة</div>
-    </div>
+  <script>
+    const $ = (s) => document.querySelector(s);
 
-    <textarea id="vsNotes" rows="5" class="input"
-      style="width:100%; border-radius:14px; padding:12px"
-      placeholder="اكتب ملاحظاتك..."></textarea>
-  </section>
-
-</main>
-
-<script>
-(function(){
-  const $ = (s)=>document.querySelector(s);
-  const qs = new URLSearchParams(location.search);
-  const room = qs.get("room") || "ROOM-DEMO";
-  const role = (qs.get("role") || localStorage.getItem("SC_ROLE") || "student").toLowerCase();
-  const isGuest = role === "parent";
-  const isDoctor = role === "doctor";
-
-  $("#roomTxt").textContent = room;
-  $("#roleBadge").textContent =
-    role==="doctor" ? "👨‍⚕️ Doctor" :
-    role==="parent" ? "👨‍👩‍👧 Parent (Guest)" :
-    "🎓 Student";
-
-  $("#hint").textContent = isGuest
-    ? "Guest Mode: عرض فقط (بدون كاميرا/مايك افتراضيًا)"
-    : "يمكن تشغيل الكاميرا والمايك للعرض";
-
-  $("#btnBack").addEventListener("click", ()=>{
-    location.href = role==="doctor" ? "doctor.html" : role==="parent" ? "parent.html" : "student.html";
-  });
-
-  // Invite parent (open same room)
-  $("#btnInviteParent").addEventListener("click", ()=>{
-    const url = `visit.html?role=parent&room=${encodeURIComponent(room)}&autojoin=1`;
-    window.open(url, "_blank");
-  });
-  if(!isDoctor) $("#btnInviteParent").style.display = "none";
-
-  // Media
-  const localVid = $("#localVid");
-  const remoteVid = $("#remoteVid");
-  let stream = null;
-  let camOn = false;
-  let micOn = false;
-
-  async function startMedia(){
-    try{
-      const mediaOpts = isGuest ? { video:false, audio:false } : { video:true, audio:true };
-      stream = await navigator.mediaDevices.getUserMedia(mediaOpts);
-      localVid.srcObject = stream;
-
-      camOn = !!mediaOpts.video;
-      micOn = !!mediaOpts.audio;
-
-      // Demo: remote shows same stream if exists
-      remoteVid.srcObject = stream;
-
-      updateBtns();
-    }catch(e){
-      $("#hint").textContent = "لم يتم منح صلاحيات كاميرا/مايك (أو الجهاز لا يدعم).";
-      updateBtns();
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;").replaceAll("<","&lt;")
+        .replaceAll(">","&gt;").replaceAll('"',"&quot;")
+        .replaceAll("'","&#39;");
     }
-  }
 
-  function updateBtns(){
-    $("#btnToggleCam").textContent = camOn ? "📷 إيقاف الكاميرا" : "📷 تشغيل الكاميرا";
-    $("#btnToggleMic").textContent = micOn ? "🎙️ كتم المايك" : "🎙️ تشغيل المايك";
-    if(isGuest){
-      $("#btnToggleCam").style.display = "none";
-      $("#btnToggleMic").style.display = "none";
+    function renderVisit(){
+      const visits = window.app?.getVisits?.() || [];
+      const st = window.app?.getState?.();
+      const v = visits.find(x => x.id === st?.lastVisitId);
+
+      if(!v){
+        $("#visitState").textContent = "لا توجد جلسة";
+        return;
+      }
+
+      $("#visitState").textContent = v.session?.state || v.status || "—";
+      $("#visitCode").textContent = v.joinCode || "—";
+
+      const p = v.session?.participants || {};
+      $("#visitMembers").textContent =
+        `${p.student ? "🎒" : ""} ${p.doctor ? "🩺" : ""} ${p.parent ? "👨‍👩‍👧" : ""}` || "—";
+
+      const tl = $("#visitTimeline");
+      if(tl){
+        const items = (v.timeline || []).slice(0,8);
+        tl.innerHTML = items.length
+          ? items.map(x => `<div class="rowCard"><div class="rowMeta">${escapeHtml(x.txt)} • ${new Date(x.at).toLocaleString("ar-SA")}</div></div>`).join("")
+          : `<div class="muted">لا يوجد سجل بعد.</div>`;
+      }
+
+      const chat = $("#visitChat");
+      if(chat){
+        const msgs = v.chat || [];
+        chat.innerHTML = msgs.map(m => `
+          <div class="chatMsg ${m.who}">
+            <div class="chatWho">${escapeHtml(m.who)}</div>
+            <div class="chatTxt">${escapeHtml(m.msg)}</div>
+          </div>
+        `).join("");
+        chat.scrollTop = chat.scrollHeight;
+      }
     }
-  }
 
-  function toggleTrack(kind, on){
-    if(!stream) return;
-    const tracks = kind==="video" ? stream.getVideoTracks() : stream.getAudioTracks();
-    tracks.forEach(t=>t.enabled = on);
-  }
+    document.addEventListener("DOMContentLoaded", () => {
+      // theme
+      $("#btnTheme")?.addEventListener("click", () => {
+        const html = document.documentElement;
+        html.setAttribute("data-theme",
+          html.getAttribute("data-theme") === "light" ? "dark" : "light"
+        );
+      });
 
-  $("#btnToggleCam").addEventListener("click", ()=>{
-    camOn = !camOn;
-    toggleTrack("video", camOn);
-    updateBtns();
-  });
+      const role = window.Auth?.getRole?.() || "student";
 
-  $("#btnToggleMic").addEventListener("click", ()=>{
-    micOn = !micOn;
-    toggleTrack("audio", micOn);
-    updateBtns();
-  });
+      $("#btnJoinSession")?.addEventListener("click", () => {
+        const visits = window.app?.getVisits?.() || [];
+        const st = window.app?.getState?.();
+        const v = visits.find(x => x.id === st?.lastVisitId);
+        if(!v) return alert("لا توجد جلسة");
 
-  // Notes editing only doctor
-  setTimeout(()=>{
-    const notes = $("#vsNotes");
-    if(notes && !isDoctor){
-      notes.setAttribute("readonly","readonly");
-      notes.style.opacity = "0.9";
-    }
-    const saveBtn = $("#btnSaveNotes");
-    if(saveBtn && !isDoctor) saveBtn.style.display = "none";
-  }, 250);
+        window.VisitSession.start(v, role);
+        renderVisit();
+      });
 
-  // Start session (BUS integration)
-  window.SCVISIT && window.SCVISIT.mount();
+      $("#btnEndSession")?.addEventListener("click", () => {
+        const visits = window.app?.getVisits?.() || [];
+        const st = window.app?.getState?.();
+        const v = visits.find(x => x.id === st?.lastVisitId);
+        if(!v) return;
 
-  // Auto media
-  startMedia();
-})();
-</script>
+        window.VisitSession.end(v.id, role, "انتهت الجلسة");
+        renderVisit();
+      });
+
+      $("#btnSendChat")?.addEventListener("click", () => {
+        const msg = $("#chatInput").value.trim();
+        if(!msg) return;
+        const visits = window.app?.getVisits?.() || [];
+        const st = window.app?.getState?.();
+        const v = visits.find(x => x.id === st?.lastVisitId);
+        if(!v) return;
+
+        window.VisitSession.sendMessage(v.id, role, msg);
+        $("#chatInput").value = "";
+        renderVisit();
+      });
+
+      renderVisit();
+      window.bus?.on?.("visit:update", renderVisit);
+    });
+  </script>
 </body>
 </html>
