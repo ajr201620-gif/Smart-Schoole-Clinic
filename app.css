@@ -1,0 +1,207 @@
+/* =========================================================
+   Smart School Clinic OS — Unified App CSS
+   RTL • Health UI • Static (GitHub Pages)
+   ========================================================= */
+
+:root{
+  --bg:#0b1020;
+  --panel:#11162a;
+  --card:#151b34;
+  --soft:#1b2246;
+  --border:rgba(255,255,255,.08);
+  --text:#e7e9f3;
+  --muted:#a9b0d6;
+
+  --primary:#4f7cff;
+  --primary-2:#6ae3ff;
+  --ok:#2dd4bf;
+  --warn:#f59e0b;
+  --danger:#ef4444;
+
+  --radius:16px;
+  --radius-sm:12px;
+  --shadow:0 20px 40px rgba(0,0,0,.35);
+}
+
+/* Reset */
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  background: radial-gradient(1200px 600px at 90% -10%, #16205a 0%, transparent 60%), var(--bg);
+  color:var(--text);
+  line-height:1.6;
+}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* Utilities */
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.sep{height:1px;background:var(--border);margin:14px 0}
+.full{width:100%}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.badge{
+  padding:6px 10px;border-radius:999px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  font-size:12px;font-weight:800
+}
+.pill{
+  padding:6px 10px;border-radius:999px;
+  background:rgba(79,124,255,.15);
+  border:1px solid rgba(79,124,255,.35);
+  font-size:12px;font-weight:800;color:#dbe5ff
+}
+.chip{
+  padding:6px 10px;border-radius:999px;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--border);
+  font-size:12px
+}
+
+/* Buttons */
+.btn{
+  cursor:pointer;
+  border-radius:14px;
+  padding:10px 14px;
+  border:1px solid rgba(79,124,255,.45);
+  background:linear-gradient(180deg, #5b85ff, #4169e1);
+  color:#fff;font-weight:900;
+  box-shadow:0 10px 25px rgba(79,124,255,.25);
+}
+.btn:hover{filter:brightness(1.05)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--border);
+  color:var(--text);
+  box-shadow:none
+}
+
+/* Topbar */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  display:flex;justify-content:space-between;gap:12px;
+  padding:14px 18px;
+  background:rgba(11,16,32,.85);
+  backdrop-filter: blur(10px);
+  border-bottom:1px solid var(--border)
+}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{
+  width:42px;height:42px;border-radius:12px;
+  background:linear-gradient(135deg, #4f7cff, #6ae3ff);
+  display:grid;place-items:center;
+  color:#0b1020;font-weight:900
+}
+.brandText .name{font-weight:900}
+.brandText .tagline{font-size:12px;color:var(--muted)}
+.topActions{display:flex;gap:8px;align-items:center}
+
+/* Layout */
+.container{max-width:1200px;margin:0 auto;padding:18px}
+.footer{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:12px;margin:20px 0 10px
+}
+
+/* Hero */
+.hero{
+  display:grid;grid-template-columns:1.3fr .7fr;gap:16px;
+  margin-top:10px
+}
+.heroText h1{margin:0 0 6px;font-size:28px}
+.heroBadges{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.quickRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+
+.heroCard{
+  background:linear-gradient(180deg, var(--panel), var(--card));
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:14px;box-shadow:var(--shadow)
+}
+.cardTitle{font-weight:900;margin-bottom:6px}
+.kpiGrid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px
+}
+.kpi{
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--border);
+  border-radius:14px;padding:10px
+}
+.kpi .k{font-size:12px;color:var(--muted)}
+.kpi .v{font-size:22px;font-weight:900}
+
+/* Grid */
+.grid4{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:14px;margin-top:16px
+}
+
+/* Role Cards */
+.roleCard{
+  background:linear-gradient(180deg, var(--panel), var(--card));
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:14px;box-shadow:var(--shadow);
+  cursor:pointer;transition:transform .15s ease, box-shadow .15s ease
+}
+.roleCard:hover{
+  transform:translateY(-2px);
+  box-shadow:0 30px 60px rgba(0,0,0,.45)
+}
+.roleTop{display:flex;gap:10px;align-items:flex-start}
+.roleIcon{font-size:28px}
+.roleList{padding-inline-start:18px;margin:8px 0 12px}
+.roleList li{font-size:13px;color:var(--muted)}
+
+/* Panels */
+.panel{
+  background:linear-gradient(180deg, var(--panel), var(--card));
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:14px;box-shadow:var(--shadow)
+}
+.h h2{margin:0}
+.h .muted{margin-top:2px}
+
+/* Inputs */
+.input, textarea{
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--border);
+  border-radius:14px;
+  color:var(--text);
+  padding:10px 12px;
+  outline:none
+}
+textarea{resize:vertical}
+
+/* Lists */
+.sc-nav-item{
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;margin-bottom:10px
+}
+.sc-chip{
+  padding:6px 10px;border-radius:999px;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--border);
+  font-size:12px
+}
+
+/* Status colors */
+.ok{color:var(--ok)}
+.warn{color:var(--warn)}
+.danger{color:var(--danger)}
+
+/* Responsive */
+@media (max-width:1100px){
+  .grid4{grid-template-columns:repeat(2,1fr)}
+  .hero{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  .grid4{grid-template-columns:1fr}
+  .topbar{flex-direction:column;align-items:flex-start}
+}
