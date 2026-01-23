@@ -9,6 +9,7 @@
   <script src="bus.js"></script>
   <script src="sensor-sim.js"></script>
   <script src="ai-triage.js"></script>
+  <script src="doctor-copilot.js"></script>
   <script src="rbac.js"></script>
 </head>
 <body>
@@ -108,6 +109,23 @@
           placeholder="الخطة: راحة/متابعة/إحالة..."></textarea>
 
         <div class="sep"></div>
+        <div class="sep"></div>
+
+<div class="panel" style="padding:12px; border-radius:14px;">
+  <div class="h">
+    <h2>🤖 Doctor AI Copilot</h2>
+    <div class="muted">ملخص + DDx + Red Flags + أسئلة + خطة + تقرير</div>
+  </div>
+
+  <div class="row">
+    <button class="btn" id="btnCopilot">⚡ توليد Copilot</button>
+    <button class="btn ghost" id="btnCopyReport">📋 نسخ التقرير</button>
+  </div>
+
+  <div class="sep"></div>
+
+  <pre id="cpOut" style="white-space:pre-wrap; margin:0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px; opacity:.95;"></pre>
+</div>
 
         <div class="row">
           <button class="btn" id="btnApprove">✅ اعتماد الحالة</button>
