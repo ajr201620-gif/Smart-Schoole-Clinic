@@ -1,70 +1,95 @@
-/* ===========================================================
-   AI TRIAGE (client-side demo)
-   - input: complaint + vitals
-   - output: risk, priority, recommendation, flags
-   =========================================================== */
+/* =========================================================
+   Smart School Clinic OS — AI Triage (Offline Demo)
+   - Calculates Risk (0–100)
+   - Determines Priority: LOW | MED | HIGH | CRIT
+   - Generates Recommendation
+   ========================================================= */
+
 (function(){
-  const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
-  const has=(t,arr)=>arr.some(w=>t.includes(w));
+  const clamp = (n, a, b)=> Math.max(a, Math.min(b, n));
+  const low = (s)=> (s||"").toLowerCase();
 
-  function triage({complaint="", vitals={}}){
-    const txt = (complaint||"").toLowerCase();
+  function scoreVitals(v){
+    let s = 0;
 
-    const temp = Number(vitals.temp ?? 0);
-    const hr   = Number(vitals.hr ?? 0);
-    const spo2 = Number(vitals.spo2 ?? 0);
-    const bpS  = Number((vitals.bp||"").split("/")[0]||0);
-    const bpD  = Number((vitals.bp||"").split("/")[1]||0);
+    if(v.temp >= 39) s += 25;
+    else if(v.temp >= 38) s += 15;
+    else if(v.temp >= 37.5) s += 8;
 
-    let risk = 10;
-    const flags = [];
+    if(v.hr >= 130) s += 25;
+    else if(v.hr >= 110) s += 15;
+    else if(v.hr >= 100) s += 8;
 
-    // symptom keywords
-    const resp = ["ضيق","تنفس","كحة","كتمة","صفير","ربو","اختناق","صدر"];
-    const fever= ["حمى","حرارة","سخونة","قشعريرة"];
-    const gi   = ["مغص","اسهال","إسهال","قيء","استفراغ","غثيان"];
-    const neuro= ["دوخة","صداع","اغماء","إغماء","تشنج","تشوش","نوبة"];
-    const pain = ["ألم","وجع","جرح","نزيف","كسر","التواء"];
+    if(v.spo2 <= 90) s += 30;
+    else if(v.spo2 <= 93) s += 20;
+    else if(v.spo2 <= 95) s += 10;
 
-    if (has(txt, resp))  { risk += 18; flags.push("Resp"); }
-    if (has(txt, fever)) { risk += 10; flags.push("Fever"); }
-    if (has(txt, gi))    { risk += 8;  flags.push("GI"); }
-    if (has(txt, neuro)) { risk += 18; flags.push("Neuro"); }
-    if (has(txt, pain))  { risk += 6;  flags.push("Pain"); }
+    if(v.bp){
+      const [sys] = v.bp.split("/").map(Number);
+      if(sys >= 160 || sys <= 90) s += 10;
+    }
 
-    // vitals scoring (simple but believable)
-    if (temp >= 39.5) risk += 30;
-    else if (temp >= 38.5) risk += 22;
-    else if (temp >= 37.6) risk += 10;
+    return s;
+  }
 
-    if (hr >= 145) risk += 28;
-    else if (hr >= 125) risk += 18;
-    else if (hr >= 110) risk += 10;
+  function scoreComplaint(text){
+    const t = low(text);
+    let s = 0;
 
-    if (spo2 > 0 && spo2 <= 90) risk += 45;
-    else if (spo2 > 0 && spo2 <= 93) risk += 32;
-    else if (spo2 > 0 && spo2 <= 95) risk += 18;
+    if(t.includes("ألم صدر") || t.includes("تنفس") || t.includes("ضيق")) s += 30;
+    if(t.includes("إغماء") || t.includes("تشنج")) s += 30;
+    if(t.includes("صداع شديد")) s += 20;
+    if(t.includes("قيء") || t.includes("استفراغ") || t.includes("إسهال")) s += 10;
+    if(t.includes("دوخة") || t.includes("تعب")) s += 5;
 
-    if (bpS && (bpS <= 90 || bpD <= 55)) risk += 15;
-    if (bpS && (bpS >= 145 || bpD >= 95)) risk += 10;
+    return s;
+  }
 
-    risk = clamp(Math.round(risk), 5, 100);
+  function priorityFrom(risk){
+    if(risk >= 80) return "CRIT";
+    if(risk >= 60) return "HIGH";
+    if(risk >= 35) return "MED";
+    return "LOW";
+  }
 
-    let priority = "LOW";
-    if (risk >= 80) priority = "CRIT";
-    else if (risk >= 60) priority = "HIGH";
-    else if (risk >= 35) priority = "MED";
+  function recommendation(priority){
+    switch(priority){
+      case "CRIT":
+        return "تدخل عاجل + إشعار فوري للطبيب وولي الأمر";
+      case "HIGH":
+        return "زيارة افتراضية سريعة + قراءة ثانية";
+      case "MED":
+        return "متابعة وراحة + تقييم طبي";
+      default:
+        return "إرشاد صحي وراحة";
+    }
+  }
 
-    const recommendation =
-      priority==="CRIT" ? "طارئ: تواصل فوري + احتمالية إحالة" :
-      priority==="HIGH" ? "عالي: زيارة افتراضية للطبيب + إشعار ولي الأمر" :
-      priority==="MED" ? "متوسط: متابعة عيادة مدرسية + إعادة قراءة عند الحاجة" :
-      "منخفض: إرشاد صحي + راحة + متابعة ذاتية";
+  function triage(vitals, complaint){
+    const vScore = scoreVitals(vitals);
+    const cScore = scoreComplaint(complaint);
+    const risk = clamp(vScore + cScore, 0, 100);
+    const priority = priorityFrom(risk);
 
-    const requireParentConsent = (priority==="HIGH" || priority==="CRIT");
-    const suggestReRead = (priority==="MED" || priority==="HIGH");
+    return {
+      risk,
+      priority,
+      recommendation: recommendation(priority),
+      flags: buildFlags(vitals, complaint)
+    };
+  }
 
-    return { risk, priority, recommendation, flags, requireParentConsent, suggestReRead };
+  function buildFlags(v, text){
+    const f = [];
+    const t = low(text);
+
+    if(v.temp >= 38.5) f.push("Fever");
+    if(v.hr >= 120) f.push("Tachycardia");
+    if(v.spo2 <= 93) f.push("LowSpO2");
+    if(t.includes("تنفس") || t.includes("صدر")) f.push("Respiratory");
+    if(t.includes("إغماء") || t.includes("تشنج")) f.push("Neuro");
+
+    return f;
   }
 
   window.SCAI = { triage };
