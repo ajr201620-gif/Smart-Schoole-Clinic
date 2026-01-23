@@ -1,95 +1,137 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="dark">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>بوابة الطالب — Smart School Clinic OS</title>
-  <meta name="theme-color" content="#0b1020"/>
-  <link rel="stylesheet" href="app.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>بوابة الطالب — العيادة المدرسية الذكية</title>
+  <link rel="stylesheet" href="app.css" />
+</head>
 
+<body data-page="student">
+  <header class="topbar">
+    <div class="topbar__left">
+      <a class="btn ghost" href="index.html">⟵ الرئيسية</a>
+      <div class="brand mini">
+        <div class="brand__logo">🎒</div>
+        <div class="brand__txt">
+          <div class="brand__name">بوابة الطالب</div>
+          <div class="brand__sub">حساسات افتراضية • فرز AI • زيارة افتراضية</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="topbar__right">
+      <div class="pill">مرحبًا: <b data-user-name>طالب</b></div>
+      <button class="btn ghost" id="btnTheme">🌓</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="grid2">
+      <!-- Left: Complaint + Actions -->
+      <div class="card pad">
+        <div class="card__title">📝 الشكوى</div>
+        <div class="muted">اكتب شكواك، ثم ولّد القياسات وشغّل الفرز الذكي.</div>
+
+        <textarea id="complaint" class="input area" placeholder="مثال: عندي حرارة وكحة وضيق بسيط..." rows="5"></textarea>
+
+        <div class="row actions">
+          <button class="btn solid" id="btnSimulateSensors" data-action="student:generateSensors">📟 توليد محاكاة الحساسات</button>
+          <button class="btn solid" id="btnAiTriage" data-action="student:aiTriage">🤖 فرز AI ذكي</button>
+        </div>
+
+        <div class="row actions">
+          <button class="btn ghost" id="btnCreateCase" data-action="student:createCase">🧾 إنشاء الحالة</button>
+          <button class="btn ghost" id="btnRequestVisit" data-action="student:requestVisit">🎥 طلب عيادة افتراضية</button>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="card__title">📌 نصيحة</div>
+        <div class="muted">
+          إذا ظهرت “P1” أو “Risk High” اطلب الزيارة فورًا (ولا تسوي نفسك قوي 😄).
+        </div>
+      </div>
+
+      <!-- Right: KPIs -->
+      <div class="card pad">
+        <div class="card__title">📊 قراءات الحساسات</div>
+        <div class="kpis">
+          <div class="kpi">
+            <div class="kpi__label">HR</div>
+            <div class="kpi__val" id="kpiHR">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">Temp</div>
+            <div class="kpi__val" id="kpiTemp">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">SpO2</div>
+            <div class="kpi__val" id="kpiSpO2">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">BP</div>
+            <div class="kpi__val" id="kpiBP">—</div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="card__title">🧠 نتيجة الفرز الذكي</div>
+        <div class="kpis">
+          <div class="kpi">
+            <div class="kpi__label">Risk</div>
+            <div class="kpi__val" id="kpiRisk">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">Priority</div>
+            <div class="kpi__val" id="kpiPriority">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">Status</div>
+            <div class="kpi__val" id="kpiStatus">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">Decision</div>
+            <div class="kpi__val" id="kpiDecision">—</div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="card__title">📣 توصية النظام</div>
+        <pre class="pre" id="aiRecommendation">—</pre>
+
+        <div class="row actions">
+          <a class="btn ghost" href="doctor.html">🩺 فتح بوابة الطبيب</a>
+          <a class="btn ghost" href="parent.html">👨‍👩‍👧 فتح ولي الأمر</a>
+          <a class="btn ghost" href="admin.html">🏫 فتح الإدارة</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Scripts -->
   <script src="bus.js"></script>
   <script src="auth.js"></script>
-  <script src="triage-ai.js"></script>
+  <script src="app-init.js"></script>
   <script src="sensor-sim.js"></script>
+  <script src="triage-ai.js"></script>
+  <script src="doctor-copilot.js"></script>
   <script src="visit-session.js"></script>
+  <script src="app.js"></script>
   <script src="actions.js"></script>
-</head>
-<body>
 
-<header class="topbar">
-  <div class="inner">
-    <div class="brand">
-      <div class="logo">SC</div>
-      <div class="brandText">
-        <div class="name">بوابة الطالب</div>
-        <div class="tagline">شكوى + محاكاة حساسات + فرز AI + طلب زيارة افتراضية</div>
-      </div>
-    </div>
-    <div class="pills">
-      <a class="btn ghost" href="index.html">⬅️ رجوع</a>
-      <span class="pill" id="roleBadge">Role: student</span>
-      <span class="pill" id="permBadge">Local Demo</span>
-    </div>
-  </div>
-</header>
-
-<div class="container">
-  <div class="grid">
-
-    <div class="card">
-      <div class="cardHeader">
-        <h2 class="sectionTitle"><span class="emoji">📝</span> الشكوى</h2>
-        <span class="small">اكتب شكواك ثم ولّد/حدّث الحساسات</span>
-      </div>
-      <div class="cardBody">
-        <textarea id="complaint" class="field" placeholder="مثال: صداع + دوخة + ألم في البطن ..."></textarea>
-
-        <hr>
-
-        <div class="row">
-          <button class="btn" data-action="student_sim_normal">🟢 محاكاة طبيعية</button>
-          <button class="btn" data-action="student_sim_fever">🌡️ محاكاة حمّى</button>
-          <button class="btn" data-action="student_sim_asthma">💨 محاكاة ضيق تنفّس</button>
-          <button class="btn primary" data-action="student_sim_mixed">🎲 توليد قراءات</button>
-        </div>
-
-        <div style="margin-top:12px" class="kpis">
-          <div class="kpi"><div class="label">HR</div><div class="value" id="v_hr">—</div><div class="hint">نبض</div></div>
-          <div class="kpi"><div class="label">SpO₂</div><div class="value" id="v_spo2">—</div><div class="hint">أكسجين</div></div>
-          <div class="kpi"><div class="label">Temp</div><div class="value" id="v_temp">—</div><div class="hint">حرارة</div></div>
-          <div class="kpi"><div class="label">BP</div><div class="value" id="v_bp">—</div><div class="hint">ضغط</div></div>
-        </div>
-      </div>
-
-      <div class="cardFooter">
-        <button class="btn good" data-action="student_create_case">✅ إنشاء الحالة + فرز AI</button>
-        <button class="btn primary" data-action="student_request_visit">🎥 طلب زيارة افتراضية للطبيب</button>
-        <a class="btn" href="report.html">📄 تقرير الحالة</a>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="cardHeader">
-        <h2 class="sectionTitle"><span class="emoji">🧠</span> نتيجة الفرز الذكي (AI)</h2>
-      </div>
-      <div class="cardBody">
-        <div class="kpis">
-          <div class="kpi"><div class="label">Risk</div><div class="value" id="out_risk">—</div><div class="hint">0 - 100</div></div>
-          <div class="kpi"><div class="label">Priority</div><div class="value" id="out_priority">—</div><div class="hint">اعتيادي/عاجل/حرج</div></div>
-          <div class="kpi" style="grid-column: span 2"><div class="label">Decision</div><div class="value" id="out_decision">—</div><div class="hint">قرار مقترح</div></div>
-        </div>
-        <hr>
-        <div class="small">Recommendation</div>
-        <div class="card" style="padding:12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10)">
-          <div id="out_rec" class="muted">—</div>
-        </div>
-        <hr>
-        <div class="small">تلميح: زر “إنشاء الحالة” هو اللي يخلي كل شيء “فعلي” ويطلع للطبيب والإدارة.</div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
+  <script>
+    // Theme toggle (simple)
+    document.addEventListener("DOMContentLoaded", () => {
+      const btn = document.getElementById("btnTheme");
+      btn?.addEventListener("click", () => {
+        const html = document.documentElement;
+        const isDark = html.getAttribute("data-theme") !== "light";
+        html.setAttribute("data-theme", isDark ? "light" : "dark");
+      });
+    });
+  </script>
 </body>
 </html>
