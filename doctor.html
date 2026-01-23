@@ -5,15 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>بوابة الطبيب — Smart School Clinic OS</title>
 
-  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="app.css" />
 
-  <script src="js/bus.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/ai-triage.js"></script>
-  <script src="js/sensor-sim.js"></script>
-  <script src="js/doctor-copilot.js"></script>
-  <script src="js/protocols.js"></script>
-  <script src="actions.js"></script>
+<script src="bus.js"></script>
+<script src="auth.js"></script>
+<script src="triage-ai.js"></script>
+<script src="sensor-sim.js"></script>
+<script src="visit-session.js"></script>
+<script src="doctor-copilot.js"></script>
+<script src="actions.js"></script>
+<script src="app-init.js"></script>
 </head>
 
 <body>
@@ -29,6 +30,119 @@
     <button class="btn ghost" onclick="location.href='index.html'">⬅️ رجوع</button>
   </div>
 </header>
+  <main class="page doctor-page">
+
+  <!-- 🧾 قائمة الطلبات القادمة من الطلاب -->
+  <section class="card">
+    <div class="row between">
+      <h3>📥 طلبات الزيارة الافتراضية</h3>
+      <button class="btn ghost" data-action="doctor.refresh">🔄 تحديث</button>
+    </div>
+
+    <div id="doctorQueue" class="list">
+      <!-- يتم تعبئتها تلقائياً -->
+      <div class="muted">لا توجد طلبات حالياً.</div>
+    </div>
+  </section>
+
+  <!-- 🧠 ملخص الحالة المختارة -->
+  <section class="card">
+    <h3>🩺 تفاصيل الحالة (الحالة المختارة)</h3>
+
+    <div class="grid-2">
+      <div>
+        <div class="label">الطالب</div>
+        <div class="value" id="dStudentName">—</div>
+      </div>
+      <div>
+        <div class="label">وقت الطلب</div>
+        <div class="value" id="dTime">—</div>
+      </div>
+    </div>
+
+    <div class="label" style="margin-top:10px;">الشكوى</div>
+    <div class="box" id="dComplaint">—</div>
+
+    <div class="label" style="margin-top:10px;">قراءات الحساسات</div>
+    <div class="vitals-grid">
+      <div>HR: <span id="dHR">—</span></div>
+      <div>SpO₂: <span id="dSpO2">—</span></div>
+      <div>Temp: <span id="dTemp">—</span></div>
+      <div>BP: <span id="dBP">—</span></div>
+    </div>
+
+    <div class="row" style="margin-top:12px; gap:10px; flex-wrap:wrap;">
+      <button class="btn primary" data-action="doctor.requestSecondReading">
+        📟 طلب قراءة ثانية
+      </button>
+
+      <button class="btn ghost" data-action="doctor.runAiAssist">
+        🤖 تشغيل مساعد الطبيب AI
+      </button>
+    </div>
+  </section>
+
+  <!-- 🤖 مساعد الطبيب AI -->
+  <section class="card">
+    <h3>🤖 مساعد الطبيب AI</h3>
+
+    <div class="grid-3">
+      <div>
+        <div class="label">Risk</div>
+        <div class="value" id="dRisk">—</div>
+      </div>
+      <div>
+        <div class="label">Priority</div>
+        <div class="value" id="dPriority">—</div>
+      </div>
+      <div>
+        <div class="label">قرار مقترح</div>
+        <div class="value" id="dDecision">—</div>
+      </div>
+    </div>
+
+    <div class="label" style="margin-top:10px;">توصية</div>
+    <div class="box" id="dRecommendation">—</div>
+
+    <div class="row" style="margin-top:12px; gap:10px; flex-wrap:wrap;">
+      <button class="btn success" data-action="doctor.acceptVisit">✅ قبول الزيارة</button>
+      <button class="btn danger" data-action="doctor.rejectVisit">⛔ رفض</button>
+      <button class="btn warn" data-action="doctor.requestParentJoin">👨‍👩‍👦 طلب انضمام ولي الأمر</button>
+      <button class="btn ghost" data-action="doctor.escalateToAdmin">🏫 إشعار الإدارة</button>
+    </div>
+  </section>
+
+  <!-- 📝 التشخيص والإحالة والتقارير -->
+  <section class="card">
+    <h3>📝 التشخيص والإحالة والتقرير</h3>
+
+    <div class="grid-2">
+      <div>
+        <div class="label">تشخيص الطبيب</div>
+        <input id="dDx" class="input" placeholder="مثال: التهاب لوز / صداع إجهاد..." />
+      </div>
+      <div>
+        <div class="label">الخطة</div>
+        <input id="dPlan" class="input" placeholder="مثال: راحة + سوائل + متابعة 24 ساعة" />
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:12px; gap:10px; flex-wrap:wrap;">
+      <button class="btn primary" data-action="doctor.issueSlip">
+        🧾 إصدار راحة
+      </button>
+      <button class="btn warn" data-action="doctor.createReferral">
+        🏥 إحالة
+      </button>
+      <button class="btn ghost" data-action="doctor.exportReport">
+        📄 تصدير تقرير
+      </button>
+    </div>
+
+    <div class="muted" id="dResult" style="margin-top:10px;"></div>
+  </section>
+
+</main>
 
 <main class="container">
 
