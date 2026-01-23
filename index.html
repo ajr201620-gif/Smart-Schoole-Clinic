@@ -1,136 +1,150 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-mode="dark">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>SSC V2 — العيادة المدرسية الذكية</title>
+  <title>SSC V3 — العيادة المدرسية الذكية</title>
   <link rel="stylesheet" href="./assets/ui.css"/>
 </head>
 <body>
-
-  <div class="bgGrid"></div>
   <div class="bgNoise"></div>
 
   <header class="topbar">
     <div class="brand">
       <div class="logo">🩺</div>
       <div>
-        <div class="brandTitle">العيادة المدرسية الذكية — V2</div>
-        <div class="brandSub">منصة أدوار متعددة • فرز ذكي • زيارات افتراضية • تقارير</div>
+        <div class="brandTitle">العيادة المدرسية الذكية — V3</div>
+        <div class="brandSub">واجهة أبلّية • أدوار متعددة • منتج جاهز للعرض</div>
       </div>
     </div>
 
     <div class="actions">
-      <span class="pill"><span class="dot ok"></span> جاهز للعرض</span>
-      <a class="btn ghost sm" href="../index.html">النسخة القديمة</a>
+      <span class="pill"><span class="dot ok"></span> جاهز</span>
+      <span class="pill">مرحبًا: <b data-user-name>زائر</b></span>
+      <button class="btn sm ghost" id="btnMode" title="تبديل الوضع">☀️</button>
+      <a class="btn sm ghost" href="../index.html">النسخة القديمة</a>
     </div>
   </header>
 
   <main class="shell">
 
     <section class="hero">
-      <section class="heroMain">
-        <h1 class="hTitle">منصة صحية مدرسية… شكلها “وزارة” وأداؤها “منتج” 🔥</h1>
-        <p class="hLead">
-          اختر دورك وابدأ. V2 مبنية بتنظيم نظيف عشان ما نتوه في تكرار سكربتات ولا تضارب ستايلات.
-        </p>
+      <div class="heroInner">
+        <section>
+          <h1 class="hTitle">تصميم هادئ… فخم… “يبان حكومي”</h1>
+          <p class="hLead">
+            اختر دورك وابدأ مباشرة. V3 مصممة بعناية: مساحة بيضاء محسوبة، طباعة قوية، وحركة خفيفة
+            تعطيك إحساس “منتج” مو “قالب”.
+          </p>
 
-        <div class="hRow">
-          <span class="pill"><span class="dot ok"></span> بيانات: Demo الآن • Firestore لاحقًا</span>
-          <span class="pill">مرحبًا: <b data-user-name>زائر</b></span>
-        </div>
+          <div class="hActions">
+            <button class="btn primary" data-go-role="student">ابدأ كطالب</button>
+            <button class="btn" data-go-role="doctor">ابدأ كطبيب</button>
+            <button class="btn ghost" data-go-role="admin">الإدارة</button>
+            <button class="btn ghost" data-go-role="parent">ولي الأمر</button>
+          </div>
 
-        <hr class="sep"/>
+          <div style="margin-top:16px" class="panel">
+            <div class="panelTitle">اسم العرض</div>
+            <div class="muted" style="margin-top:6px; line-height:1.8">
+              هذا الاسم يظهر أعلى الصفحات (للديـمو). تقدر تغيّره بأي وقت.
+            </div>
 
-        <div class="hRow" style="align-items:flex-end">
-          <div style="min-width:280px; flex:1">
-            <div class="muted2" style="font-weight:900; margin-bottom:8px">اسم المستخدم للعرض</div>
-            <div style="display:flex; gap:10px; flex-wrap:wrap">
-              <input id="nameInput" class="btn" style="flex:1; min-width:200px; cursor:text" placeholder="مثال: عبدالعزيز"/>
+            <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap">
+              <input id="nameInput" class="input" placeholder="مثال: عبدالعزيز"/>
               <button id="btnSaveName" class="btn primary">حفظ</button>
             </div>
           </div>
+        </section>
 
-          <div style="display:flex; gap:10px; flex-wrap:wrap">
-            <button class="btn primary" data-go-role="student">ابدأ كطالب</button>
-            <button class="btn" data-go-role="doctor">ابدأ كطبيب</button>
+        <aside class="panel">
+          <div class="panelTitle">مؤشرات سريعة</div>
+          <div class="muted" style="margin-top:6px; line-height:1.8">
+            (Demo الآن) — وبنربطها بـ Firestore بعد ما نثبت الصفحات.
           </div>
-        </div>
-      </section>
 
-      <aside class="heroSide">
-        <div style="font-weight:950; font-size:16px">لوحة مؤشرات (Demo)</div>
-        <div class="muted" style="margin-top:6px; line-height:1.8">
-          هنا نعرض KPIs سريعة (وفي V2 بنربطها بفايرستور من غير ما نغير التصميم).
-        </div>
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpiT">حالات اليوم</div>
+              <div class="kpiV">—</div>
+            </div>
+            <div class="kpi">
+              <div class="kpiT">زيارات افتراضية</div>
+              <div class="kpiV">—</div>
+            </div>
+            <div class="kpi">
+              <div class="kpiT">متابعة</div>
+              <div class="kpiV">—</div>
+            </div>
+            <div class="kpi">
+              <div class="kpiT">إحالات</div>
+              <div class="kpiV">—</div>
+            </div>
+          </div>
 
-        <div style="margin-top:12px" class="kpis">
-          <div class="kpi">
-            <div class="kpiT">حالات اليوم</div>
-            <div class="kpiV">—</div>
+          <div class="muted2" style="margin-top:14px; font-weight:900">
+            💡 تلميح
           </div>
-          <div class="kpi">
-            <div class="kpiT">زيارات افتراضية</div>
-            <div class="kpiV">—</div>
+          <div class="muted" style="margin-top:6px; line-height:1.8">
+            جرّب زر 🌙/☀️… بتشوف الفرق مثل مواقع المنتجات المحترمة.
           </div>
-          <div class="kpi">
-            <div class="kpiT">متابعة</div>
-            <div class="kpiV">—</div>
-          </div>
-          <div class="kpi">
-            <div class="kpiT">إحالات</div>
-            <div class="kpiV">—</div>
-          </div>
-        </div>
-
-        <hr class="sep"/>
-
-        <div class="muted2" style="font-weight:900">اختيار الدور</div>
-        <div class="muted" style="margin-top:6px">اضغط بطاقة الدور تحت.</div>
-      </aside>
+        </aside>
+      </div>
     </section>
 
-    <section class="roleGrid">
-      <div class="roleCard" data-go-role="student">
-        <div class="roleIcon">🎒</div>
-        <div class="roleName">بوابة الطالب</div>
-        <div class="roleDesc">شكوى + قياسات + فرز ذكي + طلب زيارة افتراضية.</div>
-        <div class="roleMeta">
-          <span class="tag">Triage</span><span class="tag">Vitals</span><span class="tag">Visit</span>
+    <section class="roleGrid" aria-label="اختيار الدور">
+      <div class="role" data-go-role="student">
+        <div class="roleGlow"></div>
+        <div class="roleInner">
+          <div class="roleIcon">🎒</div>
+          <div class="roleName">بوابة الطالب</div>
+          <div class="roleDesc">شكوى + قياسات + فرز ذكي + طلب زيارة افتراضية.</div>
+          <div class="tags">
+            <span class="tag">Vitals</span><span class="tag">AI Triage</span><span class="tag">Visit</span>
+          </div>
         </div>
       </div>
 
-      <div class="roleCard" data-go-role="doctor">
-        <div class="roleIcon">🧑‍⚕️</div>
-        <div class="roleName">لوحة الطبيب</div>
-        <div class="roleDesc">استقبال الحالات + قرار + متابعة/إحالة + موافقات.</div>
-        <div class="roleMeta">
-          <span class="tag">Queue</span><span class="tag">Decision</span><span class="tag">Referral</span>
+      <div class="role" data-go-role="doctor">
+        <div class="roleGlow"></div>
+        <div class="roleInner">
+          <div class="roleIcon">🧑‍⚕️</div>
+          <div class="roleName">لوحة الطبيب</div>
+          <div class="roleDesc">قائمة حالات + قرار + متابعة/إحالة + موافقات.</div>
+          <div class="tags">
+            <span class="tag">Queue</span><span class="tag">Decision</span><span class="tag">Referral</span>
+          </div>
         </div>
       </div>
 
-      <div class="roleCard" data-go-role="admin">
-        <div class="roleIcon">🏫</div>
-        <div class="roleName">لوحة الإدارة</div>
-        <div class="roleDesc">إحصائيات المدرسة + حالات عالية الخطورة + تقارير.</div>
-        <div class="roleMeta">
-          <span class="tag">KPIs</span><span class="tag">Compliance</span><span class="tag">Reports</span>
+      <div class="role" data-go-role="admin">
+        <div class="roleGlow"></div>
+        <div class="roleInner">
+          <div class="roleIcon">🏫</div>
+          <div class="roleName">لوحة الإدارة</div>
+          <div class="roleDesc">إحصائيات + حالات عالية الخطورة + تقارير.</div>
+          <div class="tags">
+            <span class="tag">KPIs</span><span class="tag">Monitoring</span><span class="tag">Reports</span>
+          </div>
         </div>
       </div>
 
-      <div class="roleCard" data-go-role="parent">
-        <div class="roleIcon">👨‍👩‍👧‍👦</div>
-        <div class="roleName">بوابة ولي الأمر</div>
-        <div class="roleDesc">إشعارات + موافقة + متابعة خطة العلاج.</div>
-        <div class="roleMeta">
-          <span class="tag">Consent</span><span class="tag">Alerts</span><span class="tag">Follow-up</span>
+      <div class="role" data-go-role="parent">
+        <div class="roleGlow"></div>
+        <div class="roleInner">
+          <div class="roleIcon">👨‍👩‍👧‍👦</div>
+          <div class="roleName">بوابة ولي الأمر</div>
+          <div class="roleDesc">تنبيهات + موافقة/رفض + متابعة الحالة.</div>
+          <div class="tags">
+            <span class="tag">Consent</span><span class="tag">Alerts</span><span class="tag">Follow-up</span>
+          </div>
         </div>
       </div>
     </section>
 
     <div class="footer">
-      <div>SSC V2 • تصميم سينمائي احترافي • RTL</div>
-      <div class="muted2">نبدأ بالواجهات… ثم نربط Firestore بدون تخبيص.</div>
+      <div>SSC V3 • Apple-like UI • RTL</div>
+      <div>الآن: نثبت هذه الهوية… ثم ننقل نفس الروح لكل صفحة دور.</div>
     </div>
 
   </main>
