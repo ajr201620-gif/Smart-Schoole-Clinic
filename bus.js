@@ -1,224 +1,162 @@
-/* ===========================================================
-   Smart Clinic OS — BUS (Cross-role Live Flow)
-   - One shared store in localStorage
-   - Publish/Subscribe events across pages (storage event)
-   - Cases / Requests / Alerts / Consents / Audit log
-   =========================================================== */
+/* =========================================================
+   Smart School Clinic OS — BUS (LocalStorage DB)
+   Static • Free • No Backend
+   ========================================================= */
 
 (function(){
-  const BUS_KEY = "sc_bus_v1";
+  const KEY = "SC_BUS_V1";
 
-  const pad2 = (n)=>String(n).padStart(2,"0");
-  const nowTime = ()=>{
-    const d=new Date();
-    return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
-  };
-  const uid = (p)=> (p||"ID") + "-" + Math.random().toString(36).slice(2,8).toUpperCase();
-
-  const safeParse = (s, fallback)=>{ try{ return JSON.parse(s); }catch(_){ return fallback; } };
+  const empty = () => ({
+    requests: [],   // طلبات الطالب الأولية
+    cases: [],      // الحالات الطبية
+    slips: [],      // سندات الموافقة
+    alerts: [],     // تنبيهات
+    audit: []       // سجل الإجراءات
+  });
 
   function load(){
-    const raw = localStorage.getItem(BUS_KEY);
-    if(!raw){
-      const init = {
-        meta:{ createdAt: new Date().toISOString(), version:"bus-1" },
-        requests: [],    // student -> clinic
-        cases: [],       // clinic case
-        alerts: [],      // to roles
-        consents: [],    // parent approvals
-        audit: [],       // audit trail
-        story: { step: 0, lastRunAt: null }
-      };
-      localStorage.setItem(BUS_KEY, JSON.stringify(init));
-      return init;
+    try{
+      const raw = localStorage.getItem(KEY);
+      return raw ? JSON.parse(raw) : empty();
+    }catch(e){
+      return empty();
     }
-    return safeParse(raw, {requests:[],cases:[],alerts:[],consents:[],audit:[],story:{step:0}});
   }
 
   function save(bus){
-    localStorage.setItem(BUS_KEY, JSON.stringify(bus));
-    // trigger storage for other tabs/pages
-    localStorage.setItem("sc_bus_ping", String(Date.now()));
+    localStorage.setItem(KEY, JSON.stringify(bus));
   }
 
-  function audit(type, meta){
+  function reset(){
+    localStorage.removeItem(KEY);
+    save(empty());
+  }
+
+  /* ------------------ Core helpers ------------------ */
+
+  function uid(prefix){
+    return `${prefix}-${Date.now()}-${Math.floor(Math.random()*1000)}`;
+  }
+
+  function pushAlert(role, level, title, msg, meta={}){
     const bus = load();
-    bus.audit.unshift({ t: nowTime(), type, meta: meta||{} });
-    bus.audit = bus.audit.slice(0, 300);
+    bus.alerts.unshift({
+      id: uid("ALT"),
+      at: new Date().toISOString(),
+      role, level, title, msg, meta
+    });
     save(bus);
   }
 
-  function pushRequest(req){
+  function log(action, details={}, actor="system"){
     const bus = load();
-    const r = Object.assign({
+    bus.audit.unshift({
+      id: uid("AUD"),
+      at: new Date().toISOString(),
+      actor,
+      action,
+      details
+    });
+    save(bus);
+  }
+
+  /* ------------------ Student ------------------ */
+
+  function addRequest(payload){
+    const bus = load();
+    const req = {
       id: uid("REQ"),
-      t: nowTime(),
-      status: "SENT",
-    }, req||{});
-    bus.requests.unshift(r);
-    bus.requests = bus.requests.slice(0, 200);
-    audit("REQUEST_NEW", { id:r.id, symptom:r.symptom, urgency:r.urgency });
-    save(bus);
-    return r;
-  }
-
-  function createCase(fromReq, extras){
-    const bus = load();
-    const c = Object.assign({
-      id: uid("CASE"),
-      t: nowTime(),
-      fromRequest: fromReq?.id || null,
-      studentId: fromReq?.studentId || "",
-      studentName: fromReq?.studentName || "",
-      priority: "MED",
-      riskScore: 35,
-      dx: "تقييم مبدئي (Demo)",
-      decision: "observe_followup",
-      plan: "سوائل + راحة + متابعة",
-      media: { photo:null, audio:null, video:null, attachments: [] } // optional
-    }, extras||{});
-    bus.cases.unshift(c);
-    bus.cases = bus.cases.slice(0, 200);
-    audit("CASE_CREATED", { id:c.id, from: c.fromRequest, priority:c.priority, risk:c.riskScore });
-    save(bus);
-    return c;
-  }
-
-  function pushAlert(toRole, level, title, body, ref){
-    const bus = load();
-    const a = {
-      id: uid("AL"),
-      t: nowTime(),
-      to: toRole,        // "admin" | "staff" | "student" | "parent"
-      level: level||"MED",
-      title: title||"تنبيه",
-      body: body||"",
-      ref: ref||null,
-      ack: false
+      createdAt: new Date().toISOString(),
+      ...payload
     };
-    bus.alerts.unshift(a);
-    bus.alerts = bus.alerts.slice(0, 300);
-    audit("ALERT_NEW", { id:a.id, to: a.to, level:a.level, ref:a.ref });
+    bus.requests.unshift(req);
     save(bus);
-    return a;
+    log("إضافة طلب طالب", { requestId: req.id }, "student");
+    return req;
   }
 
-  function ackAlert(id){
-    const bus = load();
-    const a = bus.alerts.find(x=>x.id===id);
-    if(a){ a.ack = true; audit("ALERT_ACK", { id }); save(bus); }
-    return a;
-  }
+  /* ------------------ Doctor / Case ------------------ */
 
-  function upsertConsent(consent){
+  function createCase(fromRequest){
     const bus = load();
-    const c = Object.assign({
-      id: uid("C"),
-      t: nowTime(),
-      status: "PENDING", // APPROVED | REJECTED
-      type: "clinic_visit",
-      summary: "",
-      note: "",
-      caseId: null
-    }, consent||{});
-    const idx = bus.consents.findIndex(x=>x.id===c.id);
-    if(idx>=0) bus.consents[idx]=c; else bus.consents.unshift(c);
-    bus.consents = bus.consents.slice(0, 200);
-    audit("CONSENT_UPSERT", { id:c.id, status:c.status, caseId:c.caseId });
+    const c = {
+      id: uid("CASE"),
+      createdAt: new Date().toISOString(),
+      requestId: fromRequest.id,
+      studentName: fromRequest.studentName || "طالب (Demo)",
+      requestDesc: fromRequest.desc || "",
+      vitals: fromRequest.vitals || {},
+      ai: fromRequest.ai || {},
+      priority: fromRequest.ai?.priority || "LOW",
+      riskScore: fromRequest.ai?.risk || 0,
+      status: "OPEN"
+    };
+    bus.cases.unshift(c);
     save(bus);
+    log("إنشاء حالة", { caseId: c.id }, "doctor");
     return c;
   }
 
-  function getRole(){
-    return (localStorage.getItem("sc_role") || "").trim();
-  }
-
-  // ---- Story Mode (for judges) ----
-  function runStoryStep(){
+  function updateCase(caseId, patch){
     const bus = load();
-    const step = bus.story?.step || 0;
-
-    if(step === 0){
-      // create student request
-      const req = pushRequest({
-        studentId: "STD-23",
-        studentName: "طالب #23",
-        age: 12,
-        classRoom: "6/ب",
-        symptom: "fever",
-        urgency: "high",
-        desc: "بدأت الأعراض قبل 2 ساعة. (Demo)"
-      });
-      pushAlert("staff", "HIGH", "طلب جديد من طالب", `تم استلام طلب ${req.id}`, { requestId: req.id });
-      bus.story.step = 1;
-      bus.story.lastRunAt = new Date().toISOString();
-      save(bus);
-      return { step: 1, msg: "Student -> Request created" };
-    }
-
-    if(step === 1){
-      // clinic case
-      const req = bus.requests[0];
-      const c = createCase(req, {
-        priority: "HIGH",
-        riskScore: 68,
-        dx: "اشتباه حمّى/عدوى (Demo)",
-        decision: "call_guardian",
-        plan: "عزل مؤقت + سوائل + قياس حرارة + تواصل ولي الأمر"
-      });
-      pushAlert("parent", "HIGH", "إشعار ولي الأمر", `حالة للطالب ${c.studentName}: نحتاج موافقة متابعة/إحالة.`, { caseId: c.id });
-      upsertConsent({
-        id: "C-DEMO-01",
-        type: "referral",
-        summary: "طلب موافقة لإحالة/متابعة حالة عالية (Demo)",
-        status: "PENDING",
-        caseId: c.id
-      });
-      bus.story.step = 2;
-      bus.story.lastRunAt = new Date().toISOString();
-      save(bus);
-      return { step: 2, msg: "Clinic -> Case created + Parent notified" };
-    }
-
-    if(step === 2){
-      // admin summary alert
-      const c = bus.cases[0];
-      pushAlert("admin", c.priority, "ملخص للإدارة", `Case ${c.id} Priority=${c.priority}. (No sensitive details)`, { caseId: c.id });
-      bus.story.step = 3;
-      bus.story.lastRunAt = new Date().toISOString();
-      save(bus);
-      return { step: 3, msg: "Admin notified" };
-    }
-
-    // reset to loop
-    bus.story.step = 0;
-    bus.story.lastRunAt = new Date().toISOString();
+    const idx = bus.cases.findIndex(c=>c.id===caseId);
+    if(idx<0) return null;
+    bus.cases[idx] = { ...bus.cases[idx], ...patch };
     save(bus);
-    return { step: 0, msg: "Story looped" };
+    return bus.cases[idx];
   }
 
-  // Public API
-  window.SCBUS = {
-    KEY: BUS_KEY,
-    load, save,
-    audit,
-    pushRequest,
-    createCase,
-    pushAlert, ackAlert,
-    upsertConsent,
-    getRole,
-    runStoryStep,
-    uid
-  };
+  /* ------------------ Seed Demo ------------------ */
 
-  // Broadcast listener (tabs/pages)
-  window.addEventListener("storage", (e)=>{
-    if(e.key === "sc_bus_ping"){
-      // notify pages
-      try{
-        window.dispatchEvent(new CustomEvent("sc:bus:update", { detail: { at: Date.now() } }));
-      }catch(_){}
-    }
-  });
+  function seedDemo(){
+    reset();
+    const bus = load();
+
+    const req = {
+      id: uid("REQ"),
+      createdAt: new Date().toISOString(),
+      studentName: "محمد أحمد",
+      desc: "صداع ودوخة مع تعب عام",
+      vitals: { temp: 37.9, hr: 102, spo2: 97, bp: "110/70" },
+      ai: {
+        risk: 42,
+        priority: "MED",
+        recommendation: "متابعة وراحة + تقييم طبي"
+      }
+    };
+    bus.requests.push(req);
+
+    const c = {
+      id: uid("CASE"),
+      createdAt: new Date().toISOString(),
+      requestId: req.id,
+      studentName: req.studentName,
+      requestDesc: req.desc,
+      vitals: req.vitals,
+      ai: req.ai,
+      priority: "MED",
+      riskScore: 42,
+      status: "OPEN"
+    };
+    bus.cases.push(c);
+
+    save(bus);
+    log("Seed Demo", { caseId: c.id }, "system");
+  }
+
+  /* ------------------ Public API ------------------ */
+
+  window.SCBUS = {
+    load,
+    save,
+    reset,
+    uid,
+    log,
+    pushAlert,
+    addRequest,
+    createCase,
+    updateCase,
+    seedDemo
+  };
 
 })();
