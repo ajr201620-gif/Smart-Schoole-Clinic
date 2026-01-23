@@ -480,3 +480,100 @@ input:focus, select:focus, textarea:focus{
 
 /* -------- Toast placeholder (JS will create) -------- */
 #toast{ direction: rtl; }
+/* =========================
+   Student Hybrid UI Patch
+   ========================= */
+
+.shell--wide{ max-width: 1200px; }
+
+.topbar--slim{
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  backdrop-filter: blur(10px);
+}
+.pill--soft{ background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); }
+
+.hero--compact{ padding: 18px 0 8px; }
+.hero__cta{ margin-top: 10px; display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+.btn.lg{ padding: 12px 16px; border-radius: 14px; }
+.chip{
+  display:inline-flex; align-items:center; gap:8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  font-size: 13px;
+}
+
+.glassCard--tight{ padding: 12px; border-radius: 16px; }
+.quickBar{
+  margin-top: 10px;
+  display:flex; gap:10px; flex-wrap:wrap;
+}
+.qbtn{
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  color: inherit;
+  cursor: pointer;
+}
+.qbtn:hover{ transform: translateY(-1px); }
+.qbtn--primary{
+  background: rgba(255,255,255,.10);
+  border-color: rgba(255,255,255,.18);
+}
+
+.triLayout{
+  display:grid;
+  grid-template-columns: 320px 1fr 360px;
+  gap: 14px;
+  margin-top: 14px;
+  align-items: start;
+}
+@media (max-width: 1100px){
+  .triLayout{ grid-template-columns: 1fr; }
+}
+
+.card--soft{
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 18px;
+}
+.card--focus{
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+}
+.input--xl{ padding: 14px; border-radius: 16px; }
+
+.rowActions--split{ display:flex; gap:10px; flex-wrap:wrap; }
+.rowActions--split .btn{ flex:1; min-width: 160px; }
+
+.steps{ list-style:none; padding:0; margin:0; display:grid; gap:10px; }
+.step{
+  display:flex; align-items:center; gap:10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+}
+.step__dot{
+  width:10px; height:10px; border-radius:999px;
+  background: rgba(255,255,255,.25);
+  box-shadow: 0 0 0 4px rgba(255,255,255,.06);
+}
+.step.is-active{ background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.16); }
+.step.is-active .step__dot{ background: rgba(255,255,255,.75); }
+.step.is-done{ opacity: .75; }
+
+.vitals--mini .vital{ border-radius: 16px; }
+.miniCards--2{ grid-template-columns: 1fr 1fr; }
+
+.noticeBox{
+  padding: 10px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+}
+.noticeBox__title{ font-weight: 700; margin-bottom: 8px; }
