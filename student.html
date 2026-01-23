@@ -25,6 +25,49 @@
       <button class="btn ghost" id="btnTheme">🌓</button>
     </div>
   </header>
+  <main class="container">
+
+  <!-- 🧑‍🎓 بطاقة الطالب -->
+  <section class="card">
+    <h2>🧑‍🎓 بيانات الطالب</h2>
+
+    <div class="field">
+      <label>اسم الطالب</label>
+      <input id="studentName" type="text" placeholder="اكتب اسمك" />
+    </div>
+
+    <div class="field">
+      <label>الشكوى الصحية</label>
+      <textarea id="complaint" rows="3" placeholder="اشرح شعورك أو الأعراض"></textarea>
+    </div>
+  </section>
+
+  <!-- ❤️ محاكاة الحساسات -->
+  <section class="card">
+    <h2>❤️ قراءات الحساسات (محاكاة)</h2>
+
+    <div class="vitals-grid">
+      <div class="vital">BP: <span id="v_bp">--</span></div>
+      <div class="vital">SpO₂: <span id="v_spo2">--</span></div>
+      <div class="vital">HR: <span id="v_hr">--</span></div>
+      <div class="vital">Temp: <span id="v_temp">--</span></div>
+    </div>
+
+    <button class="btn ghost" id="btnSimulate">🔄 توليد قراءات</button>
+  </section>
+
+  <!-- 🤖 فرز ذكي + إرسال -->
+  <section class="card highlight">
+    <h2>🤖 التقييم الذكي</h2>
+
+    <p>سيتم إرسال الشكوى والقراءات للفرز الطبي الذكي</p>
+
+    <button class="btn primary" data-action="case:create">
+      🚑 إرسال للعيادة المدرسية
+    </button>
+  </section>
+
+</main>
 
   <main class="shell">
     <section class="grid2">
