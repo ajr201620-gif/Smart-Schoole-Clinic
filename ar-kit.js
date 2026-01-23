@@ -200,6 +200,14 @@ if(data.caseId){
     let stream = null;
     let ctx = null;
     let vitals = genVitals();
+     function getCaseInfo(){
+  const bus = window.SCBUS?.load?.();
+  const latest = bus?.cases?.[0];
+  return {
+    caseId: latest?.id || null,
+    studentName: latest?.studentName || null
+  };
+}
     let tick = null;
 
     async function start(){
@@ -236,7 +244,8 @@ if(data.caseId){
       // ensure canvas size on resize
       ctx = fitCanvasToVideo(hud, video);
 
-      drawDoctorHUD(ctx, w, h, vitals);
+      const ci = getCaseInfo();
+drawDoctorHUD(ctx, w, h, Object.assign({}, vitals, ci));
       requestAnimationFrame(loop);
     }
 
