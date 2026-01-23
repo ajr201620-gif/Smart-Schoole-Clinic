@@ -254,7 +254,69 @@ function reject(){
   saveCase({ status: "CLOSED", dx: $("#dxText").value || "—", plan: "إغلاق" });
   alert("تم الإغلاق ✅");
 }
+function runCopilot(){
+  if(!currentCase){ alert("حمّل حالة أولاً"); return; }
+  const cp = window.SCDocAI.build(currentCase);
 
+  const out = [];
+  out.push(cp.summary);
+  out.push("");
+  out.push("تفريق تشخيصي (DDx):");
+  cp.ddx.forEach((x,i)=> out.push(`- ${i+1}) ${x}`));
+
+  out.push("");
+  out.push("Red Flags:");
+  (cp.redFlags.length ? cp.redFlags : ["لا توجد علامات إنذار واضحة حالياً"]).forEach(x=> out.push(`- ${x}`));
+
+  out.push("");
+  out.push("أسئلة لازمة للطبيب:");
+  cp.questions.forEach((x,i)=> out.push(`- Q${i+1}: ${x}`));
+
+  out.push("");
+  out.push("خطة مقترحة:");
+  cp.plan.forEach(x=> out.push(`- ${x}`));
+
+  out.push("");
+  out.push("اقتراح صياغة Dx/Plan (يمكن تعديلها):");
+  if(!$("#dxText").value.trim()){
+    $("#dxText").value =
+`تشخيص مبدئي (Demo):
+- ${cp.ddx[0] || "أعراض عامة"}
+- يحتاج تأكيد سريري/قراءة ثانية حسب الحاجة
+
+ملاحظات:
+- ${currentCase.ai?.recommendation || "—"}
+`;
+  }
+  if(!$("#planText").value.trim()){
+    $("#planText").value = cp.plan.map(x=>"• "+x).join("\n");
+  }
+
+  $("#cpOut").textContent = out.join("\n");
+}
+
+async function copyReport(){
+  if(!currentCase){ alert("حمّل حالة أولاً"); return; }
+  const cp = window.SCDocAI.build(currentCase);
+  const dx = $("#dxText").value || "";
+  const pl = $("#planText").value || "";
+  const decision = currentCase.status || currentCase.decision || (currentCase.ai?.recommendation || "—");
+  const text = cp.report(dx, pl, decision);
+
+  try{
+    await navigator.clipboard.writeText(text);
+    alert("تم نسخ التقرير ✅");
+  }catch(e){
+    // fallback
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    ta.remove();
+    alert("تم نسخ التقرير ✅");
+  }
+}
 $("#btnLoad").addEventListener("click", loadLatest);
 $("#btnReRead").addEventListener("click", requestReRead);
 $("#btnReRead2").addEventListener("click", requestReRead);
