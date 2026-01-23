@@ -1,104 +1,131 @@
+/* visit-session.js — Virtual Visit Session Engine (Static)
+   - Creates/updates session timeline
+   - Join roles: student/doctor/parent
+   - Simple text chat + room state
+*/
+
 (() => {
   "use strict";
 
-  const createVisit = ({ caseId, fromRole, studentName }) => {
-    const id = SSC.uid("visit");
-    const v = {
-      id,
-      caseId,
-      status: "requested", // requested | accepted | rejected | active | ended
-      createdAt: SSC.nowISO(),
-      updatedAt: SSC.nowISO(),
-      participants: {
-        student: { name: studentName || "طالب", joined: false },
-        doctor:  { name: "طبيب", joined: false },
-        parent:  { name: "ولي أمر", joined: false, invited: false }
-      },
-      notes: [],
-      roomCode: id.slice(-6).toUpperCase()
+  const KEY = {
+    VISITS: "ssc_visits_v1",
+  };
+
+  const LS = {
+    get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+    set(k, v) { localStorage.setItem(k, JSON.stringify(v)); return v; }
+  };
+
+  const now = () => new Date().toISOString();
+  const uid = () => Math.random().toString(16).slice(2) + "-" + Date.now().toString(16);
+
+  function getVisits() { return LS.get(KEY.VISITS, []); }
+  function setVisits(list) { return LS.set(KEY.VISITS, list); }
+
+  function findVisit(visitId) {
+    const visits = getVisits();
+    const i = visits.findIndex(v => v.id === visitId);
+    return { visits, i, v: i >= 0 ? visits[i] : null };
+  }
+
+  function pushTimeline(v, txt) {
+    v.timeline = v.timeline || [];
+    v.timeline.unshift({ at: now(), txt });
+    return v;
+  }
+
+  function pushChat(v, who, msg) {
+    v.chat = v.chat || [];
+    v.chat.push({ id: uid(), at: now(), who, msg });
+    return v;
+  }
+
+  function start(visitObj, who = "student") {
+    const visitId = visitObj?.id;
+    if (!visitId) return visitObj;
+
+    const { visits, i, v } = findVisit(visitId);
+    if (i < 0 || !v) return visitObj;
+
+    v.session = v.session || {
+      startedAt: null,
+      endedAt: null,
+      state: "idle", // idle | live | ended
+      participants: { student: false, doctor: false, parent: false },
     };
 
-    SSC.updateDB((db) => {
-      db.visits.unshift(v);
-      return db;
-    });
+    if (!v.session.startedAt) {
+      v.session.startedAt = now();
+      v.session.state = "live";
+      pushTimeline(v, "بدأت الجلسة (Visit Session)");
+    }
 
-    SSC.audit("visit.create", { id, caseId, fromRole });
-    SSC.toast("زيارة افتراضية", "تم إنشاء طلب زيارة افتراضية");
-    SSC.emit("visit.updated", v);
+    // mark participant
+    if (who === "student") v.session.participants.student = true;
+    if (who === "doctor") v.session.participants.doctor = true;
+    if (who === "parent") v.session.participants.parent = true;
+
+    pushTimeline(v, `انضم للجلسة: ${label(who)}`);
+
+    // welcome chat
+    pushChat(v, "system", `✅ تم انضمام ${label(who)} للجلسة`);
+    setVisits(Object.assign(visits, { [i]: v }) && visits);
+
+    try { window.bus?.emit?.("visit:update", v); } catch {}
     return v;
-  };
+  }
 
-  const updateVisit = (id, patch) => {
-    let updated = null;
-    SSC.updateDB((db) => {
-      const idx = db.visits.findIndex(v => v.id === id);
-      if (idx === -1) return db;
-      db.visits[idx] = {
-        ...db.visits[idx],
-        ...patch,
-        updatedAt: SSC.nowISO()
-      };
-      updated = db.visits[idx];
-      return db;
-    });
-    if (updated) SSC.emit("visit.updated", updated);
-    return updated;
-  };
+  function end(visitId, by = "doctor", summary = "") {
+    const { visits, i, v } = findVisit(visitId);
+    if (i < 0 || !v) return null;
 
-  const addNote = (id, role, text) => {
-    updateVisit(id, {});
-    SSC.updateDB((db) => {
-      const v = db.visits.find(x => x.id === id);
-      if (!v) return db;
-      v.notes.unshift({ id: SSC.uid("note"), at: SSC.nowISO(), role, text });
-      v.notes = v.notes.slice(0, 60);
-      return db;
-    });
-    SSC.audit("visit.note", { id, role });
-    SSC.emit("visit.updated", SSC.getDB().visits.find(x => x.id === id));
-  };
+    v.session = v.session || {};
+    v.session.endedAt = now();
+    v.session.state = "ended";
+    v.status = "completed";
+    v.sessionSummary = summary || v.sessionSummary || "";
 
-  const accept = (id) => {
-    const v = updateVisit(id, { status: "accepted" });
-    SSC.audit("visit.accept", { id });
-    SSC.toast("تم قبول الزيارة", `رمز الغرفة: ${v?.roomCode || ""}`);
+    pushTimeline(v, `انتهت الجلسة بواسطة: ${label(by)}`);
+    pushChat(v, "system", "🧾 تم إنهاء الزيارة الافتراضية");
+
+    v.updatedAt = now();
+    visits[i] = v;
+    setVisits(visits);
+
+    try { window.bus?.emit?.("visit:update", v); } catch {}
     return v;
-  };
-  const reject = (id, reason="") => {
-    const v = updateVisit(id, { status: "rejected", rejectReason: reason });
-    SSC.audit("visit.reject", { id, reason });
-    SSC.toast("تم رفض الزيارة", reason || "تم الرفض");
-    return v;
-  };
+  }
 
-  const inviteParent = (id) => {
-    const v = updateVisit(id, {
-      participants: {
-        ...SSC.getDB().visits.find(x => x.id === id)?.participants,
-        parent: {
-          ...(SSC.getDB().visits.find(x => x.id === id)?.participants?.parent || {}),
-          invited: true
-        }
-      }
-    });
-    SSC.audit("visit.inviteParent", { id });
-    SSC.toast("تمت دعوة ولي الأمر", "يمكنه الانضمام للزيارة");
-    return v;
-  };
+  function sendMessage(visitId, who, msg) {
+    const { visits, i, v } = findVisit(visitId);
+    if (i < 0 || !v) return null;
 
-  const start = (id) => {
-    const v = updateVisit(id, { status: "active" });
-    SSC.audit("visit.start", { id });
-    return v;
-  };
+    const clean = String(msg || "").trim();
+    if (!clean) return v;
 
-  const end = (id) => {
-    const v = updateVisit(id, { status: "ended" });
-    SSC.audit("visit.end", { id });
-    SSC.toast("انتهت الزيارة", "تم إغلاق الجلسة");
-    return v;
-  };
+    pushChat(v, who, clean);
+    v.updatedAt = now();
+    visits[i] = v;
+    setVisits(visits);
 
-  window.SSC_VISIT = { createVisit, updateVisit, addNote, accept, reject, inviteParent, start, end };
+    try { window.bus?.emit?.("visit:update", v); } catch {}
+    return v;
+  }
+
+  function getActive(visitId) {
+    const { v } = findVisit(visitId);
+    return v || null;
+  }
+
+  function label(who) {
+    if (who === "student") return "الطالب";
+    if (who === "doctor") return "الطبيب";
+    if (who === "parent") return "ولي الأمر";
+    if (who === "system") return "النظام";
+    return "مشارك";
+  }
+
+  // Expose
+  window.VisitSession = { start, end, sendMessage, getActive };
+
 })();
