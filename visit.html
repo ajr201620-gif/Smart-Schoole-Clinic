@@ -3,193 +3,294 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>غرفة الزيارة الافتراضية</title>
+  <title>غرفة الزيارة — العيادة المدرسية الذكية</title>
   <link rel="stylesheet" href="app.css" />
 </head>
 
 <body data-page="visit">
+
+  <!-- Topbar -->
   <header class="topbar">
-    <div class="topbar__left">
-      <a class="btn ghost" href="index.html">⟵ الرئيسية</a>
-      <div class="brand mini">
-        <div class="brand__logo">🎥</div>
-        <div class="brand__txt">
-          <div class="brand__name">غرفة الزيارة الافتراضية</div>
-          <div class="brand__sub">طالب • طبيب • ولي أمر</div>
+    <div class="inner">
+      <div class="topbar_left">
+        <a class="btn ghost" href="index.html">↩︎ الرئيسية</a>
+
+        <div class="brand">
+          <div class="brand__logo"></div>
+          <div class="brand__txt">
+            <div class="brand__name">العيادة المدرسية الذكية</div>
+            <div class="brand__sub">غرفة الزيارة • فيديو/صوت • Check-in</div>
+          </div>
+        </div>
+
+        <div class="pill">
+          <small>الدور</small>
+          <b data-user-role>visit</b>
         </div>
       </div>
-    </div>
 
-    <div class="topbar__right">
-      <div class="pill">
-        الدور: <b data-user-role>—</b>
+      <div class="topbar_right">
+        <div class="pill">
+          <small>جلسة</small>
+          <b id="v_timer">00:00</b>
+        </div>
+
+        <button class="btn ghost" id="btnTheme" data-action="common:theme-toggle">🌓</button>
+        <button class="btn bad" id="btnLogout" data-action="common:logout">خروج</button>
       </div>
-      <button class="btn ghost" id="btnTheme">🌓</button>
     </div>
   </header>
 
-  <main class="shell">
-    <section class="grid2">
-      <!-- Session -->
-      <div class="card pad">
-        <div class="card__title">🧾 حالة الجلسة</div>
+  <main class="container">
 
-        <div class="kpis">
-          <div class="kpi">
-            <div class="kpi__label">الحالة</div>
-            <div class="kpi__val" id="visitState">—</div>
+    <!-- Hero -->
+    <section class="panel hero">
+      <div class="heroRow">
+        <div>
+          <div class="heroTitle">🎥 زيارة افتراضية (Demo)</div>
+          <div class="heroDesc">
+            تشغيل الكاميرا والمايك يتم من جهازك مباشرة.  
+            *هذي نسخة عرض “بدون سيرفر” — لاحقًا نضيف WebRTC حقيقي إذا تبغى.*
           </div>
-          <div class="kpi">
-            <div class="kpi__label">الكود</div>
-            <div class="kpi__val" id="visitCode">—</div>
+
+          <div class="heroActions mt12">
+            <button class="btn primary" id="btnCheckin" data-action="visit:checkin">✅ Check-in</button>
+            <button class="btn" id="btnCompleteVisit" data-action="visit:complete">🏁 إنهاء الزيارة</button>
+            <button class="btn ghost" id="btnPrintSlip" data-action="visit:print-slip">🧾 طباعة نموذج</button>
+            <button class="btn ghost" data-action="common:download-report">⬇️ تقرير</button>
           </div>
-          <div class="kpi">
-            <div class="kpi__label">المشاركون</div>
-            <div class="kpi__val" id="visitMembers">—</div>
+
+          <div class="subtle mt12">
+            إذا ما ظهرت الكاميرا: تأكد من صلاحيات Safari/Chrome ثم جرّب تحديث الصفحة.
           </div>
         </div>
 
-        <div class="row actions">
-          <button class="btn solid" id="btnJoinSession">🚪 دخول الجلسة</button>
-          <button class="btn ghost" id="btnEndSession">🛑 إنهاء الجلسة</button>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="card__title">📜 السجل الزمني</div>
-        <div id="visitTimeline" class="list"></div>
-      </div>
-
-      <!-- Chat -->
-      <div class="card pad">
-        <div class="card__title">💬 المحادثة</div>
-
-        <div id="visitChat" class="chat"></div>
-
-        <div class="row actions">
-          <input id="chatInput" class="input" placeholder="اكتب رسالة…" />
-          <button class="btn solid" id="btnSendChat">إرسال</button>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="row actions">
-          <a class="btn ghost" href="doctor.html">🩺 الطبيب</a>
-          <a class="btn ghost" href="student.html">🎒 الطالب</a>
-          <a class="btn ghost" href="parent.html">👨‍👩‍👧 ولي الأمر</a>
+        <div class="kpiRow" style="min-width:320px;">
+          <div class="kpi ok">
+            <div class="kLabel">الحالة</div>
+            <div class="kVal" id="v_status">—</div>
+            <div class="kMeta">Case</div>
+          </div>
+          <div class="kpi">
+            <div class="kLabel">القرار</div>
+            <div class="kVal" id="v_decision">—</div>
+            <div class="kMeta">AI / Doctor</div>
+          </div>
         </div>
       </div>
     </section>
+
+    <div class="grid mt16">
+
+      <!-- Video panel -->
+      <section class="panel card col-8">
+        <div class="cardHeader">
+          <div class="cardTitle"><span class="ico">📹</span> البث (محلي)</div>
+          <span class="chip warn">Local Media</span>
+        </div>
+
+        <div class="cardBody">
+          <div class="rowCard" style="padding:10px;">
+            <video id="video" autoplay playsinline muted style="width:100%; border-radius:16px; border:1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.2);"></video>
+          </div>
+
+          <div class="flex mt12">
+            <button class="btn primary" id="btnCam">📷 تشغيل الكاميرا</button>
+            <button class="btn" id="btnMic">🎙️ تشغيل المايك</button>
+            <button class="btn bad" id="btnStop">⛔ إيقاف الكل</button>
+
+            <span class="pill right">
+              <small>Cam</small> <b id="camState">OFF</b>
+              <small style="margin-inline-start:10px;">Mic</small> <b id="micState">OFF</b>
+            </span>
+          </div>
+
+          <div class="subtle mt8">
+            ملاحظة: الفيديو هنا “محلي” للعرض، وليس مكالمة مع الطرف الآخر. نقدر نطورها لـ WebRTC إذا تبغى.
+          </div>
+        </div>
+      </section>
+
+      <!-- Case summary -->
+      <section class="panel card col-4">
+        <div class="cardHeader">
+          <div class="cardTitle"><span class="ico">🧾</span> ملخص سريع</div>
+          <span class="chip">Summary</span>
+        </div>
+
+        <div class="cardBody">
+          <div class="rowCard">
+            <div class="rowTitle">الطالب</div>
+            <div class="rowMeta" id="v_owner">—</div>
+          </div>
+
+          <div class="rowCard">
+            <div class="rowTitle">الشكوى</div>
+            <div class="rowMeta" id="v_symptoms">—</div>
+          </div>
+
+          <div class="rowCard">
+            <div class="rowTitle">قياسات</div>
+            <div class="rowMeta" id="v_vitals">—</div>
+          </div>
+
+          <div class="hr"></div>
+          <div class="flex">
+            <a class="btn ghost" href="doctor.html">🩺 الطبيب</a>
+            <a class="btn ghost" href="parent.html">👨‍👩‍👧‍👦 ولي الأمر</a>
+            <a class="btn ghost" href="admin.html">🏫 الإدارة</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Notes -->
+      <section class="panel card col-12">
+        <div class="cardHeader">
+          <div class="cardTitle"><span class="ico">🗒️</span> ملاحظات الزيارة</div>
+          <span class="chip ok">Notes</span>
+        </div>
+
+        <div class="cardBody">
+          <div class="field">
+            <label>ملاحظات / تعليمات</label>
+            <textarea id="visitNotes" class="input" rows="4" placeholder="اكتب ملاحظات الزيارة…"></textarea>
+          </div>
+          <div class="subtle">
+            *في النسخة القادمة نربط الملاحظات بالحالة في قاعدة البيانات (Firestore).*
+          </div>
+        </div>
+      </section>
+
+    </div>
   </main>
 
   <!-- Scripts -->
-  <script src="bus.js"></script>
-  <script src="auth.js"></script>
-  <script src="app-init.js"></script>
-  <script src="visit-session.js"></script>
-  <script src="app.js"></script>
-  <script src="actions.js"></script>
+  <script src="./bus.js"></script>
+  <script src="./auth.js"></script>
 
-  <script>
-    const $ = (s) => document.querySelector(s);
+  <!-- Firebase init (module) -->
+  <script type="module" src="./firebase-init.js"></script>
 
-    function escapeHtml(s){
-      return String(s ?? "")
-        .replaceAll("&","&amp;").replaceAll("<","&lt;")
-        .replaceAll(">","&gt;").replaceAll('"',"&quot;")
-        .replaceAll("'","&#39;");
-    }
-
-    function renderVisit(){
-      const visits = window.app?.getVisits?.() || [];
-      const st = window.app?.getState?.();
-      const v = visits.find(x => x.id === st?.lastVisitId);
-
-      if(!v){
-        $("#visitState").textContent = "لا توجد جلسة";
-        return;
-      }
-
-      $("#visitState").textContent = v.session?.state || v.status || "—";
-      $("#visitCode").textContent = v.joinCode || "—";
-
-      const p = v.session?.participants || {};
-      $("#visitMembers").textContent =
-        `${p.student ? "🎒" : ""} ${p.doctor ? "🩺" : ""} ${p.parent ? "👨‍👩‍👧" : ""}` || "—";
-
-      const tl = $("#visitTimeline");
-      if(tl){
-        const items = (v.timeline || []).slice(0,8);
-        tl.innerHTML = items.length
-          ? items.map(x => `<div class="rowCard"><div class="rowMeta">${escapeHtml(x.txt)} • ${new Date(x.at).toLocaleString("ar-SA")}</div></div>`).join("")
-          : `<div class="muted">لا يوجد سجل بعد.</div>`;
-      }
-
-      const chat = $("#visitChat");
-      if(chat){
-        const msgs = v.chat || [];
-        chat.innerHTML = msgs.map(m => `
-          <div class="chatMsg ${m.who}">
-            <div class="chatWho">${escapeHtml(m.who)}</div>
-            <div class="chatTxt">${escapeHtml(m.msg)}</div>
-          </div>
-        `).join("");
-        chat.scrollTop = chat.scrollHeight;
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      // theme
-      $("#btnTheme")?.addEventListener("click", () => {
-        const html = document.documentElement;
-        html.setAttribute("data-theme",
-          html.getAttribute("data-theme") === "light" ? "dark" : "light"
-        );
-      });
-
-      const role = window.Auth?.getRole?.() || "student";
-
-      $("#btnJoinSession")?.addEventListener("click", () => {
-        const visits = window.app?.getVisits?.() || [];
-        const st = window.app?.getState?.();
-        const v = visits.find(x => x.id === st?.lastVisitId);
-        if(!v) return alert("لا توجد جلسة");
-
-        window.VisitSession.start(v, role);
-        renderVisit();
-      });
-
-      $("#btnEndSession")?.addEventListener("click", () => {
-        const visits = window.app?.getVisits?.() || [];
-        const st = window.app?.getState?.();
-        const v = visits.find(x => x.id === st?.lastVisitId);
-        if(!v) return;
-
-        window.VisitSession.end(v.id, role, "انتهت الجلسة");
-        renderVisit();
-      });
-
-      $("#btnSendChat")?.addEventListener("click", () => {
-        const msg = $("#chatInput").value.trim();
-        if(!msg) return;
-        const visits = window.app?.getVisits?.() || [];
-        const st = window.app?.getState?.();
-        const v = visits.find(x => x.id === st?.lastVisitId);
-        if(!v) return;
-
-        window.VisitSession.sendMessage(v.id, role, msg);
-        $("#chatInput").value = "";
-        renderVisit();
-      });
-
-      renderVisit();
-      window.bus?.on?.("visit:update", renderVisit);
-    });
-  </script>
-    <!-- باقي سكربتاتك -->
+  <!-- Actions -->
   <script src="./actions.js"></script>
 
-  <!-- Firebase (لازم آخر شيء وقبل </body>) -->
-  <script type="module" src="./firebase-init.js"></script>
+  <!-- Visit logic -->
+  <script>
+    (function(){
+      "use strict";
+      const $ = (s,r=document)=>r.querySelector(s);
+
+      // Timer
+      let t0 = null, timer = null;
+      function startTimer(){
+        if(timer) return;
+        t0 = Date.now();
+        timer = setInterval(()=>{
+          const s = Math.floor((Date.now()-t0)/1000);
+          const mm = String(Math.floor(s/60)).padStart(2,"0");
+          const ss = String(s%60).padStart(2,"0");
+          $("#v_timer").textContent = `${mm}:${ss}`;
+        }, 250);
+      }
+      startTimer();
+
+      // Render summary from SSC.db
+      function renderSummary(){
+        const DB = window.SSC?.db;
+        if(!DB) return;
+        const c = DB.cases?.[0];
+        if(!c) return;
+
+        $("#v_owner").textContent = c.owner?.name || "—";
+        $("#v_symptoms").textContent = c.symptoms || "—";
+        $("#v_status").textContent = c.status || "—";
+        $("#v_decision").textContent = c.decision || "—";
+
+        const v = c.vitals || {};
+        $("#v_vitals").textContent =
+          `HR: ${v.hr ?? "—"} • SpO₂: ${v.spo2 ?? "—"} • Temp: ${v.temp ?? "—"} • BP: ${v.bp ?? "—"}`;
+      }
+
+      document.addEventListener("DOMContentLoaded", ()=>{
+        renderSummary();
+        window.bus?.on?.("case:update", renderSummary);
+      });
+
+      // Media controls (local only)
+      const video = $("#video");
+      const btnCam = $("#btnCam");
+      const btnMic = $("#btnMic");
+      const btnStop = $("#btnStop");
+      const camState = $("#camState");
+      const micState = $("#micState");
+
+      let stream = null;
+
+      async function ensureStream(wantVideo, wantAudio){
+        if(stream) return stream;
+
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: !!wantVideo,
+          audio: !!wantAudio
+        });
+        return stream;
+      }
+
+      function applyToVideo(){
+        if(video) video.srcObject = stream;
+      }
+
+      function updateStates(){
+        const vOn = stream && stream.getVideoTracks().some(t=>t.enabled);
+        const aOn = stream && stream.getAudioTracks().some(t=>t.enabled);
+        camState.textContent = vOn ? "ON" : "OFF";
+        micState.textContent = aOn ? "ON" : "OFF";
+      }
+
+      btnCam?.addEventListener("click", async ()=>{
+        try{
+          // create or add video
+          if(!stream){
+            await ensureStream(true, false);
+          } else {
+            const hasV = stream.getVideoTracks().length>0;
+            if(!hasV){
+              const s2 = await navigator.mediaDevices.getUserMedia({video:true, audio:false});
+              s2.getVideoTracks().forEach(t=>stream.addTrack(t));
+            }
+            stream.getVideoTracks().forEach(t=>t.enabled = true);
+          }
+          applyToVideo(); updateStates();
+        } catch(e){ alert("تعذر تشغيل الكاميرا. تحقق من الصلاحيات."); console.error(e); }
+      });
+
+      btnMic?.addEventListener("click", async ()=>{
+        try{
+          if(!stream){
+            await ensureStream(false, true);
+          } else {
+            const hasA = stream.getAudioTracks().length>0;
+            if(!hasA){
+              const s2 = await navigator.mediaDevices.getUserMedia({video:false, audio:true});
+              s2.getAudioTracks().forEach(t=>stream.addTrack(t));
+            }
+            stream.getAudioTracks().forEach(t=>t.enabled = true);
+          }
+          applyToVideo(); updateStates();
+        } catch(e){ alert("تعذر تشغيل المايك. تحقق من الصلاحيات."); console.error(e); }
+      });
+
+      btnStop?.addEventListener("click", ()=>{
+        if(!stream) return;
+        stream.getTracks().forEach(t=>t.stop());
+        stream = null;
+        if(video) video.srcObject = null;
+        updateStates();
+      });
+
+      updateStates();
+    })();
+  </script>
+
 </body>
 </html>
