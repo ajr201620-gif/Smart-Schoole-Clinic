@@ -1,333 +1,192 @@
 <!doctype html>
-<html lang="ar" dir="rtl" data-theme="dark">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Smart Clinic OS — Doctor</title>
-  <link rel="stylesheet" href="ar.css"/>
-  <link rel="stylesheet" href="shell.css"/>
-  <script src="bus.js"></script>
-  <script src="sensor-sim.js"></script>
-  <script src="ai-triage.js"></script>
-  <script src="doctor-copilot.js"></script>
-  <script src="rbac.js"></script>
+  <title>بوابة الطبيب — Smart School Clinic OS</title>
+
+  <link rel="stylesheet" href="assets/css/app.css"/>
+
+  <script src="js/bus.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/ai-triage.js"></script>
+  <script src="js/sensor-sim.js"></script>
+  <script src="js/doctor-copilot.js"></script>
+  <script src="js/protocols.js"></script>
 </head>
+
 <body>
-
-<div class="sc-top">
-  <div class="left">
-    <span class="sc-chip" id="scRoleChip">Doctor</span>
-    <div class="sc-title">
-      <b id="scRoleTitle">بوابة الطبيب</b>
-      <small>الطلبات + قراءات + توصية AI + تشخيص + قرارات</small>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">👨‍⚕️</div>
+    <div class="brandText">
+      <div class="name">بوابة الطبيب</div>
+      <div class="tagline">حالات • Copilot • قرارات • زيارة افتراضية</div>
     </div>
   </div>
-  <div class="sc-actions">
-    <span class="sc-status" id="scStatus">🟢 Ready</span>
-    <a class="sc-primary" id="scPrimaryAction" href="visit.html?role=doctor">🎥 زيارة افتراضية</a>
+  <div class="topActions">
+    <button class="btn ghost" onclick="location.href='index.html'">⬅️ رجوع</button>
   </div>
-</div>
+</header>
 
-<div class="sc-shell">
-  <aside class="sc-side">
-    <div class="sc-chip">التنقّل</div>
-    <nav class="sc-nav">
-      <a class="sc-nav-item" href="index.html">🏠 البوابة</a>
-      <a class="sc-nav-item" href="#inbox">📥 آخر حالة</a>
-      <a class="sc-nav-item" href="#dx">🧠 التشخيص</a>
-      <a class="sc-nav-item" href="report.html">🧾 التقارير</a>
-    </nav>
+<main class="container">
 
-    <div style="margin-top:14px" class="sc-chip">Quick</div>
-    <div class="sc-quick">
-      <button class="sc-qa" id="btnLoad">📥 تحميل آخر حالة</button>
-      <button class="sc-qa" id="btnReRead">🔁 طلب قراءة ثانية</button>
-      <button class="sc-qa" id="btnAIHelp">🤖 مساعد تشخيص AI</button>
-      <a class="sc-qa" id="btnVisit" href="visit.html?role=doctor">🎥 دخول الزيارة</a>
+  <!-- Cases List -->
+  <section class="panel">
+    <div class="h">
+      <h2>📥 الحالات الواردة</h2>
+      <div class="muted">اختر حالة للبدء</div>
     </div>
-  </aside>
-
-  <main class="sc-main">
-    <div style="padding:16px">
-      <div class="panel" id="inbox">
-        <div class="h">
-          <h2>آخر حالة واردة</h2>
-          <div class="muted">Complaint + Vitals + AI</div>
-        </div>
-
-        <div class="row">
-          <span class="badge">Case: <b id="caseId">—</b></span>
-          <span class="badge">Priority: <b id="casePri">—</b></span>
-          <span class="badge">Risk: <b id="caseRisk">—</b></span>
-        </div>
-
-        <div class="sep"></div>
-
-        <div class="kpis">
-          <div class="kpi"><b>Temp</b><span id="vTemp">—</span></div>
-          <div class="kpi"><b>HR</b><span id="vHR">—</span></div>
-          <div class="kpi"><b>SpO₂</b><span id="vSp">—</span></div>
-          <div class="kpi"><b>BP</b><span id="vBP">—</span></div>
-        </div>
-
-        <div class="sep"></div>
-
-        <div class="h"><h2>الشكوى</h2><div class="muted">من الطالب</div></div>
-        <div class="panel" style="padding:12px; border-radius:14px;">
-          <div id="complaint">—</div>
-        </div>
-
-        <div class="sep"></div>
-
-        <div class="h"><h2>توصية AI</h2><div class="muted">Recommendation</div></div>
-        <div class="panel" style="padding:12px; border-radius:14px;">
-          <div id="aiRec">—</div>
-          <div class="muted small" id="aiFlags">—</div>
-        </div>
-
-        <div class="sep"></div>
-
-        <div class="row">
-          <button class="btn ghost" id="btnReRead2">🔁 طلب قراءة ثانية</button>
-          <a class="btn" id="btnVisit2" href="visit.html?role=doctor">🎥 قبول/دخول الزيارة</a>
-          <button class="btn ghost" id="btnAskParent">👨‍👩‍👦 طلب انضمام ولي الأمر</button>
-        </div>
-      </div>
-
-      <div class="panel" id="dx" style="margin-top:16px">
-        <div class="h">
-          <h2>التشخيص وخطة الإجراء</h2>
-          <div class="muted">Dx + Plan + Decisions</div>
-        </div>
-
-        <textarea id="dxText" class="input" rows="4" style="width:100%; border-radius:14px; padding:12px;"
-          placeholder="اكتب التشخيص / الملاحظات..."></textarea>
-
-        <div class="sep"></div>
-
-        <textarea id="planText" class="input" rows="3" style="width:100%; border-radius:14px; padding:12px;"
-          placeholder="الخطة: راحة/متابعة/إحالة..."></textarea>
-
-        <div class="sep"></div>
-        <div class="sep"></div>
-
-<div class="panel" style="padding:12px; border-radius:14px;">
-  <div class="h">
-    <h2>🤖 Doctor AI Copilot</h2>
-    <div class="muted">ملخص + DDx + Red Flags + أسئلة + خطة + تقرير</div>
-  </div>
-
-  <div class="row">
-    <button class="btn" id="btnCopilot">⚡ توليد Copilot</button>
-    <button class="btn ghost" id="btnCopyReport">📋 نسخ التقرير</button>
-  </div>
+    <div id="casesList"></div>
+  </section>
 
   <div class="sep"></div>
 
-  <pre id="cpOut" style="white-space:pre-wrap; margin:0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px; opacity:.95;"></pre>
-</div>
+  <!-- Case Details -->
+  <section class="panel" id="casePanel" style="display:none">
+    <div class="h">
+      <h2>🧾 تفاصيل الحالة</h2>
+      <div class="muted" id="caseMeta">—</div>
+    </div>
 
-        <div class="row">
-          <button class="btn" id="btnApprove">✅ اعتماد الحالة</button>
-          <button class="btn ghost" id="btnNeedConsent">🟡 تحويل لموافقة ولي الأمر</button>
-          <button class="btn ghost" id="btnRefer">🚑 إحالة</button>
-          <button class="btn ghost" id="btnReject">⛔ رفض/إغلاق</button>
-        </div>
+    <div class="kpiGrid">
+      <div class="kpi"><div class="k">Temp</div><div class="v" id="dTemp">—</div></div>
+      <div class="kpi"><div class="k">HR</div><div class="v" id="dHR">—</div></div>
+      <div class="kpi"><div class="k">SpO₂</div><div class="v" id="dSpO2">—</div></div>
+      <div class="kpi"><div class="k">BP</div><div class="v" id="dBP">—</div></div>
+    </div>
 
-        <div class="small" id="hint">حمّل آخر حالة أولاً، ثم اكتب التشخيص أو استخدم مساعد AI.</div>
+    <div class="sep"></div>
+
+    <div class="row">
+      <button class="btn ghost" id="btnSecond">🔁 قراءة ثانية</button>
+      <button class="btn" id="btnVirtual">🎥 زيارة افتراضية</button>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Copilot -->
+    <div class="panel">
+      <div class="h">
+        <h2>🤖 Doctor AI Copilot</h2>
+        <div class="muted">ملخص • DDx • Red Flags • خطة</div>
       </div>
 
+      <div class="row">
+        <button class="btn" id="btnCopilot">⚡ توليد Copilot</button>
+        <button class="btn ghost" id="btnAutoDecision">🧭 قرار تلقائي</button>
+        <button class="btn ghost" id="btnApplyDecision">✅ تطبيق القرار</button>
+      </div>
+
+      <div class="sep"></div>
+
+      <pre id="cpOut" style="white-space:pre-wrap;font-size:12px"></pre>
+
+      <div class="sep"></div>
+
+      <div class="row">
+        <textarea id="dxText" class="input" rows="3" placeholder="تشخيص الطبيب (DX)"></textarea>
+        <textarea id="planText" class="input" rows="3" placeholder="الخطة (PLAN)"></textarea>
+      </div>
+
+      <div class="sep"></div>
+
+      <div>
+        <b>Checklist البروتوكول</b>
+        <div id="protoList" style="margin-top:8px"></div>
+      </div>
     </div>
-  </main>
-</div>
+  </section>
+
+</main>
 
 <script>
-localStorage.setItem("SC_ROLE","doctor");
-const $ = (s)=>document.querySelector(s);
-let currentCase = null;
+(function(){
+  SCAUTH.requireRole("doctor");
+  const $ = (s)=>document.querySelector(s);
+  let currentCase = null;
+  let proposed = null;
 
-function paintCase(c){
-  currentCase = c;
-  $("#caseId").textContent = c?.id || "—";
-  $("#casePri").textContent = c?.priority || "—";
-  $("#caseRisk").textContent = (c?.riskScore ?? c?.ai?.risk ?? "—");
-
-  const v = c?.vitals || {};
-  $("#vTemp").textContent = v.temp ? (v.temp+"°C") : "—";
-  $("#vHR").textContent   = v.hr ? (v.hr+" bpm") : "—";
-  $("#vSp").textContent   = v.spo2 ? (v.spo2+"%") : "—";
-  $("#vBP").textContent   = v.bp || "—";
-
-  $("#complaint").textContent = c?.requestDesc || c?.desc || c?.complaint || "—";
-  $("#aiRec").textContent = c?.ai?.recommendation || c?.decision || "—";
-  $("#aiFlags").textContent = c?.ai?.flags?.length ? ("Flags: " + c.ai.flags.join(", ")) : "";
-
-  const room = "ROOM-" + (c.id || Date.now());
-  $("#btnVisit").href  = `visit.html?role=doctor&room=${encodeURIComponent(room)}&autojoin=1`;
-  $("#btnVisit2").href = $("#btnVisit").href;
-}
-
-function loadLatest(){
-  const bus = window.SCBUS?.load?.();
-  const c = bus?.cases?.[0];
-  if(!c){ alert("لا توجد حالات بعد"); return; }
-  // best effort map complaint
-  c.requestDesc = bus?.requests?.find(r=>r.id===c.requestId)?.desc || c.requestDesc || c.desc;
-  paintCase(c);
-}
-
-function saveCase(patch){
-  if(!currentCase) return;
-  const bus = window.SCBUS.load();
-  const idx = (bus.cases||[]).findIndex(x=>x.id===currentCase.id);
-  if(idx<0) return;
-
-  bus.cases[idx] = Object.assign({}, bus.cases[idx], patch);
-  window.SCBUS.save(bus);
-  paintCase(bus.cases[idx]);
-}
-
-function requestReRead(){
-  if(!currentCase){ alert("حمّل حالة أولاً"); return; }
-  // demo: generate a second reading and attach to case
-  const v2 = window.SCSIM.gen(currentCase.priority==="CRIT"?"critical":currentCase.priority==="HIGH"?"sick":"mild");
-  const ai2 = window.SCAI.triage({ complaint: $("#complaint").textContent, vitals: v2 });
-
-  const readings = Array.isArray(currentCase.readings) ? currentCase.readings : [];
-  readings.unshift({ t: new Date().toISOString(), vitals: v2, ai: ai2 });
-
-  saveCase({ readings, vitals: v2, ai: ai2, note: "تمت قراءة ثانية (محاكاة)" });
-  alert("تمت القراءة الثانية ✅ وتم تحديث الحالة");
-}
-
-function aiAssistant(){
-  if(!currentCase){ alert("حمّل حالة أولاً"); return; }
-  const v = currentCase.vitals || {};
-  const a = currentCase.ai || {};
-  const dx = [
-    "ملخص مساعد الطبيب (AI):",
-    `- Priority: ${currentCase.priority || a.priority || "—"} | Risk: ${currentCase.riskScore || a.risk || "—"}`,
-    `- Temp: ${v.temp||"—"} | HR: ${v.hr||"—"} | SpO₂: ${v.spo2||"—"} | BP: ${v.bp||"—"}`,
-    `- Recommendation: ${a.recommendation || currentCase.decision || "—"}`,
-    "",
-    "اقتراح تشخيص أولي (Demo):",
-    (a.flags||[]).includes("Resp") ? "• اشتباه مشكلة تنفسية/التهاب" :
-    (a.flags||[]).includes("Fever") ? "• حمّى/عدوى محتملة" :
-    "• أعراض عامة تحتاج تقييم",
-    "",
-    "خطة مقترحة:",
-    currentCase.priority==="CRIT" ? "• إجراء طارئ + إحالة + إشعار ولي الأمر" :
-    currentCase.priority==="HIGH" ? "• زيارة افتراضية فورية + متابعة + احتمال موافقة ولي الأمر" :
-    currentCase.priority==="MED"  ? "• متابعة + إعادة قراءة + إرشادات" :
-    "• إرشاد صحي + راحة"
-  ].join("\n");
-
-  $("#dxText").value = dx;
-  $("#planText").value = a.recommendation || "";
-}
-
-function askParentJoin(){
-  if(!currentCase){ alert("حمّل حالة أولاً"); return; }
-  saveCase({ parentJoinRequested: true });
-  window.SCBUS.pushAlert("parent", currentCase.priority || "MED", "طلب انضمام لزيارة افتراضية", `Case ${currentCase.id}`, { caseId: currentCase.id });
-  alert("تم إرسال طلب انضمام ولي الأمر ✅");
-}
-
-function approve(){
-  if(!currentCase) return;
-  saveCase({ status: "APPROVED", dx: $("#dxText").value || "—", plan: $("#planText").value || "—" });
-  alert("تم الاعتماد ✅");
-}
-function needConsent(){
-  if(!currentCase) return;
-  saveCase({ status: "CONSENT_REQUIRED", dx: $("#dxText").value || "—", plan: $("#planText").value || "—" });
-  window.SCBUS.pushAlert("parent","MED","مطلوب موافقة ولي الأمر",`Case ${currentCase.id}`,{caseId:currentCase.id});
-  alert("تم تحويلها لموافقة ولي الأمر ✅");
-}
-function refer(){
-  if(!currentCase) return;
-  saveCase({ status: "REFERRED", dx: $("#dxText").value || "—", plan: "إحالة" });
-  alert("تمت الإحالة ✅");
-}
-function reject(){
-  if(!currentCase) return;
-  saveCase({ status: "CLOSED", dx: $("#dxText").value || "—", plan: "إغلاق" });
-  alert("تم الإغلاق ✅");
-}
-function runCopilot(){
-  if(!currentCase){ alert("حمّل حالة أولاً"); return; }
-  const cp = window.SCDocAI.build(currentCase);
-
-  const out = [];
-  out.push(cp.summary);
-  out.push("");
-  out.push("تفريق تشخيصي (DDx):");
-  cp.ddx.forEach((x,i)=> out.push(`- ${i+1}) ${x}`));
-
-  out.push("");
-  out.push("Red Flags:");
-  (cp.redFlags.length ? cp.redFlags : ["لا توجد علامات إنذار واضحة حالياً"]).forEach(x=> out.push(`- ${x}`));
-
-  out.push("");
-  out.push("أسئلة لازمة للطبيب:");
-  cp.questions.forEach((x,i)=> out.push(`- Q${i+1}: ${x}`));
-
-  out.push("");
-  out.push("خطة مقترحة:");
-  cp.plan.forEach(x=> out.push(`- ${x}`));
-
-  out.push("");
-  out.push("اقتراح صياغة Dx/Plan (يمكن تعديلها):");
-  if(!$("#dxText").value.trim()){
-    $("#dxText").value =
-`تشخيص مبدئي (Demo):
-- ${cp.ddx[0] || "أعراض عامة"}
-- يحتاج تأكيد سريري/قراءة ثانية حسب الحاجة
-
-ملاحظات:
-- ${currentCase.ai?.recommendation || "—"}
-`;
-  }
-  if(!$("#planText").value.trim()){
-    $("#planText").value = cp.plan.map(x=>"• "+x).join("\n");
+  function loadCases(){
+    const bus = SCBUS.load();
+    const list = $("#casesList");
+    list.innerHTML = (bus.cases||[]).map(c=>`
+      <div class="sc-nav-item">
+        <b>${c.studentName}</b>
+        <div class="muted small">Case ${c.id} • ${c.priority} • ${c.status}</div>
+        <button class="btn ghost" data-open="${c.id}">فتح</button>
+      </div>
+    `).join("") || `<div class="muted">لا توجد حالات</div>`;
   }
 
-  $("#cpOut").textContent = out.join("\n");
-}
+  function openCase(id){
+    const bus = SCBUS.load();
+    currentCase = bus.cases.find(c=>c.id===id);
+    if(!currentCase) return;
 
-async function copyReport(){
-  if(!currentCase){ alert("حمّل حالة أولاً"); return; }
-  const cp = window.SCDocAI.build(currentCase);
-  const dx = $("#dxText").value || "";
-  const pl = $("#planText").value || "";
-  const decision = currentCase.status || currentCase.decision || (currentCase.ai?.recommendation || "—");
-  const text = cp.report(dx, pl, decision);
+    $("#casePanel").style.display="";
+    $("#caseMeta").textContent = `Case ${currentCase.id} • ${currentCase.studentName} • ${currentCase.priority}`;
 
-  try{
-    await navigator.clipboard.writeText(text);
-    alert("تم نسخ التقرير ✅");
-  }catch(e){
-    // fallback
-    const ta = document.createElement("textarea");
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand("copy");
-    ta.remove();
-    alert("تم نسخ التقرير ✅");
+    const v = currentCase.vitals;
+    $("#dTemp").textContent = v.temp+"°C";
+    $("#dHR").textContent = v.hr;
+    $("#dSpO2").textContent = v.spo2+"%";
+    $("#dBP").textContent = v.bp;
   }
-}
-$("#btnLoad").addEventListener("click", loadLatest);
-$("#btnReRead").addEventListener("click", requestReRead);
-$("#btnReRead2").addEventListener("click", requestReRead);
-$("#btnAIHelp").addEventListener("click", aiAssistant);
-$("#btnAskParent").addEventListener("click", askParentJoin);
-$("#btnApprove").addEventListener("click", approve);
-$("#btnNeedConsent").addEventListener("click", needConsent);
-$("#btnRefer").addEventListener("click", refer);
-$("#btnReject").addEventListener("click", reject);
-$("#btnCopilot").addEventListener("click", runCopilot);
-$("#btnCopyReport").addEventListener("click", copyReport);
+
+  function secondReading(){
+    if(!currentCase) return;
+    const v2 = SCSIM.generateSecond(currentCase.vitals);
+    currentCase.vitals = v2;
+    currentCase.ai = SCAI.triage(v2, currentCase.requestDesc);
+    SCBUS.updateCase(currentCase.id, { vitals:v2, ai:currentCase.ai });
+    openCase(currentCase.id);
+    alert("تمت القراءة الثانية");
+  }
+
+  function runCopilot(){
+    if(!currentCase) return;
+    const cp = SCDocAI.build(currentCase);
+    $("#cpOut").textContent = cp.summary;
+  }
+
+  function autoDecision(){
+    if(!currentCase) return;
+    proposed = SCPROTO.proposeDecision(currentCase);
+    $("#cpOut").textContent += `\n\nقرار مقترح: ${proposed.label}`;
+    $("#protoList").innerHTML = proposed.checklist.map(x=>`<div class="sc-nav-item">${x}</div>`).join("");
+  }
+
+  function applyDecision(){
+    if(!currentCase || !proposed) return;
+    const patch = {
+      dx: $("#dxText").value,
+      plan: $("#planText").value,
+      decision: proposed.label,
+      status: proposed.status
+    };
+    SCBUS.updateCase(currentCase.id, patch);
+    alert("تم تطبيق القرار");
+    loadCases();
+  }
+
+  $("#btnSecond").onclick = secondReading;
+  $("#btnCopilot").onclick = runCopilot;
+  $("#btnAutoDecision").onclick = autoDecision;
+  $("#btnApplyDecision").onclick = applyDecision;
+
+  document.addEventListener("click",(e)=>{
+    const btn = e.target.closest("[data-open]");
+    if(btn) openCase(btn.getAttribute("data-open"));
+  });
+
+  $("#btnVirtual").onclick = ()=>{
+    if(!currentCase) return;
+    location.href = `visit.html?role=doctor&room=ROOM-${currentCase.id}&autojoin=1`;
+  };
+
+  loadCases();
+})();
 </script>
 </body>
 </html>
