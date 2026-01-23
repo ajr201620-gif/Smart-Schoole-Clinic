@@ -8,11 +8,10 @@
 </head>
 
 <body data-page="student">
-
-  <!-- Topbar -->
-  <header class="topbar">
+  <!-- Topbar (Slim) -->
+  <header class="topbar topbar--slim">
     <div class="topbar__left">
-      <a class="btn ghost" href="index.html">↩︎ الرئيسية</a>
+      <a class="btn ghost sm" href="index.html">↩︎ الرئيسية</a>
 
       <div class="brand mini">
         <div class="brand__logo">🩺</div>
@@ -24,127 +23,142 @@
     </div>
 
     <div class="topbar__right">
-      <div class="pill">
+      <div class="pill pill--soft">
+        <span class="dot ok"></span>
         <span>مرحبًا، <b data-user-name>طالب</b></span>
       </div>
 
-      <button class="btn ghost" id="btnTheme">🌓 المظهر</button>
-      <button class="btn danger" id="btnLogout" data-action="btnLogout">خروج</button>
+      <button class="btn ghost sm" id="btnTheme" data-action="common:theme-toggle">🌓</button>
+      <button class="btn danger sm" id="btnLogoutTop" data-action="common:logout">خروج</button>
     </div>
   </header>
 
-  <!-- Main -->
-  <main class="shell">
-    <!-- Hero -->
-    <section class="hero">
+  <main class="shell shell--wide">
+    <!-- Hero (Clean) -->
+    <section class="hero hero--compact">
       <div class="hero__left">
         <h1 class="hero__title">جاهز نفحصك… بدون ما نخوفك 😄</h1>
         <p class="hero__lead">
-          اكتب شكواك، شغّل القياسات، ثم نفّذ الفرز الذكي. الآن مربوط بـ Firebase/Firestore ✅
+          اكتب الشكوى ➜ شغّل القياسات ➜ شغّل الفرز الذكي ➜ ثم ابدأ زيارة.
         </p>
 
-        <div class="hero__actions">
-          <button class="btn primary" id="btnTriage" data-action="btnTriage">🤖 تشغيل الفرز الذكي</button>
-          <button class="btn" id="btnCreateCase" data-action="btnCreateCase">🧾 إنشاء حالة</button>
-          <button class="btn ghost" id="btnVisit" data-action="btnVisit">🎥 طلب زيارة افتراضية</button>
-          <button class="btn" id="btnMyCases" data-action="btnMyCases">📋 عرض حالاتي</button>
-          <button class="btn ghost" id="btnMyReport" data-action="btnMyReport">⬇️ تقرير</button>
-          <button class="btn ghost" id="btnHelp" data-action="btnHelp">🆘 مساعدة</button>
-        </div>
+        <div class="hero__cta">
+          <button class="btn primary lg" id="btnPrimaryFlow" data-action="student:primary-flow">
+            🧠 ابدأ الفحص الذكي
+          </button>
 
-        <div class="kpis">
-          <div class="kpi">
-            <div class="kpi__label">حالة النظام</div>
-            <div class="kpi__value">جاهز</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi__label">الدور</div>
-            <div class="kpi__value" data-user-role>student</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi__label">البيانات</div>
-            <div class="kpi__value">Firestore ✅</div>
+          <div class="hero__mini">
+            <span class="chip" id="chipStatus"><span class="dot ok"></span> النظام جاهز</span>
+            <span class="chip"><span class="dot ok"></span> Firebase/Firestore: <b id="fbState">—</b></span>
+            <span class="chip">الدور: <b data-user-role>student</b></span>
           </div>
         </div>
       </div>
 
       <div class="hero__right">
-        <div class="glassCard">
+        <div class="glassCard glassCard--tight">
           <div class="glassCard__title">ملخص سريع</div>
           <div class="glassCard__body">
             <div class="row">
-              <span class="muted">تذكير:</span>
-              <span>الأفضل: قياسات → فرز → إنشاء حالة → زيارة.</span>
+              <span class="muted">الخطوة التالية:</span>
+              <span id="nextStepTxt">ابدأ بكتابة الشكوى 👇</span>
             </div>
             <div class="row">
-              <span class="muted">نصيحة:</span>
-              <span>إذا كتبت “مادري”… AI بيحاول… بس مو ساحر 😅</span>
+              <span class="muted">آخر تحديث:</span>
+              <span id="lastUpdateTxt">—</span>
             </div>
           </div>
+        </div>
+
+        <div class="quickBar">
+          <button class="qbtn" id="qbCreateCase" data-action="btnCreateCase">🧾 حالة</button>
+          <button class="qbtn" id="qbSensors" data-action="student:run-sensors">📟 قياسات</button>
+          <button class="qbtn qbtn--primary" id="qbAI" data-action="student:submit-ai">🤖 فرز</button>
+          <button class="qbtn" id="qbVisit" data-action="student:start-visit">🎥 زيارة</button>
+          <button class="qbtn" id="qbReport" data-action="btnMyReport">⬇️ تقرير</button>
         </div>
       </div>
     </section>
 
-    <!-- Grid -->
-    <section class="grid2">
+    <!-- Layout 3 Columns -->
+    <section class="triLayout">
+      <!-- Left: Steps -->
+      <aside class="card card--soft">
+        <header class="card__head">
+          <h2 class="card__title">🧭 خطواتك</h2>
+        </header>
+        <div class="card__body">
+          <ol class="steps">
+            <li class="step" id="st1"><span class="step__dot"></span><span>اكتب الشكوى</span></li>
+            <li class="step" id="st2"><span class="step__dot"></span><span>شغّل القياسات</span></li>
+            <li class="step" id="st3"><span class="step__dot"></span><span>شغّل الفرز الذكي</span></li>
+            <li class="step" id="st4"><span class="step__dot"></span><span>ابدأ زيارة</span></li>
+          </ol>
 
-      <!-- Symptoms / Complaint -->
-      <section class="card">
+          <div class="divider"></div>
+
+          <div class="stack">
+            <a class="btn ghost" href="visit.html">فتح صفحة الزيارة</a>
+            <a class="btn ghost" href="parent.html">بوابة ولي الأمر</a>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Center: Complaint + Actions -->
+      <section class="card card--focus">
         <header class="card__head">
           <h2 class="card__title">📝 الشكوى / الأعراض</h2>
           <div class="card__tools">
-            <button class="btn ghost sm" id="btnSaveSymptoms">حفظ</button>
+            <button class="btn ghost sm" data-action="student:save-symptoms">حفظ</button>
           </div>
         </header>
 
         <div class="card__body">
           <label class="field">
             <div class="field__label">وش تحس فيه؟ (اكتبها بوضوح)</div>
-            <textarea id="symptoms" class="input" rows="5" placeholder="مثال: صداع + حرارة + سعال + ألم حلق…"></textarea>
+            <textarea id="symptoms" class="input input--xl" rows="6"
+              placeholder="مثال: صداع + حرارة + سعال + ألم حلق…"></textarea>
           </label>
 
-          <div class="rowActions">
-            <!-- نربطها تحت بــ Actions.runTriage() -->
-            <button class="btn" id="btnRunSensors">📟 تشغيل القياسات (محاكاة)</button>
-            <!-- نربطها تحت بــ Actions.createCaseFromLast() -->
-            <button class="btn primary" id="btnSubmitAI">🤖 فرز ذكي (AI)</button>
+          <div class="rowActions rowActions--split">
+            <button class="btn" id="btnRunSensors" data-action="student:run-sensors">📟 تشغيل القياسات</button>
+            <button class="btn primary" id="btnSubmitAI" data-action="student:submit-ai">🤖 تشغيل الفرز الذكي</button>
           </div>
 
-          <div class="hint">✅ القياسات هنا محاكاة للتجربة. لاحقًا نربطها IoT.</div>
+          <div class="hint">
+            ✅ القياسات هنا محاكاة (Demo). لاحقًا نربط IoT الحقيقي.
+          </div>
         </div>
       </section>
 
-      <!-- Vitals -->
-      <section class="card">
+      <!-- Right: Results -->
+      <aside class="card card--soft">
         <header class="card__head">
-          <h2 class="card__title">📊 القياسات (Vitals)</h2>
+          <h2 class="card__title">📊 النتيجة والقياسات</h2>
           <div class="card__tools">
-            <span class="pill">Demo</span>
+            <span class="pill"><span class="dot warn"></span> Demo</span>
           </div>
         </header>
 
         <div class="card__body">
-          <div class="vitals">
+          <div class="vitals vitals--mini">
             <div class="vital">
-              <div class="vital__label">نبض القلب</div>
+              <div class="vital__label">نبض</div>
               <div class="vital__value" id="v_hr">—</div>
               <div class="vital__unit">BPM</div>
             </div>
-
             <div class="vital">
-              <div class="vital__label">الأكسجين</div>
+              <div class="vital__label">O₂</div>
               <div class="vital__value" id="v_spo2">—</div>
               <div class="vital__unit">%</div>
             </div>
-
             <div class="vital">
-              <div class="vital__label">الحرارة</div>
+              <div class="vital__label">حرارة</div>
               <div class="vital__value" id="v_temp">—</div>
               <div class="vital__unit">°C</div>
             </div>
-
             <div class="vital">
-              <div class="vital__label">الضغط</div>
+              <div class="vital__label">ضغط</div>
               <div class="vital__value" id="v_bp">—</div>
               <div class="vital__unit">mmHg</div>
             </div>
@@ -152,7 +166,7 @@
 
           <div class="divider"></div>
 
-          <div class="miniCards">
+          <div class="miniCards miniCards--2">
             <div class="miniCard">
               <div class="miniCard__label">الحالة</div>
               <div class="miniCard__value" id="v_status">—</div>
@@ -170,143 +184,147 @@
               <div class="miniCard__value" id="v_decision">—</div>
             </div>
           </div>
+
+          <div class="divider"></div>
+
+          <section class="noticeBox">
+            <div class="noticeBox__title">🔔 التنبيهات</div>
+            <div id="notifyList" class="list">
+              <div class="empty muted">لا يوجد تنبيهات حالياً.</div>
+            </div>
+          </section>
+
+          <div class="divider"></div>
+
+          <button class="btn danger" id="btnLogoutBottom" data-action="common:logout">خروج</button>
         </div>
-      </section>
-
-      <!-- Visit -->
-      <section class="card">
-        <header class="card__head">
-          <h2 class="card__title">📅 الزيارة / الإحالة</h2>
-          <div class="card__tools">
-            <a class="btn ghost sm" href="visit.html">فتح صفحة الزيارة</a>
-          </div>
-        </header>
-
-        <div class="card__body">
-          <p class="muted">
-            بعد الفرز الذكي تقدر تبدأ زيارة — (Demo) ثم تروح لصفحة الزيارة.
-          </p>
-
-          <div class="rowActions">
-            <button class="btn primary" id="btnStartVisit">🚀 بدء زيارة</button>
-            <a class="btn" href="parent.html">👨‍👩‍👧‍👦 بوابة ولي الأمر</a>
-          </div>
-
-          <div class="hint">إذا ما فيه حالة: سَوّي قياسات وفرز أول.</div>
-        </div>
-      </section>
-
-      <!-- Notifications (Demo placeholder) -->
-      <section class="card">
-        <header class="card__head">
-          <h2 class="card__title">🔔 التنبيهات</h2>
-          <div class="card__tools">
-            <span class="pill">لحظي</span>
-          </div>
-        </header>
-
-        <div class="card__body">
-          <div id="notifyList" class="list">
-            <div class="empty muted">لا يوجد تنبيهات حالياً.</div>
-          </div>
-        </div>
-      </section>
-
+      </aside>
     </section>
   </main>
 
-  <!-- ✅ Required scripts (ONE TIME, order matters) -->
+  <!-- Scripts (order matters) -->
+  <script src="./bus.js"></script>
+  <script src="./auth.js"></script>
+  <script src="./triage-ai.js"></script>
+  <script src="./sensor-sim.js"></script>
+  <script src="./student-notify.js"></script>
+
+  <!-- Firebase init (ONE TIME ONLY) -->
   <script type="module" src="./firebase-init.js"></script>
-  <script src="./rbac.js"></script>
+
+  <!-- Actions wiring (ONE TIME ONLY) -->
   <script src="./actions.js"></script>
 
-  <!-- Page glue: map your custom buttons -> Actions + update UI -->
+  <!-- Small UI binder -->
   <script>
     (function(){
-      const $ = (s,r=document)=>r.querySelector(s);
+      "use strict";
+      function $(s,r=document){return r.querySelector(s);}
+      function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));}
 
-      // Theme toggle (simple)
-      $("#btnTheme")?.addEventListener("click", () => {
-        const html = document.documentElement;
-        const cur = html.getAttribute("data-theme") || "dark";
-        const nxt = cur === "dark" ? "light" : "dark";
-        html.setAttribute("data-theme", nxt);
-        localStorage.setItem("THEME", nxt);
-      });
-
-      // Restore theme
-      const savedTheme = localStorage.getItem("THEME");
-      if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
-
-      // Save symptoms locally (and used by actions via complaint)
-      $("#btnSaveSymptoms")?.addEventListener("click", () => {
-        localStorage.setItem("SYMPTOMS", ($("#symptoms")?.value || "").trim());
-        alert("تم الحفظ ✅");
-      });
-
-      // IMPORTANT: actions.js reads complaint from #complaint or #txtComplaint
-      // so we provide a hidden alias input for compatibility
-      const ta = $("#symptoms");
-      if (ta && !$("#txtComplaint")) {
-        const alias = document.createElement("textarea");
-        alias.id = "txtComplaint";
-        alias.className = "input";
-        alias.style.display = "none";
-        ta.insertAdjacentElement("afterend", alias);
-      }
-      function syncComplaint(){
-        const v = ($("#symptoms")?.value || localStorage.getItem("SYMPTOMS") || "").trim();
-        const alias = $("#txtComplaint");
-        if (alias) alias.value = v;
-      }
-      $("#symptoms")?.addEventListener("input", syncComplaint);
-      syncComplaint();
-
-      // Wire your custom buttons to Actions
-      $("#btnRunSensors")?.addEventListener("click", async () => {
-        syncComplaint();
-        await window.Actions?.runTriage?.(); // creates triage doc + emits triage:update
-      });
-
-      $("#btnSubmitAI")?.addEventListener("click", async () => {
-        syncComplaint();
-        // creates a case using last triage (or sim if none)
-        await window.Actions?.createCaseFromLast?.(); // emits case:update
-      });
-
-      $("#btnStartVisit")?.addEventListener("click", async () => {
-        syncComplaint();
-        await window.Actions?.createVisit?.(); // creates visit doc
-        location.href = "visit.html";
-      });
-
-      // Update UI from events
-      function paintFromTriage(detail){
-        const v = detail?.vitals || {};
-        const t = detail?.triage || {};
-        if ($("#v_hr")) $("#v_hr").textContent = v.hr ?? "—";
-        if ($("#v_spo2")) $("#v_spo2").textContent = v.spo2 ?? "—";
-        if ($("#v_temp")) $("#v_temp").textContent = v.temp ?? "—";
-        if ($("#v_bp")) $("#v_bp").textContent = v.bp ?? "—";
-
-        if ($("#v_status")) $("#v_status").textContent = "تم القياس";
-        if ($("#v_priority")) $("#v_priority").textContent = t.priority ?? "—";
-        if ($("#v_risk")) $("#v_risk").textContent = t.risk ?? "—";
-        if ($("#v_decision")) $("#v_decision").textContent = `Score ${t.score ?? "—"}`;
+      function setStep(n){
+        ["st1","st2","st3","st4"].forEach((id,i)=>{
+          const el = $("#"+id);
+          if(!el) return;
+          el.classList.toggle("is-done", i < n-1);
+          el.classList.toggle("is-active", i === n-1);
+        });
       }
 
-      window.addEventListener("triage:update", (e) => paintFromTriage(e.detail));
-      window.addEventListener("case:update", (e) => {
-        // case:update from actions sometimes is patch-only; keep simple
-        if ($("#v_status")) $("#v_status").textContent = "تم إنشاء حالة";
-      });
+      function renderVitals() {
+        const db = window.SSC && window.SSC.db;
+        if (!db) return;
 
-      // Auto-fill name/role labels
-      const name = localStorage.getItem("USER_NAME") || "طالب";
-      document.querySelectorAll("[data-user-name]").forEach(el=>el.textContent = name);
-      document.querySelectorAll("[data-user-role]").forEach(el=>el.textContent = "student");
+        const userId = db.session?.currentUserId;
+        const c = db.cases?.find(x => x.owner?.id === userId) || db.cases?.[0];
+        if (!c) {
+          setStep(1);
+          $("#nextStepTxt").textContent = "ابدأ بكتابة الشكوى 👇";
+          return;
+        }
+
+        $("#v_hr").textContent = c.vitals?.hr ?? "—";
+        $("#v_spo2").textContent = c.vitals?.spo2 ?? "—";
+        $("#v_temp").textContent = c.vitals?.temp ?? "—";
+        $("#v_bp").textContent = c.vitals?.bp ?? "—";
+
+        $("#v_status").textContent = c.status ?? "—";
+        $("#v_priority").textContent = c.priority ?? "—";
+        $("#v_risk").textContent = c.risk ?? "—";
+        $("#v_decision").textContent = c.decision ?? "—";
+
+        const hasSymptoms = !!(c.symptoms && String(c.symptoms).trim().length);
+        const hasVitals = !!(c.vitals && (c.vitals.hr || c.vitals.spo2 || c.vitals.temp || c.vitals.bp));
+        const hasAI = !!(c.decision || c.priority || c.risk);
+
+        const step = !hasSymptoms ? 1 : (!hasVitals ? 2 : (!hasAI ? 3 : 4));
+        setStep(step);
+
+        const nextTxt = step===1 ? "اكتب الشكوى ثم احفظ" :
+                        step===2 ? "شغّل القياسات" :
+                        step===3 ? "شغّل الفرز الذكي" :
+                                  "ابدأ زيارة الآن ✅";
+        $("#nextStepTxt").textContent = nextTxt;
+
+        $("#lastUpdateTxt").textContent = c.updatedAt || c.createdAt || "—";
+      }
+
+      function renderNotifications() {
+        const db = window.SSC && window.SSC.db;
+        const box = $("#notifyList");
+        if (!db || !box) return;
+
+        const role = "student";
+        const items = (db.notifications||[]).filter(n => n.toRole === role).slice(0,8);
+
+        if (!items.length) {
+          box.innerHTML = `<div class="empty muted">لا يوجد تنبيهات حالياً.</div>`;
+          return;
+        }
+
+        box.innerHTML = items.map(n => `
+          <div class="rowCard">
+            <div class="rowTitle">${escapeHtml(n.title)}</div>
+            <div class="rowMeta">${escapeHtml(n.message)} • <span class="muted">${escapeHtml(n.at)}</span></div>
+          </div>
+        `).join("");
+      }
+
+      // Primary flow button
+      function wirePrimary(){
+        const b = $("#btnPrimaryFlow");
+        if(!b) return;
+        b.addEventListener("click", () => {
+          // 1) focus symptoms
+          const t = $("#symptoms");
+          if (t) { t.scrollIntoView({behavior:"smooth", block:"center"}); t.focus(); }
+        });
+      }
+
+      // Firebase state badge
+      async function showFB(){
+        const el = $("#fbState");
+        if(!el) return;
+        try{
+          // wait a moment for module to load
+          let tries=0;
+          while(!window.FB && tries++<40) await new Promise(r=>setTimeout(r,50));
+          el.textContent = window.FB ? "متصل" : "غير جاهز";
+        }catch(_){
+          el.textContent = "غير جاهز";
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        wirePrimary();
+        renderVitals();
+        renderNotifications();
+        showFB();
+
+        window.bus?.on?.("case:update", () => renderVitals());
+        window.bus?.on?.("notify:update", () => renderNotifications());
+      });
     })();
   </script>
-<script type="module" src="./firebase-init.js"></script>
 </body>
 </html>
