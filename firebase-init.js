@@ -144,3 +144,10 @@ window.FB = {
 };
 
 console.log("✅ Firebase initialized. (window.FB ready)");
+// Auto log page visit
+ensureAuth().then(() => {
+  logSession({
+    page: document.body?.dataset?.page || "unknown",
+    role: localStorage.getItem("ROLE") || null
+  });
+});
