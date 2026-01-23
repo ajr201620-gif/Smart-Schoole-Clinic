@@ -1,60 +1,54 @@
-/* =========================================================
-   Smart School Clinic OS — Sensors Simulator (Offline)
-   - Generates realistic vitals for demo
-   ========================================================= */
+(() => {
+  "use strict";
 
-(function(){
-  const rand = (min, max)=> Math.round((Math.random()*(max-min)+min)*10)/10;
-  const pick = (arr)=> arr[Math.floor(Math.random()*arr.length)];
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const round1 = (n) => Math.round(n * 10) / 10;
 
-  function generate(){
-    // Base ranges (school-aged)
-    let temp = rand(36.4, 38.8);
-    let hr   = Math.round(rand(72, 118));
-    let spo2 = Math.round(rand(93, 100));
-    let sys  = Math.round(rand(95, 125));
-    let dia  = Math.round(rand(60, 80));
-
-    // Introduce occasional abnormality (demo realism)
-    const anomaly = Math.random();
-    if(anomaly < 0.12){           // fever spike
-      temp = rand(38.5, 39.6);
-    }else if(anomaly < 0.20){     // low SpO2
-      spo2 = Math.round(rand(88, 92));
-    }else if(anomaly < 0.28){     // tachycardia
-      hr = Math.round(rand(120, 145));
-    }else if(anomaly < 0.34){     // BP abnormal
-      sys = pick([rand(85,90), rand(140,165)]);
-      dia = pick([rand(50,55), rand(85,95)]);
+  const simulate = (preset = "mixed") => {
+    // Presets: normal / fever / asthma / stressed / mixed
+    if (preset === "normal") {
+      return {
+        hr: Math.round(rand(68, 92)),
+        spo2: Math.round(rand(96, 99)),
+        temp: round1(rand(36.4, 37.2)),
+        bpSys: Math.round(rand(105, 125)),
+        bpDia: Math.round(rand(65, 82))
+      };
     }
 
-    return {
-      temp: Number(temp),
-      hr: Number(hr),
-      spo2: Number(spo2),
-      bp: `${sys}/${dia}`,
-      generatedAt: new Date().toISOString()
-    };
-  }
+    if (preset === "fever") {
+      return {
+        hr: Math.round(rand(95, 125)),
+        spo2: Math.round(rand(95, 98)),
+        temp: round1(rand(38.0, 39.4)),
+        bpSys: Math.round(rand(110, 135)),
+        bpDia: Math.round(rand(70, 90))
+      };
+    }
 
-  // Optional: generate a second reading closer to first (confirmation)
-  function generateSecond(prev){
-    if(!prev) return generate();
-    const jitter = (v, j)=> Math.round((v + rand(-j, j))*10)/10;
+    if (preset === "asthma") {
+      return {
+        hr: Math.round(rand(90, 135)),
+        spo2: Math.round(rand(90, 95)),
+        temp: round1(rand(36.6, 37.6)),
+        bpSys: Math.round(rand(110, 140)),
+        bpDia: Math.round(rand(70, 92))
+      };
+    }
 
-    const [sys, dia] = (prev.bp||"110/70").split("/").map(Number);
+    if (preset === "stressed") {
+      return {
+        hr: Math.round(rand(95, 135)),
+        spo2: Math.round(rand(96, 99)),
+        temp: round1(rand(36.2, 37.1)),
+        bpSys: Math.round(rand(140, 170)),
+        bpDia: Math.round(rand(90, 110))
+      };
+    }
 
-    return {
-      temp: clamp(jitter(prev.temp, 0.3), 35.8, 40.2),
-      hr:   Math.round(clamp(jitter(prev.hr, 6), 60, 170)),
-      spo2: Math.round(clamp(jitter(prev.spo2, 2), 85, 100)),
-      bp:   `${Math.round(clamp(jitter(sys, 6), 80, 180))}/${Math.round(clamp(jitter(dia, 5), 45, 110))}`,
-      generatedAt: new Date().toISOString(),
-      second: true
-    };
-  }
+    const bag = ["normal", "fever", "asthma", "stressed"];
+    return simulate(SSC.pick(bag));
+  };
 
-  function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
-
-  window.SCSIM = { generate, generateSecond };
+  window.SSC_SENSORS = { simulate };
 })();
