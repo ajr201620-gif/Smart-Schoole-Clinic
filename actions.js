@@ -1,719 +1,357 @@
-/* actions.js — Smart School Clinic OS
-   Event delegation for data-action across roles
-   Storage-driven demo backend (localStorage)
-*/
-
 (() => {
   "use strict";
 
-  const $ = (s, r = document) => r.querySelector(s);
-  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
 
-  /* ---------- Store ---------- */
-  const Store = {
-    keys: {
-      cases: "SSCOS_CASES",
-      queue: "SSCOS_QUEUE",
-      audit: "SSCOS_AUDIT",
-      selected: "SSCOS_SELECTED_CASE",
-      parentInbox: "SSCOS_PARENT_INBOX"
-    },
-    read(key, fallback) {
-      try {
-        const v = localStorage.getItem(key);
-        return v ? JSON.parse(v) : fallback;
-      } catch {
-        return fallback;
-      }
-    },
-    write(key, value) {
-      localStorage.setItem(key, JSON.stringify(value));
-      return value;
-    },
-    now() {
-      return new Date().toISOString();
-    },
-    uid(prefix = "C") {
-      return prefix + "-" + Math.random().toString(16).slice(2, 10).toUpperCase();
-    },
-    audit(type, payload = {}) {
-      const logs = Store.read(Store.keys.audit, []);
-      logs.unshift({ id: Store.uid("A"), t: Store.now(), type, ...payload });
-      Store.write(Store.keys.audit, logs.slice(0, 500));
-    }
+  const getActiveCaseId = () => SSC.getDB().settings?.activeCaseId || null;
+  const setActiveCaseId = (id) => SSC.updateDB(db => { db.settings.activeCaseId = id; return db; });
+
+  const ensureToastHost = () => {
+    if ($(".toastWrap")) return;
+    const wrap = document.createElement("div");
+    wrap.className = "toastWrap";
+    document.body.appendChild(wrap);
+
+    SSC.on("toast", (t) => {
+      const el = document.createElement("div");
+      el.className = "toast";
+      el.innerHTML = `<div class="t">${t.title}</div><div class="m">${t.message}</div>`;
+      wrap.prepend(el);
+      setTimeout(() => el.remove(), 4200);
+    });
   };
 
-  /* ---------- Helpers ---------- */
-  const UI = {
-    toast(id, msg) {
-      const el = $(id);
-      if (el) el.textContent = msg;
-    },
-    set(id, val) {
-      const el = $(id);
-      if (el) el.textContent = val ?? "—";
-    },
-    box(id, val) {
-      const el = $(id);
-      if (el) el.textContent = val ?? "—";
-    }
+  const renderBadges = () => {
+    const role = SSC_AUTH.getRole();
+    const elRole = $("#roleBadge");
+    const elP = $("#permBadge");
+    if (elRole) elRole.textContent = `Role: ${role}`;
+    if (elP) elP.textContent = SSC.getDB().settings?.demoMode ? "Local Demo" : "Live";
   };
 
-  function clamp(n, a, b) {
-    return Math.max(a, Math.min(b, n));
-  }
+  // ---------- Case helpers ----------
+  const createCaseFromStudentUI = () => {
+    if (!SSC_AUTH.can("case.create")) return SSC.toast("صلاحيات", "غير مسموح");
 
-  /* ---------- Data Model ---------- */
-  function getCases() {
-    return Store.read(Store.keys.cases, []);
-  }
-  function setCases(cases) {
-    return Store.write(Store.keys.cases, cases);
-  }
-  function getQueue() {
-    return Store.read(Store.keys.queue, []);
-  }
-  function setQueue(q) {
-    return Store.write(Store.keys.queue, q);
-  }
-  function getSelectedCaseId() {
-    return localStorage.getItem(Store.keys.selected) || "";
-  }
-  function setSelectedCaseId(id) {
-    localStorage.setItem(Store.keys.selected, id || "");
-  }
-  function findCase(id) {
-    return getCases().find((c) => c.id === id);
-  }
-
-  function upsertCase(next) {
-    const cases = getCases();
-    const i = cases.findIndex((c) => c.id === next.id);
-    if (i >= 0) cases[i] = next;
-    else cases.unshift(next);
-    setCases(cases);
-    return next;
-  }
-
-  /* ---------- Demo AI ---------- */
-  function triageAI({ complaint = "", vitals = {} }) {
-    const hr = Number(vitals.hr ?? 0);
-    const spo2 = Number(vitals.spo2 ?? 0);
-    const temp = Number(vitals.temp ?? 0);
-
-    let risk = 20;
-    if (temp >= 39) risk += 25;
-    if (spo2 && spo2 < 92) risk += 40;
-    if (hr && hr > 130) risk += 25;
-    if (/ضيق|تنفس|إغماء|نزيف|تشنج|صدر/i.test(complaint)) risk += 35;
-
-    risk = clamp(risk, 0, 100);
-
-    const priority =
-      risk >= 75 ? "Critical" :
-      risk >= 50 ? "High" :
-      risk >= 30 ? "Medium" : "Low";
-
-    const decision =
-      priority === "Critical" ? "زيارة افتراضية عاجلة + إشعار الإدارة" :
-      priority === "High" ? "زيارة افتراضية اليوم" :
-      priority === "Medium" ? "متابعة + إرشادات" : "إرشادات منزلية";
-
-    const recommendation =
-      priority === "Critical" ? "يوصى بإجراء تقييم فوري. راقب التنفس/الوعي، وفعّل التواصل مع ولي الأمر." :
-      priority === "High" ? "يوصى بزيارة افتراضية مع الطبيب. اطلب قراءة ثانية للتأكيد عند الحاجة." :
-      priority === "Medium" ? "يوصى بالراحة، سوائل، وقياس الحرارة خلال 4–6 ساعات." :
-      "يوصى بإرشادات عامة ومتابعة الأعراض عند التغير.";
-
-    return { risk, priority, decision, recommendation };
-  }
-
-  /* ---------- Demo Sensors ---------- */
-  function genSensors() {
-    const hr = Math.round(70 + Math.random() * 70);        // 70-140
-    const spo2 = Math.round(92 + Math.random() * 8);       // 92-100
-    const temp = (36 + Math.random() * 3.5).toFixed(1);    // 36-39.5
-    const bpS = Math.round(95 + Math.random() * 45);       // 95-140
-    const bpD = Math.round(55 + Math.random() * 30);       // 55-85
-    return { hr, spo2, temp, bp: `${bpS}/${bpD}` };
-  }
-
-  /* ---------- Renderers ---------- */
-  function renderDoctorQueue() {
-    const wrap = $("#doctorQueue");
-    if (!wrap) return;
-
-    const q = getQueue();
-    if (!q.length) {
-      wrap.innerHTML = `<div class="muted">لا توجد طلبات حالياً.</div>`;
+    const complaint = ($("#complaint")?.value || "").trim();
+    if (!complaint) {
+      SSC.toast("الشكوى", "اكتب الشكوى أولاً");
       return;
     }
 
-    wrap.innerHTML = q.map((it) => `
-      <button class="list-item" data-action="doctor.selectCase" data-id="${it.caseId}">
-        <div class="row between">
-          <div>
-            <div class="title">طلب زيارة — ${it.studentName || "طالب"}</div>
-            <div class="muted">${new Date(it.t).toLocaleString()}</div>
-          </div>
-          <div class="pill">${it.priority || "—"}</div>
-        </div>
-      </button>
-    `).join("");
-  }
+    const vitals = {
+      hr: Number($("#v_hr")?.textContent || $("#hr")?.value || 0) || 0,
+      spo2: Number($("#v_spo2")?.textContent || $("#spo2")?.value || 0) || 0,
+      temp: Number($("#v_temp")?.textContent || $("#temp")?.value || 0) || 0,
+      bpSys: Number($("#v_bpSys")?.textContent || $("#bpSys")?.value || 0) || 0,
+      bpDia: Number($("#v_bpDia")?.textContent || $("#bpDia")?.value || 0) || 0,
+    };
 
-  function renderAdminCases() {
-    const wrap = $("#aCaseList");
-    if (!wrap) return;
+    const triage = SSC_TRIAGE.runTriage({ ...vitals, complaintText: complaint, complaint });
 
-    const cases = getCases();
-    if (!cases.length) {
-      wrap.innerHTML = `<div class="muted">لا توجد حالات بعد.</div>`;
-      return;
+    const c = {
+      id: SSC.uid("case"),
+      createdAt: SSC.nowISO(),
+      updatedAt: SSC.nowISO(),
+      student: { name: SSC.getDB().user?.name || "طالب" },
+      complaint,
+      vitals,
+      triage,
+      status: "ready",
+      history: [{ at: SSC.nowISO(), what: "case.created" }]
+    };
+
+    SSC.updateDB((db) => {
+      db.cases.unshift(c);
+      db.cases = db.cases.slice(0, 300);
+      db.settings.activeCaseId = c.id;
+      return db;
+    });
+
+    SSC.audit("case.create", { caseId: c.id });
+    SSC.toast("تم إنشاء الحالة", `Risk ${triage.risk}/100 — ${triage.priorityLabel}`);
+    SSC.emit("case.updated", c);
+
+    renderStudentCase(c);
+  };
+
+  const renderStudentCase = (c) => {
+    if (!c) return;
+
+    const setText = (id, txt) => { const el = $(id); if (el) el.textContent = txt; };
+    setText("#out_risk", c.triage?.risk ?? "—");
+    setText("#out_priority", c.triage?.priorityLabel ?? "—");
+    setText("#out_rec", c.triage?.recommendation ?? "—");
+    setText("#out_decision", c.triage?.suggestedDecision ?? "—");
+
+    const vit = c.vitals || {};
+    setText("#v_hr", vit.hr ?? "—");
+    setText("#v_spo2", vit.spo2 ?? "—");
+    setText("#v_temp", vit.temp ?? "—");
+    setText("#v_bp", (vit.bpSys && vit.bpDia) ? `${vit.bpSys}/${vit.bpDia}` : "—");
+  };
+
+  const simulateSensorsToStudentUI = (preset="mixed") => {
+    if (!SSC_AUTH.can("case.simulateSensors")) return SSC.toast("صلاحيات", "غير مسموح");
+
+    const vit = SSC_SENSORS.simulate(preset);
+
+    const setText = (id, txt) => { const el = $(id); if (el) el.textContent = String(txt); };
+    setText("#v_hr", vit.hr);
+    setText("#v_spo2", vit.spo2);
+    setText("#v_temp", vit.temp);
+    setText("#v_bp", `${vit.bpSys}/${vit.bpDia}`);
+
+    SSC.audit("sensors.simulate", { preset });
+    SSC.toast("محاكاة الحساسات", `HR ${vit.hr} • SpO₂ ${vit.spo2}% • Temp ${vit.temp}`);
+  };
+
+  const requestVisitFromStudent = () => {
+    if (!SSC_AUTH.can("visit.request")) return SSC.toast("صلاحيات", "غير مسموح");
+    const caseId = getActiveCaseId();
+    if (!caseId) return SSC.toast("زيارة افتراضية", "أنشئ حالة أولاً");
+
+    const c = SSC.getDB().cases.find(x => x.id === caseId);
+    const v = SSC_VISIT.createVisit({ caseId, fromRole: "student", studentName: c?.student?.name || "طالب" });
+
+    // Open visit page as student
+    window.location.href = `visit.html?visit=${encodeURIComponent(v.id)}&as=student`;
+  };
+
+  // ---------- Doctor side ----------
+  const getSelectedDoctorCase = () => {
+    const id = $("#doctorCaseSelect")?.value || getActiveCaseId();
+    if (!id) return null;
+    return SSC.getDB().cases.find(x => x.id === id) || null;
+  };
+
+  const doctorRequestRecheck = () => {
+    if (!SSC_AUTH.can("case.requestRecheck")) return SSC.toast("صلاحيات", "غير مسموح");
+    const c = getSelectedDoctorCase();
+    if (!c) return SSC.toast("قراءة ثانية", "اختر حالة");
+
+    SSC.updateDB(db => {
+      const x = db.cases.find(k => k.id === c.id);
+      if (!x) return db;
+      x.history.unshift({ at: SSC.nowISO(), what: "doctor.requestRecheck" });
+      x.status = "recheck_requested";
+      return db;
+    });
+
+    SSC.audit("case.requestRecheck", { caseId: c.id });
+    SSC.toast("طلب قراءة ثانية", "تم إرسال طلب إعادة قياس للطالب (نسخة عرض)");
+    SSC.emit("case.updated", SSC.getDB().cases.find(x=>x.id===c.id));
+  };
+
+  const doctorIssueSlip = (type) => {
+    if (!SSC_AUTH.can("slip.issue")) return SSC.toast("صلاحيات", "غير مسموح");
+    const c = getSelectedDoctorCase();
+    if (!c) return SSC.toast("إجراء", "اختر حالة");
+
+    const days = Number($("#slipDays")?.value || 1) || 1;
+    const notes = ($("#slipNotes")?.value || "").trim();
+
+    SSC_SLIPS.issueSlip({ caseId: c.id, type, days, notes });
+
+    SSC.updateDB(db => {
+      const x = db.cases.find(k => k.id === c.id);
+      if (!x) return db;
+      x.history.unshift({ at: SSC.nowISO(), what: `slip.${type}` });
+      x.status = (type === "إحالة") ? "referred" : "rested";
+      return db;
+    });
+
+    SSC.emit("case.updated", SSC.getDB().cases.find(x=>x.id===c.id));
+  };
+
+  const doctorAcceptLatestVisit = () => {
+    if (!SSC_AUTH.can("visit.accept")) return SSC.toast("صلاحيات", "غير مسموح");
+    const v = SSC.getDB().visits.find(x => x.status === "requested");
+    if (!v) return SSC.toast("الزيارات", "لا يوجد طلبات جديدة");
+    SSC_VISIT.accept(v.id);
+    window.location.href = `visit.html?visit=${encodeURIComponent(v.id)}&as=doctor`;
+  };
+
+  const doctorRejectLatestVisit = () => {
+    if (!SSC_AUTH.can("visit.reject")) return SSC.toast("صلاحيات", "غير مسموح");
+    const v = SSC.getDB().visits.find(x => x.status === "requested");
+    if (!v) return SSC.toast("الزيارات", "لا يوجد طلبات جديدة");
+    const reason = prompt("سبب الرفض؟ (اختياري)") || "";
+    SSC_VISIT.reject(v.id, reason);
+  };
+
+  const doctorInviteParent = () => {
+    if (!SSC_AUTH.can("visit.inviteParent")) return SSC.toast("صلاحيات", "غير مسموح");
+    const id = $("#visitId")?.value?.trim();
+    if (!id) return SSC.toast("دعوة ولي الأمر", "اكتب Visit ID أولاً");
+    SSC_VISIT.inviteParent(id);
+  };
+
+  const doctorAskCopilot = () => {
+    if (!SSC_AUTH.can("copilot.ask")) return SSC.toast("صلاحيات", "غير مسموح");
+
+    const c = getSelectedDoctorCase();
+    if (!c) return SSC.toast("Copilot", "اختر حالة أولاً");
+
+    const q = ($("#copilotQ")?.value || "").trim();
+    const txt = SSC_COPILOT.answer({
+      complaint: c.complaint,
+      vitals: c.vitals,
+      triage: c.triage,
+      question: q
+    });
+
+    const out = $("#copilotOut");
+    if (out) out.value = txt;
+
+    SSC.audit("copilot.ask", { caseId: c.id });
+    SSC.toast("Copilot", "تم توليد مساعدة للطبيب");
+  };
+
+  // ---------- Admin ----------
+  const adminRefresh = () => {
+    if (!SSC_AUTH.can("dash.view")) return;
+    const s = SSC_ADMIN.stats();
+
+    const set = (id,val) => { const el = $(id); if(el) el.textContent = val; };
+    set("#adm_total", s.totalCases);
+    set("#adm_critical", s.critical);
+    set("#adm_urgent", s.urgent);
+    set("#adm_routine", s.routine);
+    set("#adm_slips", s.slips);
+    set("#adm_follow", s.followUp);
+
+    // render last 12 cases
+    const tbody = $("#adm_cases");
+    if (tbody) {
+      const rows = (SSC.getDB().cases || []).slice(0,12).map(c => {
+        const pri = c.triage?.priorityLabel || "—";
+        const r = c.triage?.risk ?? "—";
+        const st = c.status || "—";
+        return `<tr>
+          <td><span class="badge">${c.id.slice(-6)}</span></td>
+          <td>${c.student?.name || "—"}</td>
+          <td>${pri} • ${r}</td>
+          <td>${st}</td>
+          <td class="small">${new Date(c.createdAt).toLocaleString("ar-SA")}</td>
+        </tr>`;
+      }).join("");
+      tbody.innerHTML = rows || `<tr><td colspan="5" class="small">لا توجد بيانات بعد</td></tr>`;
     }
 
-    wrap.innerHTML = cases.slice(0, 15).map((c) => `
-      <button class="list-item" data-action="admin.selectCase" data-id="${c.id}">
-        <div class="row between">
-          <div>
-            <div class="title">${c.studentName || "طالب"} — ${c.priority || "—"}</div>
-            <div class="muted">${(c.complaint || "").slice(0, 80)}${(c.complaint||"").length>80?"…":""}</div>
-          </div>
-          <div class="pill">${c.decision || "—"}</div>
-        </div>
-      </button>
-    `).join("");
-  }
-
-  function renderAdminKPIs() {
-    const cases = getCases();
-    const q = getQueue();
-
-    const critical = cases.filter(c => c.priority === "Critical").length;
-    const followup = cases.filter(c => (c.tags||[]).includes("followup")).length;
-
-    UI.set("#aRequests", q.length);
-    UI.set("#aCases", cases.length);
-    UI.set("#aCritical", critical);
-    UI.set("#aFollowup", followup);
-  }
-
-  function renderAdminHeatmap() {
-    const el = $("#aHeatmap");
-    if (!el) return;
-
-    const cases = getCases();
-    const byP = { Critical:0, High:0, Medium:0, Low:0 };
-    for (const c of cases) byP[c.priority] = (byP[c.priority]||0) + 1;
-
-    el.classList.remove("muted");
-    el.textContent = `Critical:${byP.Critical}  |  High:${byP.High}  |  Medium:${byP.Medium}  |  Low:${byP.Low}`;
-  }
-
-  function renderParentSummary() {
-    // show last case related to parent (demo: latest case)
-    const cases = getCases();
-    const c = cases[0];
-    if (!c) return;
-
-    UI.set("#pCaseId", c.id);
-    UI.set("#pStatus", c.status || "—");
-    UI.set("#pPriority", c.priority || "—");
-    UI.box("#pRecommendation", c.recommendation || "—");
-    UI.box("#pDxPlan", `${c.dx || "—"}\n${c.plan || ""}`.trim());
-  }
-
-  function renderDoctorSelected(caseId) {
-    const c = findCase(caseId);
-    if (!c) return;
-
-    UI.set("#dStudentName", c.studentName || "—");
-    UI.set("#dTime", c.t ? new Date(c.t).toLocaleString() : "—");
-    UI.box("#dComplaint", c.complaint || "—");
-
-    UI.set("#dHR", c.vitals?.hr ?? "—");
-    UI.set("#dSpO2", c.vitals?.spo2 ?? "—");
-    UI.set("#dTemp", c.vitals?.temp ?? "—");
-    UI.set("#dBP", c.vitals?.bp ?? "—");
-
-    UI.set("#dRisk", c.risk ?? "—");
-    UI.set("#dPriority", c.priority ?? "—");
-    UI.set("#dDecision", c.decision ?? "—");
-    UI.box("#dRecommendation", c.recommendation ?? "—");
-  }
-
-  function renderAdminSelected(caseId) {
-    const c = findCase(caseId);
-    if (!c) return;
-
-    UI.set("#aStudent", c.studentName || "—");
-    UI.set("#aStatus", c.status || "—");
-    UI.set("#aDecision", c.decision || "—");
-    UI.box("#aSummary",
-      `شكوى: ${c.complaint || "—"}\n` +
-      `Vitals: HR ${c.vitals?.hr ?? "—"}, SpO2 ${c.vitals?.spo2 ?? "—"}, Temp ${c.vitals?.temp ?? "—"}, BP ${c.vitals?.bp ?? "—"}\n` +
-      `AI: Risk ${c.risk ?? "—"} | Priority ${c.priority ?? "—"}\n` +
-      `Dx/Plan: ${(c.dx||"—")} ${(c.plan||"")}`
-    );
-  }
-
-  /* ---------- Actions per role ---------- */
-  const Handlers = {
-
-    /* ===== Student ===== */
-    "student.generateSensors": () => {
-      const caseId = getSelectedCaseId() || Store.uid("CASE");
-      const vitals = genSensors();
-
-      // Create/update case for student
-      const existing = findCase(caseId);
-      const studentName = existing?.studentName || "طالب (Demo)";
-
-      const next = upsertCase({
-        id: caseId,
-        t: existing?.t || Store.now(),
-        studentName,
-        status: existing?.status || "Ready",
-        complaint: existing?.complaint || ($("#sComplaint")?.value || "صداع وتعب"),
-        vitals,
-        ...existing
-      });
-
-      setSelectedCaseId(next.id);
-      Store.audit("student.generateSensors", { caseId: next.id, vitals });
-
-      // Update UI if ids exist
-      UI.set("#sHR", vitals.hr);
-      UI.set("#sSpO2", vitals.spo2);
-      UI.set("#sTemp", vitals.temp);
-      UI.set("#sBP", vitals.bp);
-
-      UI.toast("#sResult", "✅ تم توليد قراءات افتراضية.");
-    },
-
-    "student.runTriage": () => {
-      const caseId = getSelectedCaseId();
-      const c = findCase(caseId);
-      if (!c) return UI.toast("#sResult", "⚠️ أولاً: ولّد القراءات أو أنشئ حالة.");
-
-      const ai = triageAI({ complaint: c.complaint, vitals: c.vitals });
-
-      const next = upsertCase({
-        ...c,
-        risk: ai.risk,
-        priority: ai.priority,
-        decision: ai.decision,
-        recommendation: ai.recommendation
-      });
-
-      Store.audit("student.triageAI", { caseId: next.id, ai });
-
-      // Update UI if ids exist
-      UI.set("#sRisk", ai.risk);
-      UI.set("#sPriority", ai.priority);
-      UI.box("#sRecommendation", ai.recommendation);
-
-      UI.toast("#sResult", "🤖 تم تحليل الحالة بواسطة AI.");
-    },
-
-    "student.requestVisit": () => {
-      const caseId = getSelectedCaseId();
-      const c = findCase(caseId);
-      if (!c) return UI.toast("#sResult", "⚠️ أنشئ حالة أولاً.");
-
-      // Ensure AI triage exists
-      const ai = c.priority ? { risk:c.risk, priority:c.priority, decision:c.decision, recommendation:c.recommendation }
-                            : triageAI({ complaint: c.complaint, vitals: c.vitals });
-
-      const next = upsertCase({ ...c, ...ai, status: "Visit Requested" });
-
-      // Push into doctor queue
-      const q = getQueue();
-      q.unshift({
-        id: Store.uid("REQ"),
-        t: Store.now(),
-        caseId: next.id,
-        studentName: next.studentName || "طالب",
-        priority: next.priority
-      });
-      setQueue(q.slice(0, 50));
-
-      Store.audit("student.requestVisit", { caseId: next.id });
-
-      UI.toast("#sResult", "📨 تم إرسال طلب زيارة للطبيب.");
-    },
-
-    /* ===== Doctor ===== */
-    "doctor.refresh": () => {
-      renderDoctorQueue();
-      const id = getSelectedCaseId();
-      if (id) renderDoctorSelected(id);
-      UI.toast("#dResult", "✅ تم تحديث قائمة الطلبات.");
-    },
-
-    "doctor.selectCase": (btn) => {
-      const id = btn?.dataset?.id;
-      if (!id) return;
-      setSelectedCaseId(id);
-      renderDoctorSelected(id);
-      UI.toast("#dResult", `✅ تم اختيار الحالة: ${id}`);
-    },
-
-    "doctor.requestSecondReading": () => {
-      const id = getSelectedCaseId();
-      const c = findCase(id);
-      if (!c) return UI.toast("#dResult", "⚠️ اختر حالة أولاً.");
-
-      const vitals2 = genSensors();
-      const merged = { ...c, vitals: { ...c.vitals, ...vitals2 }, status: "Second Reading" };
-      upsertCase(merged);
-
-      Store.audit("doctor.secondReading", { caseId: id, vitals2 });
-      renderDoctorSelected(id);
-      UI.toast("#dResult", "📟 تم طلب/توليد قراءة ثانية (Demo).");
-    },
-
-    "doctor.runAiAssist": () => {
-      const id = getSelectedCaseId();
-      const c = findCase(id);
-      if (!c) return UI.toast("#dResult", "⚠️ اختر حالة أولاً.");
-
-      const ai = triageAI({ complaint: c.complaint, vitals: c.vitals });
-      const next = upsertCase({ ...c, ...ai, status: "AI Assisted" });
-
-      Store.audit("doctor.aiAssist", { caseId: id, ai });
-      renderDoctorSelected(id);
-      UI.toast("#dResult", "🤖 تم تشغيل مساعد الطبيب AI.");
-    },
-
-    "doctor.acceptVisit": () => {
-      const id = getSelectedCaseId();
-      const c = findCase(id);
-      if (!c) return UI.toast("#dResult", "⚠️ اختر حالة أولاً.");
-
-      upsertCase({ ...c, status: "Visit Accepted" });
-      Store.audit("doctor.acceptVisit", { caseId: id });
-      UI.toast("#dResult", "✅ تم قبول الزيارة الافتراضية.");
-
-      // optional: remove from queue
-      setQueue(getQueue().filter(x => x.caseId !== id));
-      renderDoctorQueue();
-    },
-
-    "doctor.rejectVisit": () => {
-      const id = getSelectedCaseId();
-      const c = findCase(id);
-      if (!c) return UI.toast("#dResult", "⚠️ اختر حالة أولاً.");
-
-      upsertCase({ ...c, status: "Visit Rejected" });
-      Store.audit("doctor.rejectVisit", { caseId: id });
-      UI.toast("#dResult", "⛔ تم رفض الزيارة.");
-
-      setQueue(getQueue().filter(x => x.caseId !== id));
-      renderDoctorQueue();
-    },
-
-    "doctor.requestParentJoin": () => {
-      const id = getSelectedCaseId();
-      const c = findCase(id);
-      if (!c) return UI.toast("#dResult", "⚠️ اختر حالة أولاً.");
-
-      const inbox = Store.read(Store.keys.parentInbox, []);
-      inbox.unshift({ id: Store.uid("PMSG"), t: Store.now(), caseId: id, type: "join_request" });
-      Store.write(Store.keys.parentInbox, inbox.slice(0, 50));
-
-      upsertCase({ ...c, status: "Parent Requested" });
-      Store.audit("doctor.requestParentJoin", { caseId: id });
-
-      UI.toast("#dResult", "👨‍👩‍👦 تم إرسال طلب انضمام لولي الأمر.");
-    },
-
-    "doctor.escalateToAdmin": () => {
-      const id = getSelectedCaseId();
-      const c = findCase(id);
-      if (!c) return UI.toast("#dResult", "⚠️ اختر حالة أولاً.");
-
-      const tags = new Set([...(c.tags || []), "escalated"]);
-      upsertCase({ ...c, tags: [...tags], status: "Escalated to Admin" });
-      Store.audit("doctor.escalateAdmin", { caseId: id });
-
-      UI.toast("#dResult", "🏫 تم إشعار الإدارة (Escalated).");
-    },
-
-    "doctor.issueSlip": () => {
-      const id = getSelectedCaseId();
-      const c = findCase(id);
-      if (!c) return UI.toast("#dResult", "⚠️ اختر حالة أولاً.");
-
-      const dx = $("#dDx")?.value || c.dx || "—";
-      const plan = $("#dPlan")?.value || c.plan || "راحة + سوائل + متابعة";
-      const next = upsertCase({ ...c, dx, plan, decision: "Slip (راحة)", status: "Slip Issued" });
-
-      Store.audit("doctor.issueSlip", { caseId: id, dx, plan });
-      UI.toast("#dResult", "🧾 تم إصدار راحة.");
-      renderDoctorSelected(next.id);
-    },
-
-    "doctor.createReferral": () => {
-      const id = getSelectedCaseId();
-      const c = findCase(id);
-      if (!c) return UI.toast("#dResult", "⚠️ اختر حالة أولاً.");
-
-      const dx = $("#dDx")?.value || c.dx || "—";
-      const plan = $("#dPlan")?.value || c.plan || "إحالة لمركز صحي";
-      const next = upsertCase({ ...c, dx, plan, decision: "Referral (إحالة)", status: "Referred" });
-
-      Store.audit("doctor.createReferral", { caseId: id, dx, plan });
-      UI.toast("#dResult", "🏥 تم إنشاء إحالة.");
-      renderDoctorSelected(next.id);
-    },
-
-    "doctor.exportReport": () => {
-      const id = getSelectedCaseId();
-      const c = findCase(id);
-      if (!c) return UI.toast("#dResult", "⚠️ اختر حالة أولاً.");
-
-      const blob = new Blob([JSON.stringify(c, null, 2)], { type: "application/json" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `case-${id}.json`;
-      a.click();
-      URL.revokeObjectURL(a.href);
-
-      Store.audit("doctor.exportReport", { caseId: id });
-      UI.toast("#dResult", "📄 تم تصدير تقرير (JSON).");
-    },
-
-    /* ===== Admin ===== */
-    "admin.refresh": () => {
-      renderAdminKPIs();
-      renderAdminHeatmap();
-      renderAdminCases();
-
-      const id = getSelectedCaseId();
-      if (id) renderAdminSelected(id);
-
-      UI.toast("#aResult", "✅ تم تحديث لوحة الإدارة.");
-    },
-
-    "admin.buildHeatmap": () => {
-      renderAdminHeatmap();
-      UI.toast("#aResult", "🔥 تم تحديث الـ Heatmap.");
-    },
-
-    "admin.seedDemo": () => {
-      const demo = [];
-      for (let i=0;i<8;i++){
-        const vitals = genSensors();
-        const complaint = ["صداع","حرارة","ألم بطن","دوخة","سعال","ضيق تنفس","إرهاق","غثيان"][i % 8];
-        const ai = triageAI({ complaint, vitals });
-        demo.push({
-          id: Store.uid("CASE"),
-          t: Store.now(),
-          studentName: `طالب ${i+1}`,
-          complaint,
-          vitals,
-          ...ai,
-          status: "Ready",
-          tags: []
-        });
-      }
-      setCases(demo.concat(getCases()).slice(0, 200));
-      Store.audit("admin.seedDemo", { n: 8 });
-
-      renderAdminKPIs();
-      renderAdminHeatmap();
-      renderAdminCases();
-      UI.toast("#aResult", "✨ تم توليد بيانات تجريبية.");
-    },
-
-    "admin.selectCase": (btn) => {
-      const id = btn?.dataset?.id;
-      if (!id) return;
-      setSelectedCaseId(id);
-      renderAdminSelected(id);
-      UI.toast("#aResult", `✅ تم اختيار الحالة: ${id}`);
-    },
-
-    "admin.notifyParent": () => {
-      const id = getSelectedCaseId();
-      const c = findCase(id);
-      if (!c) return UI.toast("#aResult", "⚠️ اختر حالة أولاً.");
-
-      const inbox = Store.read(Store.keys.parentInbox, []);
-      inbox.unshift({ id: Store.uid("PMSG"), t: Store.now(), caseId: id, type: "admin_notify" });
-      Store.write(Store.keys.parentInbox, inbox.slice(0, 50));
-
-      Store.audit("admin.notifyParent", { caseId: id });
-      UI.toast("#aResult", "👨‍👩‍👦 تم إشعار ولي الأمر.");
-    },
-
-    "admin.notifyDoctor": () => {
-      const id = getSelectedCaseId();
-      const c = findCase(id);
-      if (!c) return UI.toast("#aResult", "⚠️ اختر حالة أولاً.");
-
-      // put back in queue as “Admin Reminder”
-      const q = getQueue();
-      q.unshift({ id: Store.uid("REQ"), t: Store.now(), caseId: id, studentName: c.studentName || "طالب", priority: c.priority || "—" });
-      setQueue(q.slice(0, 50));
-
-      Store.audit("admin.notifyDoctor", { caseId: id });
-      UI.toast("#aResult", "👨‍⚕️ تم إشعار الطبيب (إعادة إدراج الطلب).");
-    },
-
-    "admin.markFollowup": () => {
-      const id = getSelectedCaseId();
-      const c = findCase(id);
-      if (!c) return UI.toast("#aResult", "⚠️ اختر حالة أولاً.");
-
-      const tags = new Set([...(c.tags||[]), "followup"]);
-      upsertCase({ ...c, tags: [...tags], status: "Follow-up" });
-      Store.audit("admin.followup", { caseId: id });
-
-      renderAdminKPIs();
-      renderAdminSelected(id);
-      UI.toast("#aResult", "📌 تم وضع الحالة في المتابعة.");
-    },
-
-    "admin.markCritical": () => {
-      const id = getSelectedCaseId();
-      const c = findCase(id);
-      if (!c) return UI.toast("#aResult", "⚠️ اختر حالة أولاً.");
-
-      upsertCase({ ...c, priority: "Critical", risk: 90, status: "Critical" });
-      Store.audit("admin.critical", { caseId: id });
-
-      renderAdminKPIs();
-      renderAdminHeatmap();
-      renderAdminSelected(id);
-      UI.toast("#aResult", "🚨 تم تصعيد الحالة إلى Critical.");
-    },
-
-    "admin.exportAudit": () => {
-      const logs = Store.read(Store.keys.audit, []);
-      const blob = new Blob([JSON.stringify(logs, null, 2)], { type: "application/json" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `audit-log.json`;
-      a.click();
-      URL.revokeObjectURL(a.href);
-
-      UI.toast("#aResult", "🧾 تم تصدير سجل التدقيق.");
-    },
-
-    /* ===== Parent ===== */
-    "parent.refresh": () => {
-      renderParentSummary();
-      UI.toast("#pResult", "✅ تم تحديث بيانات ولي الأمر.");
-    },
-
-    "parent.approveConsent": () => {
-      const id = getSelectedCaseId() || (getCases()[0]?.id || "");
-      const c = findCase(id);
-      if (!c) return UI.toast("#pResult", "⚠️ لا توجد حالة.");
-
-      upsertCase({ ...c, consent: true, status: "Consent Approved" });
-      Store.audit("parent.approveConsent", { caseId: id });
-      UI.toast("#pResult", "✅ تمت الموافقة على الزيارة.");
-      renderParentSummary();
-    },
-
-    "parent.approveProcedure": () => {
-      const id = getSelectedCaseId() || (getCases()[0]?.id || "");
-      const c = findCase(id);
-      if (!c) return UI.toast("#pResult", "⚠️ لا توجد حالة.");
-
-      upsertCase({ ...c, procedureConsent: true, status: "Procedure Approved" });
-      Store.audit("parent.approveProcedure", { caseId: id });
-      UI.toast("#pResult", "🩹 تمت الموافقة على إجراء بسيط.");
-      renderParentSummary();
-    },
-
-    "parent.decline": () => {
-      const id = getSelectedCaseId() || (getCases()[0]?.id || "");
-      const c = findCase(id);
-      if (!c) return UI.toast("#pResult", "⚠️ لا توجد حالة.");
-
-      upsertCase({ ...c, consent: false, status: "Declined" });
-      Store.audit("parent.decline", { caseId: id });
-      UI.toast("#pResult", "⛔ تم الرفض.");
-      renderParentSummary();
-    },
-
-    "parent.joinVisit": () => {
-      // Demo: open visit.html if exists
-      Store.audit("parent.joinVisit", { caseId: getSelectedCaseId() || "" });
-      UI.toast("#pResult", "🎥 (Demo) فتح جلسة الزيارة الافتراضية…");
-      setTimeout(() => {
-        // if you have visit.html
-        const exists = true;
-        if (exists) location.href = "visit.html";
-      }, 250);
-    },
-
-    "parent.messageDoctor": () => {
-      Store.audit("parent.messageDoctor", { caseId: getSelectedCaseId() || "" });
-      UI.toast("#pResult", "💬 (Demo) تم إرسال رسالة للطبيب.");
-    },
-
-    "parent.downloadReport": () => {
-      const id = getSelectedCaseId() || (getCases()[0]?.id || "");
-      const c = findCase(id);
-      if (!c) return UI.toast("#pResult", "⚠️ لا توجد حالة.");
-
-      const blob = new Blob([JSON.stringify(c, null, 2)], { type: "application/json" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `parent-report-${id}.json`;
-      a.click();
-      URL.revokeObjectURL(a.href);
-
-      Store.audit("parent.downloadReport", { caseId: id });
-      UI.toast("#pResult", "📄 تم تحميل التقرير.");
+    const audit = $("#adm_audit");
+    if (audit) {
+      audit.value = SSC_AUDIT.get(60).map(a => `${a.at} | ${a.role} | ${a.action} | ${JSON.stringify(a.details)}`).join("\n");
     }
   };
 
-  /* ---------- Public API ---------- */
-  const Actions = {
-    init(role) {
-      // Delegate clicks
-      document.addEventListener("click", (e) => {
-        const el = e.target.closest("[data-action]");
-        if (!el) return;
+  // ---------- Parent ----------
+  const parentRefresh = () => {
+    if (!SSC_AUTH.can("report.viewChild")) return;
 
-        const action = el.dataset.action;
-        const fn = Handlers[action];
-        if (!fn) return; // action not wired yet
+    const list = $("#parent_cases");
+    if (list) {
+      const cases = SSC_PARENT.myChildCases();
+      list.innerHTML = cases.map(c => {
+        const pri = c.triage?.priorityLabel || "—";
+        const r = c.triage?.risk ?? "—";
+        return `<div class="kpi">
+          <div class="label">حالة ${c.id.slice(-6)}</div>
+          <div class="value">${pri}</div>
+          <div class="hint">Risk ${r}/100 • ${new Date(c.createdAt).toLocaleString("ar-SA")}</div>
+        </div>`;
+      }).join("") || `<div class="small">لا توجد حالات بعد</div>`;
+    }
 
-        e.preventDefault();
-        try {
-          fn(el);
-        } catch (err) {
-          console.error("Action error:", action, err);
-        }
-      });
-
-      // Boot per role
-      if (role === "doctor") {
-        renderDoctorQueue();
-        const id = getSelectedCaseId();
-        if (id) renderDoctorSelected(id);
-      }
-
-      if (role === "admin") {
-        renderAdminKPIs();
-        renderAdminHeatmap();
-        renderAdminCases();
-        const id = getSelectedCaseId();
-        if (id) renderAdminSelected(id);
-      }
-
-      if (role === "parent") {
-        renderParentSummary();
-      }
+    const v = SSC.getDB().visits.find(x => x.participants?.parent?.invited && (x.status === "accepted" || x.status === "active"));
+    const vBox = $("#parent_visit");
+    if (vBox) {
+      if (!v) vBox.innerHTML = `<div class="small">لا توجد دعوة زيارة حالياً</div>`;
+      else vBox.innerHTML = `
+        <div class="row">
+          <span class="badge">Visit ${v.id.slice(-6)}</span>
+          <span class="badge ${v.status === "accepted" ? "warn" : "good"}">${v.status}</span>
+          <span class="badge">Room ${v.roomCode}</span>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn good" data-action="parent_consent_yes" data-visit="${v.id}">✅ موافقة على الزيارة</button>
+          <button class="btn bad" data-action="parent_consent_no" data-visit="${v.id}">⛔ رفض الزيارة</button>
+          <a class="btn primary" href="visit.html?visit=${encodeURIComponent(v.id)}&as=parent">🎥 دخول الزيارة</a>
+        </div>
+      `;
     }
   };
 
-  window.Actions = Actions;
+  // ---------- Action router ----------
+  const ACTIONS = {
+    // Student
+    student_sim_mixed: () => simulateSensorsToStudentUI("mixed"),
+    student_sim_normal: () => simulateSensorsToStudentUI("normal"),
+    student_sim_fever: () => simulateSensorsToStudentUI("fever"),
+    student_sim_asthma: () => simulateSensorsToStudentUI("asthma"),
+    student_create_case: () => createCaseFromStudentUI(),
+    student_request_visit: () => requestVisitFromStudent(),
+
+    // Doctor
+    doctor_recheck: () => doctorRequestRecheck(),
+    doctor_issue_rest: () => doctorIssueSlip("راحة"),
+    doctor_issue_ref: () => doctorIssueSlip("إحالة"),
+    doctor_accept_visit: () => doctorAcceptLatestVisit(),
+    doctor_reject_visit: () => doctorRejectLatestVisit(),
+    doctor_invite_parent: () => doctorInviteParent(),
+    doctor_ask_copilot: () => doctorAskCopilot(),
+
+    // Admin
+    admin_refresh: () => adminRefresh(),
+
+    // Parent
+    parent_refresh: () => parentRefresh(),
+    parent_consent_yes: (btn) => {
+      const id = btn?.dataset?.visit;
+      if (!id) return;
+      SSC_PARENT.consentForVisit(id, true);
+      parentRefresh();
+    },
+    parent_consent_no: (btn) => {
+      const id = btn?.dataset?.visit;
+      if (!id) return;
+      SSC_PARENT.consentForVisit(id, false);
+      parentRefresh();
+    },
+  };
+
+  const wireActions = () => {
+    ensureToastHost();
+    renderBadges();
+
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+      const name = btn.dataset.action;
+      const fn = ACTIONS[name];
+      if (!fn) {
+        SSC.toast("زر غير مفعّل", `هذا الزر يحتاج Action: ${name}`);
+        return;
+      }
+      fn(btn);
+    });
+
+    // Page-specific auto refresh
+    const role = SSC_AUTH.getRole();
+    if (role === "admin") setInterval(adminRefresh, 1200);
+    if (role === "parent") setInterval(parentRefresh, 1200);
+
+    // If student page: load last case
+    const last = SSC.getDB().cases?.[0];
+    if (role === "student" && last) renderStudentCase(last);
+
+    if (role === "admin") adminRefresh();
+    if (role === "parent") parentRefresh();
+  };
+
+  window.addEventListener("DOMContentLoaded", wireActions);
+
+  // Public
+  window.SSC_ACTIONS = { ACTIONS };
 })();
