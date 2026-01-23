@@ -75,7 +75,7 @@
       dx: "تقييم مبدئي (Demo)",
       decision: "observe_followup",
       plan: "سوائل + راحة + متابعة",
-      media: { photo:null, audio:null, video:null } // optional
+      media: { photo:null, audio:null, video:null, attachments: [] } // optional
     }, extras||{});
     bus.cases.unshift(c);
     bus.cases = bus.cases.slice(0, 200);
