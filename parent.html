@@ -1,154 +1,182 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="dark">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>بوابة ولي الأمر — Smart School Clinic OS</title>
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>بوابة ولي الأمر — العيادة المدرسية الذكية</title>
   <link rel="stylesheet" href="app.css" />
-
-<script src="bus.js"></script>
-<script src="auth.js"></script>
-<script src="protocols.js"></script>
-<script src="parent-summary.js"></script>
-
-<script src="actions.js"></script>
-<script src="app-init.js"></script>
 </head>
 
-<body>
-<header class="topbar">
-  <div class="brand">
-    <div class="logo">👨‍👩‍👧</div>
-    <div class="brandText">
-      <div class="name">بوابة ولي الأمر</div>
-      <div class="tagline">ملخص • تقرير رسمي • موافقة/رفض</div>
-    </div>
-  </div>
-  <div class="topActions">
-    <button class="btn ghost" onclick="location.href='index.html'">⬅️ رجوع</button>
-  </div>
-</header>
-  <main class="page parent-page">
-
-  <section class="card">
-    <div class="row between">
-      <h3>👨‍👩‍👦 بوابة ولي الأمر</h3>
-      <button class="btn ghost" data-action="parent.refresh">🔄 تحديث</button>
+<body data-page="parent">
+  <header class="topbar">
+    <div class="topbar__left">
+      <a class="btn ghost" href="index.html">⟵ الرئيسية</a>
+      <div class="brand mini">
+        <div class="brand__logo">👨‍👩‍👧</div>
+        <div class="brand__txt">
+          <div class="brand__name">بوابة ولي الأمر</div>
+          <div class="brand__sub">متابعة • موافقات • انضمام للزيارة</div>
+        </div>
+      </div>
     </div>
 
-    <div class="grid-3" style="margin-top:10px;">
-      <div><div class="label">آخر حالة</div><div class="value" id="pCaseId">—</div></div>
-      <div><div class="label">الحالة</div><div class="value" id="pStatus">—</div></div>
-      <div><div class="label">الأولوية</div><div class="value" id="pPriority">—</div></div>
+    <div class="topbar__right">
+      <div class="pill">مرحبًا: <b data-user-name>ولي الأمر</b></div>
+      <button class="btn ghost" id="btnTheme">🌓</button>
     </div>
-  </section>
+  </header>
 
-  <section class="card">
-    <h3>🧾 ملخص الطبيب + AI</h3>
-    <div class="label">التوصية</div>
-    <div class="box" id="pRecommendation">—</div>
+  <main class="shell">
+    <section class="grid2">
+      <!-- Summary -->
+      <div class="card pad">
+        <div class="card__title">📌 ملخص الحالة</div>
+        <div class="muted">عرض الديمو: مربوط بآخر حالة تخص رقم الطالب المحفوظ.</div>
 
-    <div class="label" style="margin-top:10px;">التشخيص/الخطة</div>
-    <div class="box" id="pDxPlan">—</div>
-  </section>
+        <div class="block">
+          <div class="label">اسم الطالب</div>
+          <div class="box" id="parentChildName">—</div>
+        </div>
 
-  <section class="card">
-    <h3>✅ الموافقات</h3>
-    <div class="row" style="gap:10px; flex-wrap:wrap;">
-      <button class="btn success" data-action="parent.approveConsent">✅ موافقة على الزيارة</button>
-      <button class="btn warn" data-action="parent.approveProcedure">🩹 موافقة إجراء بسيط</button>
-      <button class="btn danger" data-action="parent.decline">⛔ رفض</button>
-    </div>
+        <div class="kpis">
+          <div class="kpi">
+            <div class="kpi__label">آخر حالة</div>
+            <div class="kpi__val" id="parentLastCase">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi__label">الحالة</div>
+            <div class="kpi__val" id="parentStatus">—</div>
+          </div>
+        </div>
 
-    <div class="row" style="margin-top:12px; gap:10px; flex-wrap:wrap;">
-      <button class="btn primary" data-action="parent.joinVisit">🎥 الانضمام للزيارة الافتراضية</button>
-      <button class="btn ghost" data-action="parent.messageDoctor">💬 رسالة للطبيب</button>
-      <button class="btn ghost" data-action="parent.downloadReport">📄 تحميل تقرير</button>
-    </div>
+        <div class="block">
+          <div class="label">التالي</div>
+          <div class="box" id="parentActions">—</div>
+        </div>
 
-    <div class="muted" id="pResult" style="margin-top:10px;"></div>
-  </section>
+        <div class="hr"></div>
 
-</main>
+        <div class="card__title">✅ الموافقات</div>
+        <div class="muted">إذا طلب الطبيب موافقة إجراء — رد هنا.</div>
 
-<main class="container">
+        <div class="row actions">
+          <button class="btn solid" id="btnConsentApprove" data-action="consent:approve">👍 موافقة</button>
+          <button class="btn ghost" id="btnConsentDecline" data-action="consent:decline">👎 رفض</button>
+        </div>
 
-  <section class="panel">
-    <div class="h">
-      <h2>👀 آخر حالة</h2>
-      <div class="muted" id="caseMeta">—</div>
-    </div>
+        <div class="row actions">
+          <button class="btn ghost" data-action="doctor:makeDecision" data-decision="موافقة ولي الأمر مطلوبة (طلب من ولي الأمر)">📝 إرسال طلب/ملاحظة</button>
+          <a class="btn ghost" href="visit.html">🎥 غرفة الزيارة</a>
+        </div>
+      </div>
 
-    <div class="kpiGrid" style="margin-top:12px">
-      <div class="kpi"><div class="k">Status</div><div class="v" id="pStatus">—</div></div>
-      <div class="kpi"><div class="k">Priority</div><div class="v" id="pPri">—</div></div>
-      <div class="kpi"><div class="k">Risk</div><div class="v" id="pRisk">—</div></div>
-      <div class="kpi"><div class="k">Decision</div><div class="v" id="pDec">—</div></div>
-    </div>
+      <!-- History -->
+      <div class="card pad">
+        <div class="card__title">🧾 سجل الحالات</div>
+        <div class="muted">آخر 6 حالات مرتبطة برقم الطالب.</div>
 
-    <div class="sep"></div>
+        <div id="parentCasesList" class="list"></div>
 
-    <div class="row">
-      <button class="btn ghost" id="btnSummary">📌 ملخص مبسط</button>
-      <button class="btn ghost" id="btnReport">🧾 تقرير رسمي للطباعة</button>
-      <button class="btn" id="btnConsentJump" style="display:none">✅ فتح الموافقة الآن</button>
-    </div>
+        <div class="hr"></div>
 
-    <div class="sep"></div>
+        <div class="card__title">🔔 تنبيهات</div>
+        <div id="parentAlerts" class="list"></div>
 
-    <pre id="summaryOut" style="white-space:pre-wrap;font-size:12px"></pre>
-  </section>
+        <div class="row actions">
+          <a class="btn ghost" href="student.html">🎒 فتح الطالب</a>
+          <a class="btn ghost" href="doctor.html">🩺 فتح الطبيب</a>
+          <a class="btn ghost" href="admin.html">🏫 فتح الإدارة</a>
+        </div>
+      </div>
+    </section>
+  </main>
 
-</main>
+  <!-- Scripts -->
+  <script src="bus.js"></script>
+  <script src="auth.js"></script>
+  <script src="app-init.js"></script>
+  <script src="sensor-sim.js"></script>
+  <script src="triage-ai.js"></script>
+  <script src="doctor-copilot.js"></script>
+  <script src="visit-session.js"></script>
+  <script src="app.js"></script>
+  <script src="actions.js"></script>
 
-<script>
-(function(){
-  SCAUTH.requireRole("parent");
-  const $ = (s)=>document.querySelector(s);
-
-  function latestCase(){
-    const bus = SCBUS.load();
-    return (bus.cases||[])[0] || null;
-  }
-
-  function render(){
-    const c = latestCase();
-    if(!c){
-      $("#caseMeta").textContent = "لا توجد حالات";
-      return;
+  <script>
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;").replaceAll("<","&lt;")
+        .replaceAll(">","&gt;").replaceAll('"',"&quot;")
+        .replaceAll("'","&#39;");
     }
 
-    $("#caseMeta").textContent = `Case ${c.id} • الطالب: ${c.studentName || "—"}`;
-    $("#pStatus").textContent = c.status || "—";
-    $("#pPri").textContent = c.priority || c.ai?.priority || "—";
-    $("#pRisk").textContent = (c.riskScore ?? c.ai?.risk ?? "—") + "/100";
-    $("#pDec").textContent = c.decision || c.ai?.recommendation || "—";
+    function renderParent(){
+      const app = window.app;
+      if(!app) return;
 
-    $("#btnConsentJump").style.display = (c.status === "CONSENT_REQUIRED") ? "" : "none";
-  }
+      const sum = app.getParentSummary?.();
+      if(!sum) return;
 
-  $("#btnSummary").addEventListener("click", ()=>{
-    const c = latestCase();
-    if(!c) return alert("لا توجد حالة");
-    $("#summaryOut").textContent = window.SCPARENT.sum(c);
-  });
+      document.getElementById("parentChildName").textContent = sum.childName ?? "—";
+      document.getElementById("parentLastCase").textContent = sum.lastCaseTitle ?? "—";
+      document.getElementById("parentStatus").textContent = sum.status ?? "—";
+      document.getElementById("parentActions").textContent = sum.nextSteps ?? "—";
 
-  $("#btnReport").addEventListener("click", ()=>{
-    const c = latestCase();
-    if(!c) return alert("لا توجد حالة");
-    location.href = `report-view.html?case=${encodeURIComponent(c.id)}&role=parent&autoprint=1`;
-  });
+      const list = document.getElementById("parentCasesList");
+      if(list){
+        if(!sum.cases?.length){
+          list.innerHTML = `<div class="muted">لا توجد حالات بعد.</div>`;
+        } else {
+          list.innerHTML = sum.cases.map(x => `
+            <div class="rowCard">
+              <div class="rowTitle">${escapeHtml(x.title || "حالة")}</div>
+              <div class="rowMeta">${escapeHtml(x.time || "")} • ${escapeHtml(x.status || "")}</div>
+            </div>
+          `).join("");
+        }
+      }
 
-  $("#btnConsentJump").addEventListener("click", ()=>{
-    const c = latestCase();
-    if(!c) return;
-    location.href = `report-view.html?case=${encodeURIComponent(c.id)}&role=parent`;
-  });
+      const alerts = document.getElementById("parentAlerts");
+      if(alerts){
+        const cases = app.getCases?.() || [];
+        const childId = (window.Auth?.getUser?.()?.childSchoolId) || "S-1001";
+        const mine = cases.filter(c => c.patient?.schoolId === childId);
+        const last = mine.length ? mine[mine.length - 1] : null;
 
-  render();
-  setInterval(render, 1500);
-})();
-</script>
+        if(!last){
+          alerts.innerHTML = `<div class="muted">لا توجد تنبيهات.</div>`;
+          return;
+        }
+
+        const blocks = [];
+        if (last.triage?.priority === "P1") blocks.push({ t:"🚨 تنبيه", m:"حالة حرجة — يفضل التواصل فورًا" });
+        if ((last.visit?.allowParent)) blocks.push({ t:"🎥 زيارة افتراضية", m:"الطبيب فعّل انضمام ولي الأمر للزيارة" });
+        if ((last.visit?.consent && last.visit?.consent !== "none")) blocks.push({ t:"📝 موافقة", m:`حالة الموافقة الحالية: ${last.visit.consent}` });
+
+        if(!blocks.length){
+          alerts.innerHTML = `<div class="muted">لا توجد تنبيهات حالياً.</div>`;
+        } else {
+          alerts.innerHTML = blocks.map(x => `
+            <div class="rowCard">
+              <div class="rowTitle">${escapeHtml(x.t)}</div>
+              <div class="rowMeta">${escapeHtml(x.m)}</div>
+            </div>
+          `).join("");
+        }
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("btnTheme")?.addEventListener("click", () => {
+        const html = document.documentElement;
+        const isDark = html.getAttribute("data-theme") !== "light";
+        html.setAttribute("data-theme", isDark ? "light" : "dark");
+      });
+
+      renderParent();
+      window.bus?.on?.("case:update", renderParent);
+      window.bus?.on?.("visit:update", renderParent);
+    });
+  </script>
 </body>
 </html>
