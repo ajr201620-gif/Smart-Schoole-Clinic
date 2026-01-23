@@ -1,0 +1,121 @@
+/* Smart Clinic OS — Shell (Role Based) */
+
+.sc-shell{
+  display:grid;
+  grid-template-columns: 280px 1fr;
+  gap:16px;
+  padding:16px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.sc-side{
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  border-radius: 18px;
+  padding:14px;
+}
+
+[data-theme="light"] .sc-side{
+  border:1px solid rgba(20,22,28,.12);
+  background: rgba(20,22,28,.03);
+}
+
+.sc-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.sc-top .left{
+  display:flex; align-items:center; gap:10px;
+}
+
+.sc-chip{
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.05);
+}
+
+.sc-title{
+  display:flex; flex-direction:column; line-height:1.1;
+}
+.sc-title b{ font-size:14px; }
+.sc-title small{ opacity:.7; font-size:12px; }
+
+.sc-actions{
+  display:flex; align-items:center; gap:10px;
+}
+
+.sc-primary{
+  text-decoration:none;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.08);
+  font-weight:800;
+}
+
+.sc-status{
+  font-size:12px; opacity:.85;
+  padding:6px 10px; border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+}
+
+.sc-nav{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:10px;
+}
+
+.sc-nav-item{
+  text-decoration:none;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.03);
+  display:flex; align-items:center; gap:10px;
+}
+
+.sc-nav-item:hover{
+  background: rgba(255,255,255,.08);
+}
+
+.sc-quick{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:8px;
+  margin-top:12px;
+}
+
+.sc-qa{
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.03);
+  color: inherit;
+  cursor:pointer;
+  text-align:right;
+  text-decoration:none;
+}
+
+.sc-qa:hover{
+  background: rgba(255,255,255,.08);
+}
+
+.sc-main{
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.03);
+  border-radius: 18px;
+  overflow:hidden;
+}
+
+@media (max-width: 980px){
+  .sc-shell{ grid-template-columns: 1fr; }
+}
