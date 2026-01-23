@@ -1,32 +1,33 @@
 <!doctype html>
-<html lang="ar" dir="rtl" data-theme="light">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Smart Clinic OS — تقرير رسمي</title>
 
-  <script src="bus.js"></script>
+  <script src="js/bus.js"></script>
+  <script src="js/permission-slip.js"></script>
 
   <style>
-    body{font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial; background:#f6f7fb; color:#111; margin:0; padding:20px;}
-    .paper{max-width:920px; margin:0 auto; background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:18px;}
-    .top{display:flex; justify-content:space-between; align-items:flex-start; gap:12px;}
-    .brand{font-weight:900; font-size:18px;}
-    .sub{color:#6b7280; font-size:12px; margin-top:4px}
-    .tag{font-size:12px; padding:6px 10px; border:1px solid #e5e7eb; border-radius:999px; background:#fafafa;}
-    h2{margin:18px 0 10px; font-size:14px}
-    .grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-    .card{border:1px solid #e5e7eb; border-radius:14px; padding:12px; background:#fff}
-    .row{display:flex; gap:10px; padding:6px 0; border-bottom:1px dashed #eef0f4}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:#f6f7fb;color:#111;margin:0;padding:20px}
+    .paper{max-width:920px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:18px}
+    .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .brand{font-weight:900;font-size:18px}
+    .sub{color:#6b7280;font-size:12px;margin-top:4px}
+    .tag{font-size:12px;padding:6px 10px;border:1px solid #e5e7eb;border-radius:999px;background:#fafafa}
+    h2{margin:18px 0 10px;font-size:14px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .card{border:1px solid #e5e7eb;border-radius:14px;padding:12px;background:#fff}
+    .row{display:flex;gap:10px;padding:6px 0;border-bottom:1px dashed #eef0f4}
     .row:last-child{border-bottom:none}
-    .k{min-width:140px; color:#6b7280; font-size:12px}
-    .v{flex:1; font-size:12px; font-weight:650}
-    pre{white-space:pre-wrap; font-size:12px; margin:0; color:#111}
-    .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
-    .btn{cursor:pointer; border-radius:12px; padding:10px 12px; border:1px solid #e5e7eb; background:#111; color:#fff; font-weight:800}
-    .btn.ghost{background:#fff; color:#111}
-    .muted{color:#6b7280; font-size:12px}
-    @media print{ body{background:#fff; padding:0} .paper{border:none; border-radius:0} .actions{display:none} }
+    .k{min-width:140px;color:#6b7280;font-size:12px}
+    .v{flex:1;font-size:12px;font-weight:650}
+    pre{white-space:pre-wrap;font-size:12px;margin:0;color:#111}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{cursor:pointer;border-radius:12px;padding:10px 12px;border:1px solid #e5e7eb;background:#111;color:#fff;font-weight:800}
+    .btn.ghost{background:#fff;color:#111}
+    .muted{color:#6b7280;font-size:12px}
+    @media print{body{background:#fff;padding:0}.paper{border:none;border-radius:0}.actions{display:none}}
   </style>
 </head>
 
@@ -45,7 +46,6 @@
     <button class="btn ghost" id="btnPrint">🖨️ طباعة</button>
     <button class="btn ghost" id="btnCopy">📋 نسخ التقرير</button>
 
-    <!-- تظهر فقط لولي الأمر إذا الحالة تحتاج موافقة -->
     <button class="btn" id="btnConsentYes" style="display:none">✅ موافقة</button>
     <button class="btn ghost" id="btnConsentNo" style="display:none">⛔ رفض</button>
   </div>
@@ -144,7 +144,7 @@ function render(){
     line("Priority", c.priority||ai.priority||"—"),
     line("Risk", (c.riskScore??ai.risk??"—") + "/100"),
     line("القرار", c.decision||ai.recommendation||"—"),
-    line("موافقة ولي الأمر", c.consent || "—"),
+    line("موافقة ولي الأمر", c.consent || "—")
   ].join("");
 
   $("#complaint").textContent = c.requestDesc||c.desc||c.complaint||"—";
@@ -152,31 +152,29 @@ function render(){
     line("Temp", v.temp ? v.temp+"°C" : "—"),
     line("HR", v.hr ? v.hr+" bpm" : "—"),
     line("SpO₂", v.spo2 ? v.spo2+"%" : "—"),
-    line("BP", v.bp || "—"),
+    line("BP", v.bp || "—")
   ].join("");
 
   $("#aiBox").innerHTML = [
     line("AI Recommendation", ai.recommendation || "—"),
-    line("Flags", (ai.flags||[]).join(", ") || "—"),
+    line("Flags", (ai.flags||[]).join(", ") || "—")
   ].join("");
 
   $("#dx").textContent = c.dx || "—";
   $("#plan").textContent = c.plan || "—";
   $("#notes").textContent = c.visit?.notes || "—";
 
-  // Consent buttons logic: parent + CONSENT_REQUIRED
   const needConsent = (c.status === "CONSENT_REQUIRED");
   const isParent = (role === "parent");
   $("#btnConsentYes").style.display = (needConsent && isParent) ? "" : "none";
   $("#btnConsentNo").style.display  = (needConsent && isParent) ? "" : "none";
 
   $("#notice").textContent = (needConsent && isParent)
-    ? "هذه الحالة تتطلب موافقتك. اختر موافقة/رفض وسيتم تحديث الحالة فورًا."
+    ? "هذه الحالة تتطلب موافقتك. اختر موافقة/رفض وسيتم تحديث الحالة فورًا، وعند الموافقة سيتم إنشاء سند رسمي."
     : "";
 }
 
 $("#btnBack").addEventListener("click", ()=>{
-  // يرجّع حسب الدور
   location.href = role==="doctor" ? "doctor.html" : role==="admin" ? "admin.html" : role==="student" ? "student.html" : "parent.html";
 });
 $("#btnPrint").addEventListener("click", ()=> window.print());
@@ -189,13 +187,53 @@ $("#btnCopy").addEventListener("click", async ()=>{
 });
 
 $("#btnConsentYes").addEventListener("click", ()=>{
-  const updated = patchCase({ consent:"APPROVED", status:"APPROVED_BY_PARENT" });
-  alert("تمت الموافقة ✅");
+  const c = getCase();
+  if(!c) return;
+
+  // توقيع إلكتروني (Demo)
+  const guardianName = prompt("اكتب اسم ولي الأمر للتوقيع الإلكتروني:","") || "";
+  const guardianPhone = prompt("رقم الجوال (اختياري للعرض):","") || "";
+  const ok = confirm("تأكيد: أوافق إلكترونيًا على الخطة/الإجراء المذكور في التقرير.");
+  if(!ok) return;
+
+  patchCase({
+    consent:"APPROVED",
+    status:"APPROVED_BY_PARENT",
+    guardianSig: { name: guardianName.trim()||"ولي أمر (Demo)", phone: guardianPhone.trim()||"—", at: new Date().toISOString() }
+  });
+
+  // إنشاء سند موافقة رسمي + فتحه
+  const slip = window.SCSLIP?.createSlip(c.id, "موافقة على إجراء/خطة علاج", {
+    guardianName: guardianName.trim()||"ولي أمر (Demo)",
+    guardianPhone: guardianPhone.trim()||"—",
+    signedAt: new Date().toISOString()
+  });
+  if(slip) window.SCSLIP.openSlip(slip);
+
+  alert("تمت الموافقة ✅ وتم إنشاء سند موافقة رسمي");
   render();
 });
+
 $("#btnConsentNo").addEventListener("click", ()=>{
-  const updated = patchCase({ consent:"REJECTED", status:"REJECTED_BY_PARENT" });
-  alert("تم الرفض ⛔");
+  const c = getCase();
+  if(!c) return;
+
+  const fallbackPlan =
+`خطة بديلة (بسبب عدم الموافقة):
+• متابعة داخل المدرسة
+• راحة + سوائل + إرشاد صحي
+• إعادة قراءة بعد 30–60 دقيقة إذا استمرت الأعراض
+• التواصل مع ولي الأمر إذا ساءت الحالة`;
+
+  patchCase({
+    consent:"REJECTED",
+    status:"FOLLOW_UP",
+    plan: fallbackPlan
+  });
+
+  try{ window.SCBUS.pushAlert("admin","MED","رفض موافقة ولي الأمر","تم تحويل الحالة لمتابعة", { caseId: c.id }); }catch(_){}
+
+  alert("تم الرفض ⛔ وتم تحويل الحالة لمتابعة بخطة بديلة");
   render();
 });
 
