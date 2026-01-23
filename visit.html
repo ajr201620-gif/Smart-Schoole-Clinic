@@ -3,297 +3,97 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>غرفة الزيارة — العيادة المدرسية الذكية</title>
+  <title>الزيارة — العيادة المدرسية الذكية</title>
   <link rel="stylesheet" href="app.css" />
+  <link rel="stylesheet" href="ui.css" />
 </head>
 
 <body data-page="visit">
-
-  <!-- Topbar -->
   <header class="topbar">
-    <div class="inner">
-      <div class="topbar_left">
-        <a class="btn ghost" href="index.html">↩︎ الرئيسية</a>
-
-        <div class="brand">
-          <div class="brand__logo"></div>
-          <div class="brand__txt">
-            <div class="brand__name">العيادة المدرسية الذكية</div>
-            <div class="brand__sub">غرفة الزيارة • فيديو/صوت • Check-in</div>
-          </div>
-        </div>
-
-        <div class="pill">
-          <small>الدور</small>
-          <b data-user-role>visit</b>
+    <div class="topbar__left">
+      <a class="btn ghost" href="index.html">↩︎ الرئيسية</a>
+      <div class="brand mini">
+        <div class="brand__logo">🎥</div>
+        <div class="brand__txt">
+          <div class="brand__name">الزيارة / الإحالة</div>
+          <div class="brand__sub">حضوري • افتراضي • متابعة</div>
         </div>
       </div>
+    </div>
 
-      <div class="topbar_right">
-        <div class="pill">
-          <small>جلسة</small>
-          <b id="v_timer">00:00</b>
-        </div>
-
-        <button class="btn ghost" id="btnTheme" data-action="common:theme-toggle">🌓</button>
-        <button class="btn bad" id="btnLogout" data-action="common:logout">خروج</button>
-      </div>
+    <div class="topbar__right">
+      <div class="pill"><span class="dot warn"></span><span>وضع: <b>Demo</b></span></div>
+      <button class="btn ghost" id="btnTheme" data-action="common:theme-toggle">🌓 المظهر</button>
+      <button class="btn danger" id="btnLogout" data-action="common:logout">خروج</button>
     </div>
   </header>
 
-  <main class="container">
-
-    <!-- Hero -->
-    <section class="panel hero">
-      <div class="heroRow">
-        <div>
-          <div class="heroTitle">🎥 زيارة افتراضية (Demo)</div>
-          <div class="heroDesc">
-            تشغيل الكاميرا والمايك يتم من جهازك مباشرة.  
-            *هذي نسخة عرض “بدون سيرفر” — لاحقًا نضيف WebRTC حقيقي إذا تبغى.*
-          </div>
-
-          <div class="heroActions mt12">
-            <button class="btn primary" id="btnCheckin" data-action="visit:checkin">✅ Check-in</button>
-            <button class="btn" id="btnCompleteVisit" data-action="visit:complete">🏁 إنهاء الزيارة</button>
-            <button class="btn ghost" id="btnPrintSlip" data-action="visit:print-slip">🧾 طباعة نموذج</button>
-            <button class="btn ghost" data-action="common:download-report">⬇️ تقرير</button>
-          </div>
-
-          <div class="subtle mt12">
-            إذا ما ظهرت الكاميرا: تأكد من صلاحيات Safari/Chrome ثم جرّب تحديث الصفحة.
-          </div>
+  <main class="shell">
+    <section class="hero">
+      <div class="hero__left">
+        <h1 class="hero__title">ابدأ زيارة… بشكل مرتب واحترافي</h1>
+        <p class="hero__lead">اربط الحالة بالزيارة: هدف الزيارة، نوعها، ملاحظات، ثم حفظ.</p>
+        <div class="hero__actions">
+          <button class="btn primary" data-action="visit:start">🚀 بدء زيارة</button>
+          <button class="btn" data-action="visit:save">💾 حفظ</button>
+          <button class="btn ghost" data-action="visit:end">✅ إنهاء</button>
+          <a class="btn ghost" href="report.html">📄 تقرير</a>
         </div>
+      </div>
 
-        <div class="kpiRow" style="min-width:320px;">
-          <div class="kpi ok">
-            <div class="kLabel">الحالة</div>
-            <div class="kVal" id="v_status">—</div>
-            <div class="kMeta">Case</div>
-          </div>
-          <div class="kpi">
-            <div class="kLabel">القرار</div>
-            <div class="kVal" id="v_decision">—</div>
-            <div class="kMeta">AI / Doctor</div>
+      <div class="hero__right">
+        <div class="glassCard">
+          <div class="glassCard__title">معلومات الزيارة</div>
+          <div class="glassCard__body">
+            <div class="row"><span class="muted">الحالة:</span><span id="visit_case">—</span></div>
+            <div class="row"><span class="muted">النوع:</span><span id="visit_type">—</span></div>
+            <div class="row"><span class="muted">الحالة:</span><span id="visit_status">—</span></div>
           </div>
         </div>
       </div>
     </section>
 
-    <div class="grid mt16">
-
-      <!-- Video panel -->
-      <section class="panel card col-8">
-        <div class="cardHeader">
-          <div class="cardTitle"><span class="ico">📹</span> البث (محلي)</div>
-          <span class="chip warn">Local Media</span>
-        </div>
-
-        <div class="cardBody">
-          <div class="rowCard" style="padding:10px;">
-            <video id="video" autoplay playsinline muted style="width:100%; border-radius:16px; border:1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.2);"></video>
-          </div>
-
-          <div class="flex mt12">
-            <button class="btn primary" id="btnCam">📷 تشغيل الكاميرا</button>
-            <button class="btn" id="btnMic">🎙️ تشغيل المايك</button>
-            <button class="btn bad" id="btnStop">⛔ إيقاف الكل</button>
-
-            <span class="pill right">
-              <small>Cam</small> <b id="camState">OFF</b>
-              <small style="margin-inline-start:10px;">Mic</small> <b id="micState">OFF</b>
-            </span>
-          </div>
-
-          <div class="subtle mt8">
-            ملاحظة: الفيديو هنا “محلي” للعرض، وليس مكالمة مع الطرف الآخر. نقدر نطورها لـ WebRTC إذا تبغى.
-          </div>
+    <section class="grid2" style="margin-top:16px">
+      <section class="card">
+        <header class="card__head">
+          <h2 class="card__title">🧾 نموذج الزيارة</h2>
+        </header>
+        <div class="card__body">
+          <label class="field">
+            <div class="field__label">نوع الزيارة</div>
+            <select class="input" id="visitType">
+              <option value="virtual">افتراضية</option>
+              <option value="inperson">حضورية</option>
+              <option value="referral">إحالة</option>
+            </select>
+          </label>
+          <div style="height:10px"></div>
+          <label class="field">
+            <div class="field__label">ملاحظات</div>
+            <textarea class="input" id="visitNotes" rows="6" placeholder="اكتب ملاحظات الزيارة…"></textarea>
+          </label>
+          <div class="hint">لاحقًا: نضيف WebRTC حقيقي + موافقات ولي الأمر قبل فتح الاتصال.</div>
         </div>
       </section>
 
-      <!-- Case summary -->
-      <section class="panel card col-4">
-        <div class="cardHeader">
-          <div class="cardTitle"><span class="ico">🧾</span> ملخص سريع</div>
-          <span class="chip">Summary</span>
-        </div>
-
-        <div class="cardBody">
-          <div class="rowCard">
-            <div class="rowTitle">الطالب</div>
-            <div class="rowMeta" id="v_owner">—</div>
-          </div>
-
-          <div class="rowCard">
-            <div class="rowTitle">الشكوى</div>
-            <div class="rowMeta" id="v_symptoms">—</div>
-          </div>
-
-          <div class="rowCard">
-            <div class="rowTitle">قياسات</div>
-            <div class="rowMeta" id="v_vitals">—</div>
-          </div>
-
-          <div class="hr"></div>
-          <div class="flex">
-            <a class="btn ghost" href="doctor.html">🩺 الطبيب</a>
-            <a class="btn ghost" href="parent.html">👨‍👩‍👧‍👦 ولي الأمر</a>
-            <a class="btn ghost" href="admin.html">🏫 الإدارة</a>
+      <section class="card">
+        <header class="card__head">
+          <h2 class="card__title">📋 سجل الزيارات</h2>
+        </header>
+        <div class="card__body">
+          <div id="visitList" class="list">
+            <div class="empty muted">لا يوجد زيارات حالياً.</div>
           </div>
         </div>
       </section>
-
-      <!-- Notes -->
-      <section class="panel card col-12">
-        <div class="cardHeader">
-          <div class="cardTitle"><span class="ico">🗒️</span> ملاحظات الزيارة</div>
-          <span class="chip ok">Notes</span>
-        </div>
-
-        <div class="cardBody">
-          <div class="field">
-            <label>ملاحظات / تعليمات</label>
-            <textarea id="visitNotes" class="input" rows="4" placeholder="اكتب ملاحظات الزيارة…"></textarea>
-          </div>
-          <div class="subtle">
-            *في النسخة القادمة نربط الملاحظات بالحالة في قاعدة البيانات (Firestore).*
-          </div>
-        </div>
-      </section>
-
-    </div>
+    </section>
   </main>
 
-  <!-- Scripts -->
   <script src="./bus.js"></script>
   <script src="./auth.js"></script>
-
-  <!-- Firebase init (module) -->
+  <script src="./visit-session.js"></script>
   <script type="module" src="./firebase-init.js"></script>
-
-  <!-- Actions -->
+  <script src="./rbac.js"></script>
   <script src="./actions.js"></script>
-
-  <!-- Visit logic -->
-  <script>
-    (function(){
-      "use strict";
-      const $ = (s,r=document)=>r.querySelector(s);
-
-      // Timer
-      let t0 = null, timer = null;
-      function startTimer(){
-        if(timer) return;
-        t0 = Date.now();
-        timer = setInterval(()=>{
-          const s = Math.floor((Date.now()-t0)/1000);
-          const mm = String(Math.floor(s/60)).padStart(2,"0");
-          const ss = String(s%60).padStart(2,"0");
-          $("#v_timer").textContent = `${mm}:${ss}`;
-        }, 250);
-      }
-      startTimer();
-
-      // Render summary from SSC.db
-      function renderSummary(){
-        const DB = window.SSC?.db;
-        if(!DB) return;
-        const c = DB.cases?.[0];
-        if(!c) return;
-
-        $("#v_owner").textContent = c.owner?.name || "—";
-        $("#v_symptoms").textContent = c.symptoms || "—";
-        $("#v_status").textContent = c.status || "—";
-        $("#v_decision").textContent = c.decision || "—";
-
-        const v = c.vitals || {};
-        $("#v_vitals").textContent =
-          `HR: ${v.hr ?? "—"} • SpO₂: ${v.spo2 ?? "—"} • Temp: ${v.temp ?? "—"} • BP: ${v.bp ?? "—"}`;
-      }
-
-      document.addEventListener("DOMContentLoaded", ()=>{
-        renderSummary();
-        window.bus?.on?.("case:update", renderSummary);
-      });
-
-      // Media controls (local only)
-      const video = $("#video");
-      const btnCam = $("#btnCam");
-      const btnMic = $("#btnMic");
-      const btnStop = $("#btnStop");
-      const camState = $("#camState");
-      const micState = $("#micState");
-
-      let stream = null;
-
-      async function ensureStream(wantVideo, wantAudio){
-        if(stream) return stream;
-
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: !!wantVideo,
-          audio: !!wantAudio
-        });
-        return stream;
-      }
-
-      function applyToVideo(){
-        if(video) video.srcObject = stream;
-      }
-
-      function updateStates(){
-        const vOn = stream && stream.getVideoTracks().some(t=>t.enabled);
-        const aOn = stream && stream.getAudioTracks().some(t=>t.enabled);
-        camState.textContent = vOn ? "ON" : "OFF";
-        micState.textContent = aOn ? "ON" : "OFF";
-      }
-
-      btnCam?.addEventListener("click", async ()=>{
-        try{
-          // create or add video
-          if(!stream){
-            await ensureStream(true, false);
-          } else {
-            const hasV = stream.getVideoTracks().length>0;
-            if(!hasV){
-              const s2 = await navigator.mediaDevices.getUserMedia({video:true, audio:false});
-              s2.getVideoTracks().forEach(t=>stream.addTrack(t));
-            }
-            stream.getVideoTracks().forEach(t=>t.enabled = true);
-          }
-          applyToVideo(); updateStates();
-        } catch(e){ alert("تعذر تشغيل الكاميرا. تحقق من الصلاحيات."); console.error(e); }
-      });
-
-      btnMic?.addEventListener("click", async ()=>{
-        try{
-          if(!stream){
-            await ensureStream(false, true);
-          } else {
-            const hasA = stream.getAudioTracks().length>0;
-            if(!hasA){
-              const s2 = await navigator.mediaDevices.getUserMedia({video:false, audio:true});
-              s2.getAudioTracks().forEach(t=>stream.addTrack(t));
-            }
-            stream.getAudioTracks().forEach(t=>t.enabled = true);
-          }
-          applyToVideo(); updateStates();
-        } catch(e){ alert("تعذر تشغيل المايك. تحقق من الصلاحيات."); console.error(e); }
-      });
-
-      btnStop?.addEventListener("click", ()=>{
-        if(!stream) return;
-        stream.getTracks().forEach(t=>t.stop());
-        stream = null;
-        if(video) video.srcObject = null;
-        updateStates();
-      });
-
-      updateStates();
-    })();
-  </script>
-<script type="module" src="./firebase-init.js"></script>
-<script src="./rbac.js"></script>
-<script src="./actions.js"></script>
-
 </body>
 </html>
